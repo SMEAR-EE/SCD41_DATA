@@ -2,8 +2,8 @@
 
 ## SMEAR Station Dataset Repository
 
-This repository serves as a centralized, automatically-updated dataset repository containing experimental data (SCD41 low-cost CO2 sensor data) collected at the SMEAR station (smear.emu.ee). 
-We periodically synchronize the dataset from the remote source NAS storage server, preprocess, and maintain it here for ease of access, reproducibility, and further analysis.
+This repository serves as a centralized, automatically-updated dataset repository containing experimental data (SCD41 low-cost CO2 sensor data) collected at the SMEAR station (smear.emu.ee). </br>
+This repository periodically auto-synchronizes the dataset from the remote source NAS storage server, preprocesses, and maintains it here for ease of access, reproducibility, and analysis.
 
 
 ## Repository Structure
@@ -20,6 +20,8 @@ We periodically synchronize the dataset from the remote source NAS storage serve
 │   └── data.csv               # Main CSV file containing processed and cleaned data
 ├── .gitignore
 └── README.md                  # Documentation
+
+```
 
 ## Data Source and Update Frequency
 
