@@ -35,7 +35,8 @@ This repository periodically auto-synchronizes the dataset from the remote sourc
 
 ## Repository Setup
 - The synchronization and processing workflow is automated through `.github/workflows/data_sync.yml`.
-- Scripts for data management are stored in the `scripts` directory.
+- Scripts for data management are stored in the `scripts` directory. 
+  - The `scripts/` directory contains internal data management scripts. Modifications typically not needed for end-users.
 
 ## Accessing the Data
 Clone this repository and regularly pull updates to have the latest datasets:
