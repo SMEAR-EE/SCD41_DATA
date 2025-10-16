@@ -1,5 +1,7 @@
 # SCD41_DATA
 
+| Deprecated README, WIP 
+
 ## SMEAR Station Dataset Repository
 
 This repository serves as a centralized, automatically-updated dataset repository containing experimental data (SCD41 low-cost CO2 sensor data) collected at the SMEAR station (smear.emu.ee). </br>
