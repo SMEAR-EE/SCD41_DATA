@@ -1,5 +1,12 @@
-IOT/
-IOT.zip
+testing/IOT/
+testing/IOT.zip
+config/sensors.yaml
+output/individual
+output/logs
+output/parquet
+notebooks/output
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

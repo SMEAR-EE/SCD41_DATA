@@ -1,57 +1,109 @@
+# SMEAR Estonia CO2 Sensor Processing
 
-# | Deprecated README, WIP 
+Fast, reproducible processing pipeline for SCD41 and LGR CO2 sensor data.
 
-## SCD41_DATA
+## 🚀 Quick Start (5 minutes)
+```bash
+# 1. Setup (one-time)
+./setup.sh
 
-## SMEAR Station Dataset Repository
+# 2. Activate environment
+source venv/bin/activate
 
-This repository serves as a centralized, automatically-updated dataset repository containing experimental data (SCD41 low-cost CO2 sensor data) collected at the SMEAR station (smear.emu.ee). </br>
-This repository periodically auto-synchronizes the dataset from the remote source NAS storage server, preprocesses, and maintains it here for ease of access, reproducibility, and analysis.
+# 3. Edit config
+micro config/sensors.yaml
 
-
-## Repository Structure
-
-```
-.
-├── .github/
-│   └── workflows
-│       └── data_sync.yml      # GitHub Actions workflow for automation
-├── scripts
-│   └── manage_csv.sh          # Bash script managing data sync and CSV updates
-├── data
-│   ├── raw_json               # Directory storing synchronized JSON data files
-│   └── data.csv               # Main CSV file containing processed and cleaned data
-├── .gitignore
-└── README.md                  # Documentation
-
+# 4. Run processing
+jupyter notebook notebooks/process_data.ipynb
 ```
 
-## Data Source and Update Frequency
+**That's it!** Processed data appears in `output/`.
 
-- The SMEAR station NAS generates JSON data files every 10 minutes (~300KB per 6 months).
-- We synchronize the data in this repository bi-weekly.
+---
 
-## Workflow Overview
-- **Data Retrieval:** Fetch new JSON files from the NAS using SSH/SCP.
-- **Data Processing:** Convert new JSON files to CSV, appending as new rows to the main CSV file.
-- **Automation:** Scheduled via GitHub Actions, running bi-weekly.
+## 📊 What This Does
 
-## Repository Setup
-- The synchronization and processing workflow is automated through `.github/workflows/data_sync.yml`.
-- Scripts for data management are stored in the `scripts` directory. 
-  - The `scripts/` directory contains internal data management scripts. Modifications typically not needed for end-users.
+- ✅ Processes 5 sensors (4x SCD41, 1x LGR reference)
+- ✅ Resamples to 10-min intervals (time-synchronized)
+- ✅ Tracks uptime + data quality (QC flags)
+- ✅ Exports CSV + Parquet files
+- ✅ Generates validation plots
 
-## Accessing the Data
-Clone this repository and regularly pull updates to have the latest datasets:
+---
 
-```sh
-git clone https://github.com/SMEAR-EE/SCD41_DATA.git
-cd SCD41_DATA
+## 📁 Where Things Go
+
+| What | Where |
+|------|-------|
+| Your raw data | Configure in `config/sensors.yaml` |
+| Processed CSVs | `output/individual/` |
+| Monthly parquets | `output/parquet/` |
+| Plots | `output/plots/` |
+| Logs | `output/logs/` |
+
+---
+
+## 🔧 Configuration
+
+Edit `config/sensors.yaml`:
+```yaml
+sensors:
+  - name: CO2_SCT1_2M
+    input_dir: /your/path/here  # ← EDIT THIS
+    # ... (rest auto-configured)
 ```
 
-After initial setup, updates are automatically appended to the CSV file (`data/SMEAR_sensor_data.csv`).
+---
 
-## Contributing and Issues
-- Report issues or suggest improvements via GitHub Issues.
-- Contributions are welcome via Pull Requests.
+## 📖 Documentation
 
+- **Full structure:** See `PROJECT_STRUCTURE.md`
+- **Module details:** See docstrings in `src/`
+- **Examples:** See `notebooks/process_data.ipynb`
+
+---
+
+## 🐛 Troubleshooting
+
+**Import errors?**
+```bash
+source venv/bin/activate  # Activate venv first!
+```
+
+**No data found?**
+- Check paths in `config/sensors.yaml`
+- Check logs: `tail -f output/logs/processing.log`
+
+**Need to reprocess?**
+```python
+pipeline = SensorPipeline(config, force=True)
+pipeline.run_all(year=2024, month=10)
+```
+
+---
+
+## 🎨 Extending
+
+Want to add custom plots or analysis?
+
+1. Edit `src/visualization.py` (add methods to `SensorVisualizer`)
+2. Call from notebook
+3. Done!
+
+See `PROJECT_STRUCTURE.md` for details.
+
+---
+
+## 📦 Requirements
+
+- Python 3.10+
+- ~500 MB disk space (for venv + processed data)
+- Jupyter (auto-installed)
+
+---
+
+## 📝 Citation
+```
+Zorec, M. et al. (2025). Title TBD.
+Dataset: [DOI pending]
+```

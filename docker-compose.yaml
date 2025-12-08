@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  smear-co2:
+    build: .
+    container_name: smear_co2_processor
+    # Only runs when user triggers it
+    # Example manual run:
+    #   docker compose run smear-co2 --date 2025-10-10 --force
+    volumes:
+      - ./config:/app/config:ro
+      - ./output:/app/output
+      - /absolute/path/to/SCD41_data:/data/scd41:ro
+      - /absolute/path/to/LGR_data:/data/lgr:ro
+    environment:
+      PYTHONUNBUFFERED: "1"
+    # Show logs in console
+    tty: true
