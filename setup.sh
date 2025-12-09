@@ -89,7 +89,6 @@ safe_mkdir "output/parquet"
 safe_mkdir "output/logs"
 safe_mkdir "output/plots"
 safe_mkdir "config"
-safe_mkdir "notebooks"
 
 # -------------------------------
 # Create default sensors.yaml if missing
