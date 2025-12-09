@@ -19,9 +19,9 @@ from matplotlib.gridspec import GridSpec
 
 
 class SensorVisualizer:
-    """Generate publication-quality plots for sensor data"""
-    
-    def __init__(self, output_dir: Path = Path("output/plots")):
+    """Generate publication-quality plots for sensor data"""        
+
+    def __init__(self, output_dir: Path):
         """
         Args:
             output_dir: Where to save plots
@@ -625,81 +625,75 @@ class SensorVisualizer:
 # CONVENIENCE FUNCTION: Generate All Standard Plots
 # ============================================================
 
-def generate_all_plots(
-    individual_dir: Path,
-    sensor_names: List[str],
-    output_dir: Path = Path("output/plots")
-):
+
+def generate_all_plots(config: PipelineConfig):
     """
-    Generate all standard plots for processed data
-    
-    Args:
-        individual_dir: Path to output/individual/ directory
-        sensor_names: List of sensor names to plot
-        output_dir: Where to save plots
-    
-    Example:
-        generate_all_plots(
-            Path("output/individual"),
-            ["CO2_SCT1_2M", "CO2_30M_A", "CO2_30M_B", "CO2_30M_C", "LGR_30M"]
-        )
+    Generate all standard plots using pipeline configuration.
+
+    Automatically reads:
+    - config.output_dir  → processed 10min CSVs + uptime CSVs
+    - config.plots_dir   → where to save plots
     """
+
+    individual_dir = config.output_dir
+    output_dir = config.plots_dir
+    sensor_names = [s.name for s in config.sensors]
+
     viz = SensorVisualizer(output_dir)
-    
+
     print("Generating plots...")
-    
-    # 1. Uptime plots for each sensor
+
     uptime_csvs = {}
     data_csvs = {}
-    
+
+    # 1. Per-sensor plots
     for sensor in sensor_names:
         uptime_csv = individual_dir / f"{sensor}_uptime.csv"
         data_csv = individual_dir / f"{sensor}_10min.csv"
-        
+
         if uptime_csv.exists():
             print(f"  - {sensor}: Uptime timeseries")
             viz.plot_uptime_timeseries(uptime_csv, sensor)
-            
+
             print(f"  - {sensor}: Uptime heatmap")
             viz.plot_uptime_heatmap(uptime_csv, sensor)
-            
+
             uptime_csvs[sensor] = uptime_csv
-        
+
         if data_csv.exists():
             print(f"  - {sensor}: QC summary")
             viz.plot_qc_summary(data_csv, sensor)
-            
             data_csvs[sensor] = data_csv
-    
-    # 2. Multi-sensor uptime comparison
+
+    # 2. Multi-sensor summary plots
     if len(uptime_csvs) > 1:
         print("  - Multi-sensor uptime summary")
         viz.plot_uptime_summary(uptime_csvs)
-    
-    # 3. CO2 timeseries comparison
+
     if len(data_csvs) > 1:
         print("  - CO2 timeseries comparison")
         viz.plot_co2_timeseries(data_csvs)
-    
-    # 4. Validation plots (SCD41 vs LGR)
+
+    # 3. Reference comparison (LGR)
     lgr_csv = individual_dir / "LGR_30M_10min.csv"
     if lgr_csv.exists():
-        for sensor in ["CO2_SCT1_2M", "CO2_30M_A", "CO2_30M_B", "CO2_30M_C"]:
+        test_sensors = [s for s in sensor_names if s.startswith("CO2_")]
+
+        for sensor in test_sensors:
             test_csv = individual_dir / f"{sensor}_10min.csv"
             if test_csv.exists():
-                print(f"  - {sensor} vs LGR: Scatter plot")
+                print(f"  - {sensor} vs LGR: Scatter")
                 viz.plot_co2_scatter(lgr_csv, test_csv, "LGR", sensor)
-                
-                print(f"  - {sensor} vs LGR: Difference plot")
+
+                print(f"  - {sensor} vs LGR: Difference")
                 viz.plot_co2_difference(lgr_csv, test_csv, "LGR", sensor)
-        
-        # Taylor diagram
-        scd41_csvs = {s: individual_dir / f"{s}_10min.csv" 
-                      for s in ["CO2_SCT1_2M", "CO2_30M_A", "CO2_30M_B", "CO2_30M_C"]
-                      if (individual_dir / f"{s}_10min.csv").exists()}
-        
-        if len(scd41_csvs) > 1:
+
+        scd_csvs = {s: individual_dir / f"{s}_10min.csv"
+                    for s in test_sensors
+                    if (individual_dir / f"{s}_10min.csv").exists()}
+
+        if len(scd_csvs) > 1:
             print("  - Taylor diagram")
-            viz.plot_taylor_diagram(lgr_csv, scd41_csvs)
-            print(f"\n✓ All plots saved to: {output_dir}")
-    
+            viz.plot_taylor_diagram(lgr_csv, scd_csvs)
+
+    print(f"\n✓ All plots saved to: {output_dir}")
