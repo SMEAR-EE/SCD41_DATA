@@ -12,7 +12,7 @@ from typing import Dict
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from .base import BasePlotter
+from .base_plotter import BasePlotter
 
 
 class UptimePlots(BasePlotter):

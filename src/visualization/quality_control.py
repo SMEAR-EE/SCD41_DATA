@@ -6,7 +6,7 @@ Analyze and visualize QC flag distributions and patterns.
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
-from .base import BasePlotter
+from .base_plotter import BasePlotter
 
 
 class QualityControlPlots(BasePlotter):

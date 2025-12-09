@@ -20,11 +20,18 @@ Or use the convenience function:
     generate_all_plots(config)
 """
 
-from .base import BasePlotter
-from .uptime import UptimePlots
-from .validation import ValidationPlots
+from .base_plotter import BasePlotter
+from .uptime_plots import UptimePlots
+from .validation_plots import ValidationPlots
 from .quality_control import QualityControlPlots
-from .taylor import TaylorDiagram
+
+# Taylor diagram requires optional SkillMetrics package
+try:
+    from .taylor_plots import TaylorDiagram
+    TAYLOR_AVAILABLE = True
+except ImportError:
+    TAYLOR_AVAILABLE = False
+    TaylorDiagram = None
 
 __all__ = [
     'BasePlotter',
@@ -32,7 +39,8 @@ __all__ = [
     'ValidationPlots', 
     'QualityControlPlots',
     'TaylorDiagram',
-    'generate_all_plots'
+    'generate_all_plots',
+    'TAYLOR_AVAILABLE'
 ]
 
 
@@ -57,7 +65,14 @@ def generate_all_plots(config):
     uptime_plotter = UptimePlots(output_dir)
     validation_plotter = ValidationPlots(output_dir)
     qc_plotter = QualityControlPlots(output_dir)
-    taylor_plotter = TaylorDiagram(output_dir)
+    
+    # Taylor diagram only if SkillMetrics is installed
+    if TAYLOR_AVAILABLE:
+        taylor_plotter = TaylorDiagram(output_dir)
+    else:
+        print("  ⚠ Taylor diagrams skipped (SkillMetrics not installed)")
+        print("    Install with: pip install SkillMetrics")
+        taylor_plotter = None
     
     print("Generating plots...")
     
@@ -111,7 +126,10 @@ def generate_all_plots(config):
                     if (individual_dir / f"{s}_10min.csv").exists()}
         
         if len(scd_csvs) > 1:
-            print("  - Taylor diagram (WARNING: may not work correctly)")
-            taylor_plotter.plot(lgr_csv, scd_csvs, "LGR")
+            if taylor_plotter is not None:
+                print("  - Taylor diagram")
+                taylor_plotter.plot(lgr_csv, scd_csvs, "LGR")
+            else:
+                print("  - Taylor diagram: Skipped (install SkillMetrics)")
     
     print(f"\n✓ All plots saved to: {output_dir}")

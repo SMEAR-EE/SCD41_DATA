@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from .base import BasePlotter
+from .base_plotter import BasePlotter
 
 
 class ValidationPlots(BasePlotter):
