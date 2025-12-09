@@ -1,20 +1,21 @@
-"""
-LGR sensor data parser - Fixed version for headerless CSV files
-"""
+"""Parser for LGR (Los Gatos Research) sensor data files"""
 import pandas as pd
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 import logging
+import re
+
+from .base_parser import BaseSensorParser
 
 logger = logging.getLogger(__name__)
 
 
-class LGRParser:
+class LGRParser(BaseSensorParser):
     """Parser for LGR (Los Gatos Research) sensor data files."""
     
     # Define the column names based on the LGR file format
-    # Adjust these based on your actual LGR sensor configuration
     COLUMN_NAMES = [
         'timestamp_raw',      # Column 0: YYYYMMDDHHMMSS format
         'sequence',           # Column 1: Sequence number
@@ -45,11 +46,38 @@ class LGRParser:
         'MIU_Description'    # Column 26: MIU description
     ]
     
-    def __init__(self):
-        """Initialize the LGR parser."""
-        pass
+    def __init__(self, config):
+        """
+        Initialize the LGR parser.
+        
+        Args:
+            config: SensorConfig object
+        """
+        self.config = config
+        self.logger = logging.getLogger(__name__)
+        self.logger.info(f"Initialized LGR parser for sensor: {config.name}")
     
-    def parse_file(self, file_path: Path) -> pd.DataFrame:
+    def get_file_pattern(self) -> str:
+        """Return glob pattern for LGR files"""
+        return "*.co2ch4"
+    
+    def extract_datetime_from_filename(self, filename: str) -> Optional[datetime]:
+        """
+        Extract datetime from LGR filename: 20240901000000.co2ch4
+        Format: YYYYMMDDHHMMSS.co2ch4
+        """
+        pattern = re.compile(r"(\d{14})\.co2ch4")
+        m = pattern.match(filename)
+        if not m:
+            return None
+        
+        timestamp_str = m.group(1)
+        try:
+            return datetime.strptime(timestamp_str, "%Y%m%d%H%M%S")
+        except ValueError:
+            return None
+    
+    def parse_file(self, file_path: Path) -> Optional[pd.DataFrame]:
         """
         Parse a single LGR data file.
         
@@ -57,60 +85,118 @@ class LGRParser:
             file_path: Path to the LGR CSV file
             
         Returns:
-            DataFrame with parsed data
-            
-        Raises:
-            Exception: If file parsing fails
+            DataFrame with parsed data, or None if parsing fails
         """
         try:
-            logger.info(f"Parsing LGR file: {file_path}")
+            self.logger.info(f"Parsing LGR file: {file_path}")
             
             # Read CSV without header, using defined column names
             df = pd.read_csv(
                 file_path,
-                header=None,  # No header row in the file
+                header=None,  # CRITICAL: No header row in the file
                 names=self.COLUMN_NAMES,
                 na_values=['', 'NA', 'NaN'],
                 keep_default_na=True
             )
             
             # Parse timestamp from the raw timestamp column (YYYYMMDDHHMMSS format)
-            df['Time'] = pd.to_datetime(
+            df['timestamp'] = pd.to_datetime(
                 df['timestamp_raw'].astype(str),
                 format='%Y%m%d%H%M%S',
                 errors='coerce'
             )
             
-            # Alternative: Could also parse from the formatted datetime column if preferred
-            # df['Time'] = pd.to_datetime(
-            #     df['datetime_formatted'],
-            #     format='%m/%d/%Y%H:%M:%S.%f',
-            #     errors='coerce'
-            # )
-            
             # Check for parsing errors
-            invalid_times = df['Time'].isna().sum()
+            invalid_times = df['timestamp'].isna().sum()
             if invalid_times > 0:
-                logger.warning(f"Found {invalid_times} rows with invalid timestamps in {file_path.name}")
+                self.logger.warning(
+                    f"Found {invalid_times} rows with invalid timestamps in {file_path.name}"
+                )
             
             # Drop rows with invalid timestamps
-            df = df.dropna(subset=['Time'])
+            df = df.dropna(subset=['timestamp'])
             
-            # Set Time as index
-            df.set_index('Time', inplace=True)
+            if len(df) == 0:
+                self.logger.warning(f"No valid data in {file_path.name}")
+                return None
             
             # Sort by time to ensure chronological order
-            df.sort_index(inplace=True)
+            df = df.sort_values('timestamp')
+            
+            # Add QC flags
+            df = self.add_qc_flags(df)
+            
+            # Drop metadata columns that shouldn't be resampled
+            # Keep only measurement data and QC flags
+            metadata_cols = [
+                'timestamp_raw',      # Parsing helper
+                'datetime_formatted', # Parsing helper
+                'sequence',          # Not a measurement
+                'MIU_VALVE',         # Metadata
+                'MIU_Description'    # Metadata
+            ]
+            cols_to_drop = [col for col in metadata_cols if col in df.columns]
+            if cols_to_drop:
+                df = df.drop(columns=cols_to_drop)
+                self.logger.debug(f"Dropped metadata columns: {cols_to_drop}")
             
             # Log some basic statistics
-            logger.info(f"Parsed {len(df)} valid records from {file_path.name}")
-            logger.info(f"Time range: {df.index.min()} to {df.index.max()}")
+            self.logger.info(f"Parsed {len(df)} valid records from {file_path.name}")
+            self.logger.info(f"Time range: {df['timestamp'].min()} to {df['timestamp'].max()}")
             
             return df
             
         except Exception as e:
-            logger.error(f"Failed to parse {file_path}: {e}")
-            raise
+            self.logger.error(f"Failed to parse {file_path}: {e}")
+            return None
+    
+    def add_qc_flags(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Add quality control flags for LGR data without removing data.
+        
+        Flags based on:
+        - Quality indicator (column 2)
+        - Fit flag (column 24)
+        - CO2 dry mole fraction ranges
+        - Pressure and temperature ranges
+        """
+        # Initialize all as OK
+        df['co2_qc'] = 'OK'
+        df['quality_qc'] = 'OK'
+        
+        # Flag based on quality indicator (should be close to 100)
+        if 'quality' in df.columns:
+            df.loc[df['quality'] < 95, 'quality_qc'] = 'LOW_QUALITY'
+        
+        # Flag based on fit flag (3 is good, other values indicate issues)
+        if 'Fit_Flag' in df.columns:
+            df.loc[df['Fit_Flag'] != 3, 'quality_qc'] = 'BAD_FIT'
+        
+        # Flag CO2 issues based on dry mole fraction
+        if self.config.co2_range and 'CO2_dry' in df.columns:
+            df.loc[df['CO2_dry'] < self.config.co2_range[0], 'co2_qc'] = 'BELOW_RANGE'
+            df.loc[df['CO2_dry'] > self.config.co2_range[1], 'co2_qc'] = 'ABOVE_RANGE'
+        
+        # Flag extreme values that might indicate sensor issues
+        if 'CO2_dry' in df.columns:
+            # Flag unrealistic values (< 300 or > 1000 ppm is very unusual for ambient air)
+            df.loc[df['CO2_dry'] < 300, 'co2_qc'] = 'UNREALISTIC_LOW'
+            df.loc[df['CO2_dry'] > 1000, 'co2_qc'] = 'UNREALISTIC_HIGH'
+        
+        # Flag temperature issues (instrument operating range)
+        if 'GasT_C' in df.columns:
+            df.loc[df['GasT_C'] < -40, 'quality_qc'] = 'TEMP_TOO_LOW'
+            df.loc[df['GasT_C'] > 50, 'quality_qc'] = 'TEMP_TOO_HIGH'
+        
+        # Log QC summary
+        qc_issues = (df['co2_qc'] != 'OK').sum() + (df['quality_qc'] != 'OK').sum()
+        if qc_issues > 0:
+            self.logger.info(
+                f"QC flags: {qc_issues} issues in {len(df)} samples "
+                f"({100*qc_issues/len(df):.1f}%)"
+            )
+        
+        return df
     
     def get_co2_columns(self) -> dict:
         """
@@ -120,62 +206,21 @@ class LGRParser:
             Dictionary with column names for CO2 data
         """
         return {
-            'co2_wet': 'CO2_ppm',      # Wet CO2 concentration
-            'co2_dry': 'CO2_dry',       # Dry CO2 concentration (typically what you want)
-            'co2_uncertainty': 'CO2_dry_sd'  # Uncertainty in dry CO2
+            'co2': 'CO2_dry',           # Main CO2 column (dry mole fraction)
+            'co2_wet': 'CO2_ppm',       # Wet CO2 concentration
+            'co2_uncertainty': 'CO2_dry_sd',  # Uncertainty in dry CO2
+            'temp': 'GasT_C',           # Gas temperature
+            'pressure': 'GasP_torr'     # Gas pressure
         }
-    
-    def parse_directory(self, directory: Path, file_pattern: str = "*.co2ch4") -> pd.DataFrame:
-        """
-        Parse all LGR files in a directory.
-        
-        Args:
-            directory: Path to directory containing LGR files
-            file_pattern: Glob pattern for file matching
-            
-        Returns:
-            Combined DataFrame from all files
-        """
-        all_data = []
-        
-        file_list = sorted(directory.glob(file_pattern))
-        logger.info(f"Found {len(file_list)} LGR files to parse")
-        
-        for file_path in file_list:
-            try:
-                df = self.parse_file(file_path)
-                all_data.append(df)
-            except Exception as e:
-                logger.error(f"Skipping file {file_path.name} due to error: {e}")
-                continue
-        
-        if not all_data:
-            logger.warning("No data was successfully parsed")
-            return pd.DataFrame()
-        
-        # Concatenate all dataframes
-        combined_df = pd.concat(all_data, axis=0)
-        
-        # Remove any duplicate timestamps (keep first occurrence)
-        combined_df = combined_df[~combined_df.index.duplicated(keep='first')]
-        
-        # Sort by time
-        combined_df.sort_index(inplace=True)
-        
-        logger.info(f"Combined dataset: {len(combined_df)} total records")
-        logger.info(f"Time range: {combined_df.index.min()} to {combined_df.index.max()}")
-        
-        return combined_df
 
 
-# Example usage for testing
+# For testing only
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     
-    # Test with a sample file
-    parser = LGRParser()
+    class MockConfig:
+        name = "LGR_TEST"
+        co2_range = [350, 600]
     
-    # Example: Parse a single file
-    # df = parser.parse_file(Path("/path/to/20240901000000.co2ch4"))
-    # print(df.head())
-    # print("\nCO2 columns:", parser.get_co2_columns())
+    parser = LGRParser(MockConfig())
+    print("LGR Parser initialized successfully")

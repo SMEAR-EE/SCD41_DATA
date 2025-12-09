@@ -1,4 +1,4 @@
-"""Parser for SCD41 NodeRED JSON files"""
+"""Parser for SCD41 NodeRED JSON files - Fixed to handle dict values"""
 import json
 import re
 import logging
@@ -31,6 +31,37 @@ class SCD41Parser(BaseSensorParser):
         else:
             return "SCD41.json-*"
     
+    def _extract_numeric_value(self, value):
+        """
+        Extract numeric value from either a number or a dict.
+        
+        Some sensors occasionally return nested structures like:
+        {"value": 65.2, "status": "ok"} instead of just 65.2
+        
+        Args:
+            value: Either a number, dict, or None
+            
+        Returns:
+            Numeric value or np.nan
+        """
+        if value is None:
+            return np.nan
+        
+        if isinstance(value, dict):
+            # Try common keys for nested data
+            for key in ['value', 'val', 'reading']:
+                if key in value:
+                    return self._extract_numeric_value(value[key])
+            # If no recognized key, return NaN
+            self.logger.debug(f"Dict without recognized value key: {value}")
+            return np.nan
+        
+        # If it's already a number, return it
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return np.nan
+    
     def parse_file(self, file_path: Path) -> Optional[pd.DataFrame]:
         """Parse NodeRED JSON file"""
         rows = []
@@ -49,11 +80,13 @@ class SCD41Parser(BaseSensorParser):
                         if ts is None:
                             continue
                         
+                        # Use the helper method to extract numeric values
+                        # This handles both simple numbers and nested dicts
                         rows.append({
                             'timestamp': ts,
-                            'co2': entry.get('co2', np.nan),
-                            'temp': entry.get('temp', np.nan),
-                            'humidity': entry.get('humidity', np.nan)
+                            'co2': self._extract_numeric_value(entry.get('co2')),
+                            'temp': self._extract_numeric_value(entry.get('temp')),
+                            'humidity': self._extract_numeric_value(entry.get('humidity'))
                         })
                     
                     except (json.JSONDecodeError, KeyError) as e:
@@ -110,7 +143,16 @@ class SCD41Parser(BaseSensorParser):
             return None
     
     def add_qc_flags(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add QC flags without removing data - transparency for adverse conditions"""
+        """
+        Add QC flags without removing data - transparency for adverse conditions.
+        
+        Now includes defensive checks to ensure numeric types before comparisons.
+        """
+        # Ensure all data columns are numeric (convert any remaining dicts/objects to NaN)
+        for col in ['co2', 'temp', 'humidity']:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        
         # Initialize all as OK
         df['co2_qc'] = 'OK'
         df['temp_qc'] = 'OK'
