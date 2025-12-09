@@ -57,3 +57,4 @@ excluded_sensor_ids: ['D']
 output_dir: output/individual
 parquet_dir: output/parquet
 log_dir: output/logs
+plots_dir: output/plots
