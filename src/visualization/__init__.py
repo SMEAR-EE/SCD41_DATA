@@ -24,7 +24,7 @@ from .base_plotter import BasePlotter
 from .uptime_plots import UptimePlots
 from .validation_plots import ValidationPlots
 from .quality_control import QualityControlPlots
-
+# from .taylor_diagram_custom import TaylorPlotter
 # Taylor diagram requires optional SkillMetrics package
 try:
     from .taylor_plots import TaylorDiagram
