@@ -4,6 +4,9 @@ from pathlib import Path
 from typing import Optional, List
 import yaml
 
+# Determine the project root (src/ is inside repo root)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
 
 @dataclass
 class SensorConfig:
@@ -36,21 +39,12 @@ class PipelineConfig:
     """Configuration for entire processing pipeline"""
     sensors: List[SensorConfig]
     excluded_sensor_ids: List[str] = field(default_factory=list)
+
     output_dir: Path = Path("output/individual")
     parquet_dir: Path = Path("output/parquet")
     log_dir: Path = Path("output/logs")
-    
-    def __post_init__(self):
-        """Convert paths and create directories"""
-        self.output_dir = Path(self.output_dir)
-        self.parquet_dir = Path(self.parquet_dir)
-        self.log_dir = Path(self.log_dir)
-        
-        # Create output directories
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.parquet_dir.mkdir(parents=True, exist_ok=True)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
-    
+    plots_dir: Path = Path("output/plots")  # NEW
+
     @classmethod
     def from_yaml(cls, config_path: Path) -> 'PipelineConfig':
         """Load configuration from YAML file"""
@@ -58,15 +52,39 @@ class PipelineConfig:
             data = yaml.safe_load(f)
         
         sensors = [SensorConfig(**s) for s in data['sensors']]
-        
+
         return cls(
             sensors=sensors,
             excluded_sensor_ids=data.get('excluded_sensor_ids', []),
-            output_dir=Path(data.get('output_dir', 'output/individual')),
-            parquet_dir=Path(data.get('parquet_dir', 'output/parquet')),
-            log_dir=Path(data.get('log_dir', 'output/logs'))
+            output_dir=data.get('output_dir', 'output/individual'),
+            parquet_dir=data.get('parquet_dir', 'output/parquet'),
+            log_dir=data.get('log_dir', 'output/logs'),
+            plots_dir=data.get('plots_dir', 'output/plots')
         )
-    
+
+    def resolve_path(self, p: Path) -> Path:
+        """Resolve path relative to project root"""
+        p = Path(p)
+        return p if p.is_absolute() else PROJECT_ROOT / p
+
+    def __post_init__(self):
+        """Normalize and create all output directories"""
+        # Resolve paths
+        self.output_dir = self.resolve_path(self.output_dir)
+        self.parquet_dir = self.resolve_path(self.parquet_dir)
+        self.log_dir = self.resolve_path(self.log_dir)
+        self.plots_dir = self.resolve_path(self.plots_dir)
+
+        # Create directories
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.parquet_dir.mkdir(parents=True, exist_ok=True)
+        self.log_dir.mkdir(parents=True, exist_ok=True)
+        self.plots_dir.mkdir(parents=True, exist_ok=True)
+
+        # Resolve sensor input dirs
+        for sensor in self.sensors:
+            sensor.input_dir = self.resolve_path(sensor.input_dir)
+
     def get_sensor_output_paths(self, sensor_name: str):
         """Get output file paths for a sensor"""
         return {
