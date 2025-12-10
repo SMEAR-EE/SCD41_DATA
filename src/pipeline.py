@@ -187,15 +187,19 @@ class SensorPipeline:
 
     def _safe_append_csv(self, df: pd.DataFrame, csv_path: Path, first_write: bool):
         """Append to CSV with atomic write (via temp file)"""
+        # CRITICAL FIX: Reset index to make timestamp a column before writing
+        # This prevents issues with index_label when timestamp is already in index
+        df_to_write = df.reset_index()
+        
         # Write to temp file first
         tmp_path = csv_path.parent / f".{csv_path.name}.tmp"
         
         if first_write:
             # New file - write directly
-            df.to_csv(csv_path, index_label='timestamp')
+            df_to_write.to_csv(csv_path, index=False)
         else:
             # Append mode - write temp then atomic move
-            df.to_csv(tmp_path, index_label='timestamp', header=False)
+            df_to_write.to_csv(tmp_path, index=False, header=False)
             
             # Atomic append (concat files)
             with open(csv_path, 'ab') as f_out:
@@ -253,7 +257,8 @@ class SensorPipeline:
         
         df = pd.read_csv(csv_path, parse_dates=['timestamp'])
         
-        if (df['timestamp'].diff().dropna() < pd.Timedelta(0)).any():
+        # Check if sorting is needed
+        if len(df) > 1 and (df['timestamp'].diff().dropna() < pd.Timedelta(0)).any():
             self.logger.info("Sorting CSV by timestamp...")
             df = df.sort_values('timestamp')
             df.to_csv(csv_path, index=False)
