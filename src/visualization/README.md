@@ -1,32 +1,15 @@
-# Visualization Module – Minimal README
+# Visualization Module
 
-## Overview
-
-Modular plotting package replacing the former monolithic `visualization.py`.
-Provides uptime, validation, and QC plots with an optional (broken) Taylor diagram.
-
-## Structure
-
-```
-visualization/
-├── __init__.py
-├── base.py
-├── uptime.py
-├── validation.py
-├── quality_control.py
-└── taylor.py
-```
+Modular plotting package for sensor data visualization with uptime, validation, and QC plots.
 
 ## Quick Start
 
-Use the convenience function:
-
 ```python
 from visualization import generate_all_plots
-generate_all_plots(config)
+generate_all_plots(config)  # Generate all plots at once
 ```
 
-Or instantiate plotters:
+Or use individual plotters:
 
 ```python
 from visualization import UptimePlots, ValidationPlots, QualityControlPlots
@@ -36,52 +19,50 @@ validation = ValidationPlots("plots/")
 qc = QualityControlPlots("plots/")
 ```
 
-## Main Plotters
+## Available Plotters
 
 ### UptimePlots
-
-* `plot_timeseries(csv, sensor)`
-* `plot_heatmap(csv, sensor)`
-* `plot_summary(csv_dict)`
+- `plot_timeseries(csv, sensor)` - Time series with data availability
+- `plot_heatmap(csv, sensor)` - Calendar heatmap showing gaps
+- `plot_summary(csv_dict)` - Multi-sensor comparison
 
 ### ValidationPlots
-
-* `plot_timeseries(data_csvs, start_date=None, end_date=None)`
-* `plot_scatter(reference_csv, test_csv, reference_name, test_name)`
-* `plot_difference(reference_csv, test_csv, reference_name, test_name)`
+- `plot_timeseries(data_csvs, start_date, end_date)` - Overlay multiple sensors
+- `plot_scatter(reference_csv, test_csv, ref_name, test_name)` - Sensor vs reference
+- `plot_difference(reference_csv, test_csv, ref_name, test_name)` - Bias analysis
 
 ### QualityControlPlots
+- `plot_qc_summary(data_csv, sensor_name)` - QC flag distribution
 
-* `plot_qc_summary(data_csv, sensor_name)`
-
-### TaylorDiagram (broken)
-
-* Isolated in `taylor.py`. Safe to ignore or replace later.
-
-## Usage Examples
-
-**Timeseries + heatmap:**
+## Example Usage
 
 ```python
-uptime.plot_timeseries("sensor_uptime.csv", "CO2_30M_1")
-uptime.plot_heatmap("sensor_uptime.csv", "CO2_30M_1")
+# Uptime analysis
+uptime.plot_timeseries("CO2_30M_A_uptime.csv", "CO2_30M_A")
+uptime.plot_heatmap("CO2_30M_A_uptime.csv", "CO2_30M_A")
+
+# Validation against reference
+validation.plot_scatter("LGR_30M.csv", "CO2_30M_A.csv", "LGR", "SCD41_A")
+validation.plot_difference("LGR_30M.csv", "CO2_30M_A.csv", "LGR", "SCD41_A")
+
+# Quality control
+qc.plot_qc_summary("CO2_30M_A.csv", "CO2_30M_A")
 ```
 
-**Scatter + difference:**
+## Structure
 
-```python
-validation.plot_scatter("lgr.csv", "scd41.csv", "LGR", "SCD41")
-validation.plot_difference("lgr.csv", "scd41.csv", "LGR", "SCD41")
 ```
-
-**QC summary:**
-
-```python
-qc.plot_qc_summary("sensor_10min.csv", "CO2_30M_1")
+visualization/
+├── __init__.py              # Main entry point
+├── base_plotter.py          # Shared styling and utilities
+├── uptime_plots.py          # Uptime visualizations
+├── validation_plots.py      # Sensor validation plots
+├── quality_control.py       # QC analysis plots
+└── taylor_plots.py          # Taylor diagrams (non-functional)
 ```
 
 ## Notes
 
-* Works as drop-in replacement for the old file.
-* All modules share consistent styling via `base.py`.
-* Taylor diagram is not functional but does not affect other modules.
+- All plots share consistent styling via `base_plotter.py`
+- Taylor diagram module exists but is non-functional (safe to ignore)
+- Plots auto-save to configured output directory
