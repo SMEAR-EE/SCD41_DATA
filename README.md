@@ -1,8 +1,9 @@
 # SMEAR Estonia CO2 Sensor Processing
 
-Fast, reproducible processing pipeline for SCD41 and LGR CO2 sensor data.
+Fast, reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the SMEAR Estonia atmospheric research station.
 
-## 🚀 Quick Start (5 minutes)
+## 🚀 Quick Start
+
 ```bash
 # 1. Setup (one-time)
 ./setup.sh
@@ -10,100 +11,82 @@ Fast, reproducible processing pipeline for SCD41 and LGR CO2 sensor data.
 # 2. Activate environment
 source venv/bin/activate
 
-# 3. Edit config
-micro config/sensors.yaml
+# 3. Configure sensors
+nano config/sensors.yaml  # Set your data paths
 
 # 4. Run processing
-jupyter notebook notebooks/process_data.ipynb
+jupyter notebook testing/process_data.ipynb
 ```
 
-**That's it!** Processed data appears in `output/`.
+Processed data appears in `output/`.
 
----
+## 📊 What It Does
 
-## 📊 What This Does
+Processes 5 CO2 sensors (4× SCD41, 1× LGR reference) with:
+- **Time-synchronized resampling** to 10-min intervals (epoch-aligned)
+- **Quality control** tracking uptime and data quality flags
+- **Multiple outputs** CSV and Parquet formats
+- **Visualization** uptime, validation, and QC plots
 
-- ✅ Processes 5 sensors (4x SCD41, 1x LGR reference)
-- ✅ Resamples to 10-min intervals (time-synchronized)
-- ✅ Tracks uptime + data quality (QC flags)
-- ✅ Exports CSV + Parquet files
-- ✅ Generates validation plots
+## 📁 Output Structure
 
----
-
-## 📁 Where Things Go
-
-| What | Where |
-|------|-------|
-| Your raw data | Configure in `config/sensors.yaml` |
+| Output | Location |
+|--------|----------|
 | Processed CSVs | `output/individual/` |
-| Monthly parquets | `output/parquet/` |
+| Monthly Parquet | `output/parquet/` |
 | Plots | `output/plots/` |
 | Logs | `output/logs/` |
 
----
-
 ## 🔧 Configuration
 
-Edit `config/sensors.yaml`:
+Edit `config/sensors.yaml` to set input data paths:
 ```yaml
 sensors:
   - name: CO2_SCT1_2M
-    input_dir: /your/path/here  # ← EDIT THIS
-    # ... (rest auto-configured)
+    input_dir: /path/to/your/data  # ← Change this
+    sensor_type: scd41
+    # Other settings auto-configured
 ```
-
----
 
 ## 📖 Documentation
 
-- **Full structure:** See `PROJECT_STRUCTURE.md`
-- **Module details:** See docstrings in `src/`
-- **Examples:** See `notebooks/process_data.ipynb`
-
----
+- **Detailed overview**: See [`APPLICATION_SUMMARY.md`](APPLICATION_SUMMARY.md) for architecture, features, and technical details
+- **Visualization**: See [`src/visualization/README.md`](src/visualization/README.md) for plotting module
+- **Examples**: See [`testing/process_data.ipynb`](testing/process_data.ipynb) for usage patterns
 
 ## 🐛 Troubleshooting
 
-**Import errors?**
-```bash
-source venv/bin/activate  # Activate venv first!
-```
+**Import errors**: Ensure virtual environment is active: `source venv/bin/activate`
 
-**No data found?**
-- Check paths in `config/sensors.yaml`
-- Check logs: `tail -f output/logs/processing.log`
+**No data found**: Check paths in `config/sensors.yaml` and logs: `tail -f output/logs/processing.log`
 
-**Need to reprocess?**
+**Reprocess data**:
 ```python
 pipeline = SensorPipeline(config, force=True)
 pipeline.run_all(year=2024, month=10)
 ```
 
----
+## 🐳 Docker Deployment
 
-## 🎨 Extending
+```bash
+docker-compose up
+```
 
-Want to add custom plots or analysis?
-
-1. Edit `src/visualization.py` (add methods to `SensorVisualizer`)
-2. Call from notebook
-3. Done!
-
-See `PROJECT_STRUCTURE.md` for details.
-
----
+Requires editing volume paths in `docker-compose.yaml`.
 
 ## 📦 Requirements
 
 - Python 3.10+
-- ~500 MB disk space (for venv + processed data)
-- Jupyter (auto-installed)
-
----
+- ~500 MB disk space
+- Dependencies: pandas, numpy, pyarrow, matplotlib, seaborn
 
 ## 📝 Citation
+
 ```
 Zorec, M. et al. (2025). Title TBD.
 Dataset: [DOI pending]
 ```
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file.
