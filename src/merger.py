@@ -41,13 +41,21 @@ class SensorMerger:
         for sensor_name, csv_path in sensor_csvs.items():
             self.logger.info(f"  Loading {sensor_name}...")
             
-            df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+            # Parse timestamps with mixed format support to handle any inconsistencies
+            df = pd.read_csv(csv_path)
             
-            # Explicitly ensure timestamp is DatetimeIndex
             if 'timestamp' not in df.columns:
                 raise ValueError(f"{sensor_name}: CSV missing 'timestamp' column")
             
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            # Robust timestamp parsing with format='mixed' to handle variations
+            df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+            
+            # Drop rows with invalid timestamps
+            invalid_ts = df['timestamp'].isna().sum()
+            if invalid_ts > 0:
+                self.logger.warning(f"    ⚠️  Found {invalid_ts} invalid timestamps in {sensor_name}, dropping them")
+                df = df.dropna(subset=['timestamp'])
+            
             df = df.set_index('timestamp')
             
             # Filter date range
@@ -56,16 +64,13 @@ class SensorMerger:
             if end_date:
                 df = df[df.index <= end_date]
             
-            # DEBUG: Check for duplicate timestamps
+            # Check for duplicate timestamps
             dup_count = df.index.duplicated().sum()
             if dup_count > 0:
                 self.logger.warning(f"    ⚠️  Found {dup_count} duplicate timestamps in {sensor_name}")
                 self.logger.info(f"    Keeping last occurrence of duplicates")
                 # Keep last occurrence (most recent data for that timestamp)
                 df = df[~df.index.duplicated(keep='last')]
-                # Ensure index is still DatetimeIndex after filtering
-                if not isinstance(df.index, pd.DatetimeIndex):
-                    df.index = pd.to_datetime(df.index)
             
             # Rename columns with sensor prefix
             df.columns = [f"{sensor_name.lower()}_{col}" for col in df.columns]
