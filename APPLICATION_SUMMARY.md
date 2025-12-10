@@ -35,7 +35,7 @@ The data supports atmospheric CO2 research and sensor validation studies, with a
 - Ensures time synchronization across all sensors for comparative analysis
 - Proper statistical aggregation:
   - Mean, standard deviation, and count for primary measurements
-  - Uncertainty propagation for standard deviation fields (sqrt(sum(sd²))/n)
+  - Uncertainty propagation for standard deviation fields using the implementation: sqrt(sum(sd²))/n
   - QC flag summary (most common flag per window)
 
 ### 3. **Data Quality Control**
@@ -67,7 +67,6 @@ Modular plotting system with multiple plot types:
 - **Quality Control Plots**:
   - QC flag summaries
   - Distribution analysis
-- **Taylor Diagrams**: Statistical comparison framework (noted as non-functional in current version)
 
 ### 6. **Data Merging**
 - `SensorMerger` class for combining multiple sensor outputs
@@ -278,7 +277,7 @@ The pipeline is designed for easy extension:
 
 ## Current Limitations & Known Issues
 
-1. **Taylor diagram visualization**: Noted as non-functional in current version
+1. **Taylor diagram visualization**: Module exists (`taylor_plots.py`) but noted as non-functional in current version - isolated and safe to ignore or replace
 2. **Single-site focus**: Optimized for SMEAR Estonia station
 3. **File format specificity**: Parsers designed for NodeRED JSON and LGR CSV formats
 4. **No real-time processing**: Batch-oriented, not streaming
