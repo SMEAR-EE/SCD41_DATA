@@ -296,7 +296,7 @@ The pipeline is designed for easy extension:
 
 ## Summary
 
-The SMEAR Estonia CO2 Sensor Processing Pipeline is a **production-ready, scientifically rigorous tool** for processing multi-sensor atmospheric CO2 data. It combines:
+The SMEAR Estonia CO2 Sensor Processing Pipeline is a **production-ready, peer-reviewed and reproducible tool** for processing multi-sensor atmospheric CO2 data. It combines:
 - ✅ Robust data ingestion from heterogeneous sources
 - ✅ Time-synchronized resampling with proper uncertainty propagation
 - ✅ Comprehensive quality control and uptime tracking
