@@ -42,6 +42,12 @@ class SensorMerger:
             self.logger.info(f"  Loading {sensor_name}...")
             
             df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+            
+            # Explicitly ensure timestamp is DatetimeIndex
+            if 'timestamp' not in df.columns:
+                raise ValueError(f"{sensor_name}: CSV missing 'timestamp' column")
+            
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
             df = df.set_index('timestamp')
             
             # Filter date range
@@ -57,6 +63,9 @@ class SensorMerger:
                 self.logger.info(f"    Keeping last occurrence of duplicates")
                 # Keep last occurrence (most recent data for that timestamp)
                 df = df[~df.index.duplicated(keep='last')]
+                # Ensure index is still DatetimeIndex after filtering
+                if not isinstance(df.index, pd.DatetimeIndex):
+                    df.index = pd.to_datetime(df.index)
             
             # Rename columns with sensor prefix
             df.columns = [f"{sensor_name.lower()}_{col}" for col in df.columns]
