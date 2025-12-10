@@ -1,6 +1,6 @@
 # SMEAR Estonia CO2 Sensor Processing
 
-Fast, reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the SMEAR Estonia atmospheric research station.
+Fast, light and reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the SMEAR Estonia atmospheric research station.
 
 ## 🚀 Quick Start
 
