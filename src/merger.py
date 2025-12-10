@@ -50,6 +50,14 @@ class SensorMerger:
             if end_date:
                 df = df[df.index <= end_date]
             
+            # DEBUG: Check for duplicate timestamps
+            dup_count = df.index.duplicated().sum()
+            if dup_count > 0:
+                self.logger.warning(f"    ⚠️  Found {dup_count} duplicate timestamps in {sensor_name}")
+                self.logger.info(f"    Keeping last occurrence of duplicates")
+                # Keep last occurrence (most recent data for that timestamp)
+                df = df[~df.index.duplicated(keep='last')]
+            
             # Rename columns with sensor prefix
             df.columns = [f"{sensor_name.lower()}_{col}" for col in df.columns]
             
