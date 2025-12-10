@@ -1,9 +1,9 @@
 testing/IOT/
 testing/IOT.zip
 config/sensors.yaml
-output/individual
-output/logs
-output/parquet
+# output/individual
+# output/logs
+# output/parquet
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
