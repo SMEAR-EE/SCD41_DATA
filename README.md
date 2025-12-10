@@ -12,7 +12,7 @@ Fast, reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the 
 source venv/bin/activate
 
 # 3. Configure sensors
-nano config/sensors.yaml  # Set your data paths
+edit config/sensors.yaml  # Set your data paths
 
 # 4. Run processing
 jupyter notebook testing/process_data.ipynb
