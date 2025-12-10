@@ -71,8 +71,26 @@ class DayProcessor:
                 f"Removed {initial_count - len(df_raw)} duplicate timestamps"
             )
         
-        # Calculate uptime
-        uptime_stats = self.uptime_calc.calculate(df_raw)
+        # CRITICAL FIX: Filter to only measurements from THIS day before resampling
+        # This prevents day-boundary overlap duplicates when files contain data
+        # from adjacent days (common when files are timestamped by creation time)
+        day_start = pd.Timestamp(year, month, day)
+        day_end = day_start + pd.Timedelta(days=1)
+        df_day = df_raw[(df_raw.index >= day_start) & (df_raw.index < day_end)]
+        
+        if len(df_day) == 0:
+            self.logger.warning(
+                f"No data in date range for {year}-{month:02d}-{day:02d}"
+            )
+            return None
+        
+        if len(df_day) < len(df_raw):
+            self.logger.debug(
+                f"Filtered {len(df_raw) - len(df_day)} measurements outside day boundary"
+            )
+        
+        # Calculate uptime on the filtered day data
+        uptime_stats = self.uptime_calc.calculate(df_day)
         uptime_stats.update({'year': year, 'month': month, 'day': day})
         
         # Log low uptime
@@ -84,11 +102,11 @@ class DayProcessor:
             )
         
         # 10-minute resampling with epoch origin (time sync!)
-        df_10min = self._resample_10min(df_raw)
+        df_10min = self._resample_10min(df_day)
         
         self.logger.info(
             f"✓ {year}-{month:02d}-{day:02d}: "
-            f"{len(df_raw)} raw → {len(df_10min)} 10-min samples "
+            f"{len(df_day)} raw → {len(df_10min)} 10-min samples "
             f"(uptime: {uptime_stats['uptime_ratio']:.1%})"
         )
         
