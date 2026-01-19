@@ -4989,3 +4989,67 @@
 2026-01-19 17:23:01,758 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_10_merged.csv (4464 rows)
 2026-01-19 17:23:01,971 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_11_merged.csv (4320 rows)
 2026-01-19 17:23:02,174 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_12_merged.csv (4464 rows)
+2026-01-19 17:26:00,223 - src.merger - INFO - Merging 5 sensors...
+2026-01-19 17:26:00,223 - src.merger - INFO -   Loading CO2_SCT1_2M...
+2026-01-19 17:26:00,247 - src.merger - INFO -     15282 rows (2024-09-12 12:20:00 to 2024-12-31 23:10:00)
+2026-01-19 17:26:00,248 - src.merger - INFO -   Loading CO2_30M_A...
+2026-01-19 17:26:00,257 - src.merger - INFO -     5039 rows (2024-09-19 11:10:00 to 2024-11-29 23:50:00)
+2026-01-19 17:26:00,257 - src.merger - INFO -   Loading CO2_30M_B...
+2026-01-19 17:26:00,271 - src.merger - INFO -     5817 rows (2024-09-19 11:10:00 to 2024-12-10 23:50:00)
+2026-01-19 17:26:00,271 - src.merger - INFO -   Loading CO2_30M_C...
+2026-01-19 17:26:00,291 - src.merger - INFO -     12916 rows (2024-10-02 09:30:00 to 2024-12-31 23:40:00)
+2026-01-19 17:26:00,291 - src.merger - INFO -   Loading LGR_30M...
+2026-01-19 17:26:00,358 - src.merger - INFO -     17568 rows (2024-09-01 00:00:00 to 2024-12-31 23:50:00)
+2026-01-19 17:26:00,358 - src.merger - INFO -   Merging on timestamp (OUTER JOIN - no data loss)...
+2026-01-19 17:26:00,372 - src.merger - INFO -   Computing cross-sensor statistics...
+2026-01-19 17:26:00,373 - src.merger - INFO -     Computing stats for 3 co-located sensors
+2026-01-19 17:26:00,379 - src.merger - INFO -   Merge Quality Report:
+2026-01-19 17:26:00,380 - src.merger - INFO -     CO2_SCT1_2M: 15196/17568 (86.5% coverage)
+2026-01-19 17:26:00,380 - src.merger - INFO -     CO2_30M_A: 5009/17568 (28.5% coverage)
+2026-01-19 17:26:00,380 - src.merger - INFO -     CO2_30M_B: 5750/17568 (32.7% coverage)
+2026-01-19 17:26:00,381 - src.merger - INFO -     CO2_30M_C: 12893/17568 (73.4% coverage)
+2026-01-19 17:26:00,381 - src.merger - INFO -     LGR_30M: 17358/17568 (98.8% coverage)
+2026-01-19 17:26:01,201 - src.merger - INFO - ✓ Saved merged dataset: output/merged/SMEAR_EE_CO2_merged.csv
+2026-01-19 17:26:01,202 - src.merger - INFO -   Shape: 17568 rows × 99 columns
+2026-01-19 17:26:01,202 - src.merger - INFO - Exporting monthly merged Parquet files...
+2026-01-19 17:26:01,242 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_09_merged.parquet (4320 rows)
+2026-01-19 17:26:01,265 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_10_merged.parquet (4464 rows)
+2026-01-19 17:26:01,294 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_11_merged.parquet (4320 rows)
+2026-01-19 17:26:01,320 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_12_merged.parquet (4464 rows)
+2026-01-19 17:26:01,323 - src.merger - INFO - Exporting monthly merged CSV files...
+2026-01-19 17:26:01,542 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_09_merged.csv (4320 rows)
+2026-01-19 17:26:01,802 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_10_merged.csv (4464 rows)
+2026-01-19 17:26:02,026 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_11_merged.csv (4320 rows)
+2026-01-19 17:26:02,241 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_12_merged.csv (4464 rows)
+2026-01-19 17:33:42,882 - src.merger - INFO - Merging 5 sensors...
+2026-01-19 17:33:42,883 - src.merger - INFO -   Loading CO2_SCT1_2M...
+2026-01-19 17:33:42,910 - src.merger - INFO -     15282 rows (2024-09-12 12:20:00 to 2024-12-31 23:10:00)
+2026-01-19 17:33:42,911 - src.merger - INFO -   Loading CO2_30M_A...
+2026-01-19 17:33:42,919 - src.merger - INFO -     5039 rows (2024-09-19 11:10:00 to 2024-11-29 23:50:00)
+2026-01-19 17:33:42,920 - src.merger - INFO -   Loading CO2_30M_B...
+2026-01-19 17:33:42,932 - src.merger - INFO -     5817 rows (2024-09-19 11:10:00 to 2024-12-10 23:50:00)
+2026-01-19 17:33:42,933 - src.merger - INFO -   Loading CO2_30M_C...
+2026-01-19 17:33:42,967 - src.merger - INFO -     12916 rows (2024-10-02 09:30:00 to 2024-12-31 23:40:00)
+2026-01-19 17:33:42,967 - src.merger - INFO -   Loading LGR_30M...
+2026-01-19 17:33:43,045 - src.merger - INFO -     17568 rows (2024-09-01 00:00:00 to 2024-12-31 23:50:00)
+2026-01-19 17:33:43,045 - src.merger - INFO -   Merging on timestamp (OUTER JOIN - no data loss)...
+2026-01-19 17:33:43,059 - src.merger - INFO -   Computing cross-sensor statistics...
+2026-01-19 17:33:43,060 - src.merger - INFO -     Computing stats for 3 co-located sensors
+2026-01-19 17:33:43,069 - src.merger - INFO -   Merge Quality Report:
+2026-01-19 17:33:43,070 - src.merger - INFO -     CO2_SCT1_2M: 15196/17568 (86.5% coverage)
+2026-01-19 17:33:43,071 - src.merger - INFO -     CO2_30M_A: 5009/17568 (28.5% coverage)
+2026-01-19 17:33:43,072 - src.merger - INFO -     CO2_30M_B: 5750/17568 (32.7% coverage)
+2026-01-19 17:33:43,073 - src.merger - INFO -     CO2_30M_C: 12893/17568 (73.4% coverage)
+2026-01-19 17:33:43,073 - src.merger - INFO -     LGR_30M: 17358/17568 (98.8% coverage)
+2026-01-19 17:33:43,881 - src.merger - INFO - ✓ Saved merged dataset: output/merged/SMEAR_EE_CO2_merged.csv
+2026-01-19 17:33:43,882 - src.merger - INFO -   Shape: 17568 rows × 99 columns
+2026-01-19 17:33:43,882 - src.merger - INFO - Exporting monthly merged Parquet files...
+2026-01-19 17:33:43,916 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_09_merged.parquet (4320 rows)
+2026-01-19 17:33:43,940 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_10_merged.parquet (4464 rows)
+2026-01-19 17:33:43,962 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_11_merged.parquet (4320 rows)
+2026-01-19 17:33:43,987 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_12_merged.parquet (4464 rows)
+2026-01-19 17:33:43,989 - src.merger - INFO - Exporting monthly merged CSV files...
+2026-01-19 17:33:44,158 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_09_merged.csv (4320 rows)
+2026-01-19 17:33:44,371 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_10_merged.csv (4464 rows)
+2026-01-19 17:33:44,587 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_11_merged.csv (4320 rows)
+2026-01-19 17:33:44,804 - src.merger - INFO -   Saved: SMEAR_EE_CO2_2024_12_merged.csv (4464 rows)

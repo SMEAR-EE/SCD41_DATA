@@ -55,6 +55,7 @@ excluded_sensor_ids: ['D']
 
 # Output directories
 output_dir: output/individual
-parquet_dir: output/parquet
+parquet_dir: output/individual/parquet
+merged_dir: output/merged
 log_dir: output/logs
 plots_dir: output/plots
