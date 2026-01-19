@@ -260,6 +260,11 @@ class SensorPipeline:
         
         df = pd.read_csv(csv_path, parse_dates=['timestamp'])
         
+        # Ensure timestamp is datetime (fallback if parse_dates fails)
+        if not pd.api.types.is_datetime64_any_dtype(df['timestamp']):
+            self.logger.warning(f"Timestamp not parsed as datetime, converting...")
+            df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+        
         # Check if sorting is needed
         if len(df) > 1 and (df['timestamp'].diff().dropna() < pd.Timedelta(0)).any():
             self.logger.info("Sorting CSV by timestamp...")
