@@ -2,7 +2,7 @@
 
 ## Overview
 
-The sensor data merger performs time-alignment of multiple independent sensor datasets into a unified analysis-ready format. This document explains the merge behavior to ensure scientific rigor and transparency.
+The sensor data merger performs time-alignment of multiple independent sensor datasets into a unified analysis-ready format. This document explains the merge behaviour.
 
 ## Merge Strategy: OUTER JOIN
 
@@ -216,7 +216,7 @@ The merge can be reproduced by:
 
 ## References
 
-For questions about merge behavior or data interpretation:
+For questions about merge behaviour or data interpretation:
 - Code: `src/merger.py`
 - Logs: `output/logs/processing_*.log`
 - This documentation: `docs/MERGING.md`

@@ -114,12 +114,25 @@ class SensorMerger:
             # Rename columns with sensor prefix
             df.columns = [f"{sensor_name.lower()}_{col}" for col in df.columns]
             
+            # Ensure index is DatetimeIndex with consistent dtype
+            if not isinstance(df.index, pd.DatetimeIndex):
+                self.logger.warning(f"    ⚠️ {sensor_name} index is {type(df.index)}, converting")
+                df.index = pd.to_datetime(df.index)
+            
             dfs[sensor_name] = df
             self.logger.info(f"    {len(df)} rows ({df.index.min()} to {df.index.max()})")
+            self.logger.debug(f"    Index dtype: {df.index.dtype}")
         
         # Merge on timestamp (OUTER JOIN - preserves all timestamps from all sensors)
         self.logger.info("  Merging on timestamp (OUTER JOIN - no data loss)...")
         merged = pd.concat(dfs.values(), axis=1, join='outer')
+        
+        # CRITICAL: Ensure index is DatetimeIndex after concat
+        # pd.concat with outer join can produce object-dtype index with mixed types
+        # when combining DataFrames with different datetime precisions or edge cases
+        if not isinstance(merged.index, pd.DatetimeIndex):
+            self.logger.warning("  ⚠️ Index became object dtype after concat, converting to DatetimeIndex")
+            merged.index = pd.to_datetime(merged.index)
         
         # Sort by timestamp
         merged = merged.sort_index()
