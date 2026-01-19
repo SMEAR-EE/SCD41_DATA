@@ -258,12 +258,15 @@ class SensorPipeline:
         if not csv_path.exists():
             return
         
-        df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+        df = pd.read_csv(csv_path)
         
-        # Ensure timestamp is datetime (fallback if parse_dates fails)
-        if not pd.api.types.is_datetime64_any_dtype(df['timestamp']):
-            self.logger.warning(f"Timestamp not parsed as datetime, converting...")
-            df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+        # Robust timestamp parsing
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+        
+        # Check for failed parsing
+        if df['timestamp'].isna().all():
+            self.logger.error(f"Failed to parse any timestamps in {csv_path}")
+            return
         
         # Check if sorting is needed
         if len(df) > 1 and (df['timestamp'].diff().dropna() < pd.Timedelta(0)).any():
@@ -282,7 +285,16 @@ class SensorPipeline:
         if not csv_path.exists():
             return
         
-        df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+        df = pd.read_csv(csv_path)
+        
+        # Robust timestamp parsing
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+        
+        # Check for failed parsing
+        if df['timestamp'].isna().all():
+            self.logger.error(f"Failed to parse timestamps in {csv_path}, skipping parquet export")
+            return
+        
         df['year'] = df['timestamp'].dt.year
         df['month'] = df['timestamp'].dt.month
         
@@ -328,7 +340,16 @@ class SensorPipeline:
         if not csv_path.exists():
             return
         
-        df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+        df = pd.read_csv(csv_path)
+        
+        # Robust timestamp parsing
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+        
+        # Check for failed parsing
+        if df['timestamp'].isna().all():
+            self.logger.error(f"Failed to parse timestamps in {csv_path}, skipping CSV export")
+            return
+        
         df['year'] = df['timestamp'].dt.year
         df['month'] = df['timestamp'].dt.month
         
