@@ -112,6 +112,9 @@ class SensorPipeline:
         # Export monthly parquets
         self._export_parquets(sensor_config.name, paths['csv'], year, month)
         
+        # Export monthly CSVs (matching parquet behavior)
+        self._export_monthly_csvs(sensor_config.name, paths['csv'], year, month)
+        
         self.logger.info(f"✓ {sensor_config.name} complete\n")
 
     def run_all(
@@ -297,5 +300,50 @@ class SensorPipeline:
             # Use pyarrow for compression
             table = pa.Table.from_pandas(export_df, preserve_index=False)
             pq.write_table(table, output_path, compression='snappy')
+            
+            self.logger.info(f"Exported {len(export_df)} rows → {output_path.name}")
+
+    def _export_monthly_csvs(
+        self,
+        sensor_name: str,
+        csv_path: Path,
+        year: Optional[int],
+        month: Optional[int]
+    ):
+        """
+        Export monthly CSV files (matching parquet behavior).
+        
+        Output: {sensor_name}_{year}_{month:02d}.csv in same directory as main CSV.
+        
+        This gives consistent file organization:
+        - {sensor}_10min.csv         → Combined (working file)
+        - {sensor}_{year}_{month}.csv → Monthly (publication-ready)
+        - {sensor}_{year}_{month}.parquet → Monthly (efficient storage)
+        """
+        if not csv_path.exists():
+            return
+        
+        df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+        df['year'] = df['timestamp'].dt.year
+        df['month'] = df['timestamp'].dt.month
+        
+        # Filter to requested period
+        if year:
+            df = df[df['year'] == year]
+        if month:
+            df = df[df['month'] == month]
+        
+        if df.empty:
+            return
+        
+        # Export each month
+        for (y, m), group in df.groupby(['year', 'month']):
+            output_path = csv_path.parent / f"{sensor_name}_{y}_{m:02d}.csv"
+            
+            # Drop helper columns
+            export_df = group.drop(columns=['year', 'month'])
+            
+            # Write CSV
+            export_df.to_csv(output_path, index=False)
             
             self.logger.info(f"Exported {len(export_df)} rows → {output_path.name}")

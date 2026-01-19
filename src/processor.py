@@ -9,6 +9,22 @@ from .parsers import SCD41Parser, LGRParser
 from .uptime import UptimeCalculator
 
 
+def _pooled_sd(x):
+    """
+    Propagate uncertainty via pooled standard deviation.
+    
+    Formula: sqrt(sum(sd^2)) / n
+    
+    This is the correct way to combine multiple standard deviation
+    measurements when averaging values that each have their own uncertainty.
+    
+    Named function (not lambda) to avoid '<lambda>' in pandas column names.
+    """
+    if len(x) > 0:
+        return np.sqrt(np.sum(x**2)) / len(x)
+    return np.nan
+
+
 class DayProcessor:
     """Process single day of sensor data"""
     
@@ -126,8 +142,9 @@ class DayProcessor:
         agg_dict = {}
         for col in numeric_cols:
             if col.endswith('_sd'):
-                # Propagate uncertainty: sqrt(sum(sd^2)) / n
-                agg_dict[col] = lambda x: np.sqrt(np.sum(x**2)) / len(x) if len(x) > 0 else np.nan
+                # Propagate uncertainty: pooled standard deviation
+                # Using named function to avoid '<lambda>' in column names
+                agg_dict[col] = _pooled_sd
             else:
                 agg_dict[col] = ['mean', 'std', 'count']
         
