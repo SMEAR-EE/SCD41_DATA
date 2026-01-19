@@ -14377,3 +14377,242 @@ TypeError: unsupported operand type(s) for -: 'str' and 'str'
 2026-01-19 16:05:38,009 - QualityControlPlots - INFO - Saved: LGR_30M_qc_summary.png
 2026-01-19 16:05:38,345 - UptimePlots - INFO - Saved: uptime_summary_all_sensors.png
 2026-01-19 16:05:38,484 - matplotlib.category - INFO - Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2026-01-19 16:55:44,023 - src.pipeline - INFO - Starting pipeline for all sensors
+2026-01-19 16:55:44,024 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,025 - src.pipeline - INFO - Processing sensor: CO2_SCT1_2M
+2026-01-19 16:55:44,026 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,508 - src.pipeline - INFO - Found 19 days ((2024, 9, 12) to (2024, 9, 30))
+2026-01-19 16:55:44,510 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:44,543 - src.pipeline - INFO - Exported 2449 rows → CO2_SCT1_2M_2024_09.parquet
+2026-01-19 16:55:44,573 - src.pipeline - INFO - Exported 2449 rows → CO2_SCT1_2M_2024_09.csv
+2026-01-19 16:55:44,574 - src.pipeline - INFO - ✓ CO2_SCT1_2M complete
+
+2026-01-19 16:55:44,580 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,581 - src.pipeline - INFO - Processing sensor: CO2_30M_A
+2026-01-19 16:55:44,581 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,614 - src.pipeline - INFO - Found 4 days ((2024, 9, 19) to (2024, 9, 28))
+2026-01-19 16:55:44,617 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:44,635 - src.pipeline - INFO - Exported 174 rows → CO2_30M_A_2024_09.parquet
+2026-01-19 16:55:44,645 - src.pipeline - INFO - Exported 174 rows → CO2_30M_A_2024_09.csv
+2026-01-19 16:55:44,646 - src.pipeline - INFO - ✓ CO2_30M_A complete
+
+2026-01-19 16:55:44,650 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,651 - src.pipeline - INFO - Processing sensor: CO2_30M_B
+2026-01-19 16:55:44,651 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,678 - src.pipeline - INFO - Found 6 days ((2024, 9, 19) to (2024, 9, 28))
+2026-01-19 16:55:44,681 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:44,688 - src.pipeline - ERROR - Failed to process CO2_30M_B: unsupported operand type(s) for -: 'str' and 'str'
+Traceback (most recent call last):
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 144, in run_all
+    self.run_sensor(sensor_config, year, month)
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 110, in run_sensor
+    self._sort_output(paths['csv'])
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 264, in _sort_output
+    if len(df) > 1 and (df['timestamp'].diff().dropna() < pd.Timedelta(0)).any():
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbz/Documents/PhD/SCD41_DATA/venv/lib/python3.12/site-packages/pandas/core/series.py", line 3134, in diff
+    result = algorithms.diff(self._values, periods)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbz/Documents/PhD/SCD41_DATA/venv/lib/python3.12/site-packages/pandas/core/algorithms.py", line 1435, in diff
+    out_arr[res_indexer] = op(arr[res_indexer], arr[lag_indexer])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for -: 'str' and 'str'
+2026-01-19 16:55:44,690 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,691 - src.pipeline - INFO - Processing sensor: CO2_30M_C
+2026-01-19 16:55:44,691 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,748 - src.pipeline - WARNING - No files found for year=2024, month=9
+2026-01-19 16:55:44,760 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,761 - src.pipeline - INFO - Processing sensor: LGR_30M
+2026-01-19 16:55:44,761 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:44,761 - src.parsers.lgr_parser - INFO - Initialized LGR parser for sensor: LGR_30M
+2026-01-19 16:55:46,987 - src.pipeline - INFO - Found 30 days ((2024, 9, 1) to (2024, 9, 30))
+2026-01-19 16:55:46,989 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:47,092 - src.pipeline - INFO - Exported 4320 rows → LGR_30M_2024_09.parquet
+2026-01-19 16:55:47,267 - src.pipeline - INFO - Exported 4320 rows → LGR_30M_2024_09.csv
+2026-01-19 16:55:47,268 - src.pipeline - INFO - ✓ LGR_30M complete
+
+2026-01-19 16:55:47,423 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,423 - src.pipeline - INFO - Pipeline complete for all sensors
+2026-01-19 16:55:47,423 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,424 - src.pipeline - INFO - Starting pipeline for all sensors
+2026-01-19 16:55:47,424 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,424 - src.pipeline - INFO - Processing sensor: CO2_SCT1_2M
+2026-01-19 16:55:47,424 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,624 - src.pipeline - INFO - Found 31 days ((2024, 10, 1) to (2024, 10, 31))
+2026-01-19 16:55:47,627 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:47,661 - src.pipeline - INFO - Exported 4293 rows → CO2_SCT1_2M_2024_10.parquet
+2026-01-19 16:55:47,707 - src.pipeline - INFO - Exported 4293 rows → CO2_SCT1_2M_2024_10.csv
+2026-01-19 16:55:47,708 - src.pipeline - INFO - ✓ CO2_SCT1_2M complete
+
+2026-01-19 16:55:47,715 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,716 - src.pipeline - INFO - Processing sensor: CO2_30M_A
+2026-01-19 16:55:47,716 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,751 - src.pipeline - INFO - Found 16 days ((2024, 10, 1) to (2024, 10, 16))
+2026-01-19 16:55:47,753 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:47,773 - src.pipeline - INFO - Exported 2211 rows → CO2_30M_A_2024_10.parquet
+2026-01-19 16:55:47,798 - src.pipeline - INFO - Exported 2211 rows → CO2_30M_A_2024_10.csv
+2026-01-19 16:55:47,798 - src.pipeline - INFO - ✓ CO2_30M_A complete
+
+2026-01-19 16:55:47,801 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,801 - src.pipeline - INFO - Processing sensor: CO2_30M_B
+2026-01-19 16:55:47,802 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,830 - src.pipeline - INFO - Found 9 days ((2024, 10, 1) to (2024, 10, 9))
+2026-01-19 16:55:47,832 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:47,838 - src.pipeline - ERROR - Failed to process CO2_30M_B: unsupported operand type(s) for -: 'str' and 'str'
+Traceback (most recent call last):
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 144, in run_all
+    self.run_sensor(sensor_config, year, month)
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 110, in run_sensor
+    self._sort_output(paths['csv'])
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 264, in _sort_output
+    if len(df) > 1 and (df['timestamp'].diff().dropna() < pd.Timedelta(0)).any():
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbz/Documents/PhD/SCD41_DATA/venv/lib/python3.12/site-packages/pandas/core/series.py", line 3134, in diff
+    result = algorithms.diff(self._values, periods)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbz/Documents/PhD/SCD41_DATA/venv/lib/python3.12/site-packages/pandas/core/algorithms.py", line 1435, in diff
+    out_arr[res_indexer] = op(arr[res_indexer], arr[lag_indexer])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for -: 'str' and 'str'
+2026-01-19 16:55:47,840 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,841 - src.pipeline - INFO - Processing sensor: CO2_30M_C
+2026-01-19 16:55:47,841 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,904 - src.pipeline - INFO - Found 30 days ((2024, 10, 2) to (2024, 10, 31))
+2026-01-19 16:55:47,907 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:47,935 - src.pipeline - INFO - Exported 4203 rows → CO2_30M_C_2024_10.parquet
+2026-01-19 16:55:47,974 - src.pipeline - INFO - Exported 4203 rows → CO2_30M_C_2024_10.csv
+2026-01-19 16:55:47,975 - src.pipeline - INFO - ✓ CO2_30M_C complete
+
+2026-01-19 16:55:47,980 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,980 - src.pipeline - INFO - Processing sensor: LGR_30M
+2026-01-19 16:55:47,981 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:47,981 - src.parsers.lgr_parser - INFO - Initialized LGR parser for sensor: LGR_30M
+2026-01-19 16:55:50,208 - src.pipeline - INFO - Found 31 days ((2024, 10, 1) to (2024, 10, 31))
+2026-01-19 16:55:50,211 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:50,317 - src.pipeline - INFO - Exported 4464 rows → LGR_30M_2024_10.parquet
+2026-01-19 16:55:50,481 - src.pipeline - INFO - Exported 4464 rows → LGR_30M_2024_10.csv
+2026-01-19 16:55:50,481 - src.pipeline - INFO - ✓ LGR_30M complete
+
+2026-01-19 16:55:50,604 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:50,605 - src.pipeline - INFO - Pipeline complete for all sensors
+2026-01-19 16:55:50,605 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:50,605 - src.pipeline - INFO - Starting pipeline for all sensors
+2026-01-19 16:55:50,606 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:50,606 - src.pipeline - INFO - Processing sensor: CO2_SCT1_2M
+2026-01-19 16:55:50,606 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:50,668 - src.pipeline - INFO - Found 30 days ((2024, 11, 1) to (2024, 11, 30))
+2026-01-19 16:55:50,670 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:50,704 - src.pipeline - INFO - Exported 4200 rows → CO2_SCT1_2M_2024_11.parquet
+2026-01-19 16:55:50,748 - src.pipeline - INFO - Exported 4200 rows → CO2_SCT1_2M_2024_11.csv
+2026-01-19 16:55:50,748 - src.pipeline - INFO - ✓ CO2_SCT1_2M complete
+
+2026-01-19 16:55:50,756 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:50,756 - src.pipeline - INFO - Processing sensor: CO2_30M_A
+2026-01-19 16:55:50,757 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:50,922 - src.pipeline - INFO - Found 19 days ((2024, 11, 11) to (2024, 11, 29))
+2026-01-19 16:55:50,924 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:50,947 - src.pipeline - INFO - Exported 2654 rows → CO2_30M_A_2024_11.parquet
+2026-01-19 16:55:50,974 - src.pipeline - INFO - Exported 2654 rows → CO2_30M_A_2024_11.csv
+2026-01-19 16:55:50,975 - src.pipeline - INFO - ✓ CO2_30M_A complete
+
+2026-01-19 16:55:50,978 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:50,979 - src.pipeline - INFO - Processing sensor: CO2_30M_B
+2026-01-19 16:55:50,979 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:51,007 - src.pipeline - INFO - Found 20 days ((2024, 11, 11) to (2024, 11, 30))
+2026-01-19 16:55:51,009 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:51,016 - src.pipeline - ERROR - Failed to process CO2_30M_B: unsupported operand type(s) for -: 'str' and 'str'
+Traceback (most recent call last):
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 144, in run_all
+    self.run_sensor(sensor_config, year, month)
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 110, in run_sensor
+    self._sort_output(paths['csv'])
+  File "/home/mbz/Documents/PhD/SCD41_DATA/src/pipeline.py", line 264, in _sort_output
+    if len(df) > 1 and (df['timestamp'].diff().dropna() < pd.Timedelta(0)).any():
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbz/Documents/PhD/SCD41_DATA/venv/lib/python3.12/site-packages/pandas/core/series.py", line 3134, in diff
+    result = algorithms.diff(self._values, periods)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mbz/Documents/PhD/SCD41_DATA/venv/lib/python3.12/site-packages/pandas/core/algorithms.py", line 1435, in diff
+    out_arr[res_indexer] = op(arr[res_indexer], arr[lag_indexer])
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: unsupported operand type(s) for -: 'str' and 'str'
+2026-01-19 16:55:51,019 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:51,019 - src.pipeline - INFO - Processing sensor: CO2_30M_C
+2026-01-19 16:55:51,020 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:51,083 - src.pipeline - INFO - Found 30 days ((2024, 11, 1) to (2024, 11, 30))
+2026-01-19 16:55:51,086 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:51,127 - src.pipeline - INFO - Exported 4280 rows → CO2_30M_C_2024_11.parquet
+2026-01-19 16:55:51,166 - src.pipeline - INFO - Exported 4280 rows → CO2_30M_C_2024_11.csv
+2026-01-19 16:55:51,167 - src.pipeline - INFO - ✓ CO2_30M_C complete
+
+2026-01-19 16:55:51,173 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:51,173 - src.pipeline - INFO - Processing sensor: LGR_30M
+2026-01-19 16:55:51,174 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:51,174 - src.parsers.lgr_parser - INFO - Initialized LGR parser for sensor: LGR_30M
+2026-01-19 16:55:53,409 - src.pipeline - INFO - Found 30 days ((2024, 11, 1) to (2024, 11, 30))
+2026-01-19 16:55:53,412 - src.pipeline - INFO - Processed 0 days
+2026-01-19 16:55:53,517 - src.pipeline - INFO - Exported 4320 rows → LGR_30M_2024_11.parquet
+2026-01-19 16:55:53,676 - src.pipeline - INFO - Exported 4320 rows → LGR_30M_2024_11.csv
+2026-01-19 16:55:53,677 - src.pipeline - INFO - ✓ LGR_30M complete
+
+2026-01-19 16:55:53,798 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:53,800 - src.pipeline - INFO - Pipeline complete for all sensors
+2026-01-19 16:55:53,801 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:53,801 - src.pipeline - INFO - Starting pipeline for all sensors
+2026-01-19 16:55:53,801 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:53,802 - src.pipeline - INFO - Processing sensor: CO2_SCT1_2M
+2026-01-19 16:55:53,802 - src.pipeline - INFO - ============================================================
+2026-01-19 16:55:53,871 - src.pipeline - INFO - Found 31 days ((2024, 12, 1) to (2024, 12, 31))
+2026-01-19 16:55:53,874 - src.processor - INFO - Processing 2024-12-01 (24 files)
+2026-01-19 16:55:59,373 - src.processor - INFO - Removed 68189 duplicate timestamps
+2026-01-19 16:55:59,379 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:55:59,418 - src.processor - INFO - ✓ 2024-12-01: 33856 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:55:59,422 - src.processor - INFO - Processing 2024-12-02 (24 files)
+2026-01-19 16:56:04,917 - src.processor - INFO - Removed 68222 duplicate timestamps
+2026-01-19 16:56:04,920 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:04,958 - src.processor - INFO - ✓ 2024-12-02: 33683 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:04,962 - src.processor - INFO - Processing 2024-12-03 (24 files)
+2026-01-19 16:56:10,339 - src.processor - INFO - Removed 67924 duplicate timestamps
+2026-01-19 16:56:10,342 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:10,380 - src.processor - INFO - ✓ 2024-12-03: 33864 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:10,386 - src.processor - INFO - Processing 2024-12-04 (24 files)
+2026-01-19 16:56:15,706 - src.processor - INFO - Removed 68396 duplicate timestamps
+2026-01-19 16:56:15,710 - src.uptime - WARNING - Unexpected sample interval: 3.0s (expected ~60s)
+2026-01-19 16:56:15,748 - src.processor - INFO - ✓ 2024-12-04: 33518 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:15,753 - src.processor - INFO - Processing 2024-12-05 (24 files)
+2026-01-19 16:56:21,089 - src.processor - INFO - Removed 68332 duplicate timestamps
+2026-01-19 16:56:21,093 - src.uptime - WARNING - Unexpected sample interval: 3.0s (expected ~60s)
+2026-01-19 16:56:21,130 - src.processor - INFO - ✓ 2024-12-05: 33519 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:21,135 - src.processor - INFO - Processing 2024-12-06 (24 files)
+2026-01-19 16:56:26,615 - src.processor - INFO - Removed 68099 duplicate timestamps
+2026-01-19 16:56:26,621 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:26,662 - src.processor - INFO - ✓ 2024-12-06: 33802 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:26,668 - src.processor - INFO - Processing 2024-12-07 (24 files)
+2026-01-19 16:56:32,322 - src.processor - INFO - Removed 67862 duplicate timestamps
+2026-01-19 16:56:32,327 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:32,366 - src.processor - INFO - ✓ 2024-12-07: 33744 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:32,370 - src.processor - INFO - Processing 2024-12-08 (24 files)
+2026-01-19 16:56:37,712 - src.processor - INFO - Removed 68122 duplicate timestamps
+2026-01-19 16:56:37,715 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:37,751 - src.processor - INFO - ✓ 2024-12-08: 33567 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:37,756 - src.processor - INFO - Processing 2024-12-09 (24 files)
+2026-01-19 16:56:43,235 - src.processor - INFO - Removed 68140 duplicate timestamps
+2026-01-19 16:56:43,238 - src.uptime - WARNING - Unexpected sample interval: 3.0s (expected ~60s)
+2026-01-19 16:56:43,274 - src.processor - INFO - ✓ 2024-12-09: 33486 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:43,279 - src.processor - INFO - Processing 2024-12-10 (24 files)
+2026-01-19 16:56:48,904 - src.processor - INFO - Removed 67618 duplicate timestamps
+2026-01-19 16:56:48,908 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:48,945 - src.processor - INFO - ✓ 2024-12-10: 34200 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:48,949 - src.processor - INFO - Processing 2024-12-11 (24 files)
+2026-01-19 16:56:54,459 - src.processor - INFO - Removed 68110 duplicate timestamps
+2026-01-19 16:56:54,462 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:54,500 - src.processor - INFO - ✓ 2024-12-11: 33794 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:54,505 - src.processor - INFO - Processing 2024-12-12 (24 files)
+2026-01-19 16:56:59,915 - src.processor - INFO - Removed 68139 duplicate timestamps
+2026-01-19 16:56:59,920 - src.uptime - WARNING - Unexpected sample interval: 2.0s (expected ~60s)
+2026-01-19 16:56:59,961 - src.processor - INFO - ✓ 2024-12-12: 33807 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:56:59,966 - src.processor - INFO - Processing 2024-12-13 (24 files)
+2026-01-19 16:57:05,685 - src.processor - INFO - Removed 68245 duplicate timestamps
+2026-01-19 16:57:05,689 - src.uptime - WARNING - Unexpected sample interval: 3.0s (expected ~60s)
+2026-01-19 16:57:05,728 - src.processor - INFO - ✓ 2024-12-13: 33532 raw → 140 10-min samples (uptime: 100.0%)
+2026-01-19 16:57:05,733 - src.processor - INFO - Processing 2024-12-14 (24 files)
