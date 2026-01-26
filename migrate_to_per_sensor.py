@@ -157,6 +157,12 @@ def migrate_merged_files(dry_run: bool = False) -> list[tuple[Path, Path]]:
 def execute_moves(moves: list[tuple[Path, Path]], dry_run: bool = False):
     """Execute file moves."""
     for src, dst in moves:
+        # Skip if source and destination are identical
+        if src.resolve() == dst.resolve():
+            if dry_run:
+                print(f"  [SKIP] {src} (already in place)")
+            continue
+        
         if dry_run:
             print(f"  [DRY RUN] {src} → {dst}")
         else:

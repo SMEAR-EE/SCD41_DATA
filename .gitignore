@@ -2,6 +2,7 @@ testing/IOT/
 testing/IOT.zip
 # config/sensors.yaml
 output/
+output_backup_20260126_193423/
 # output/individual
 # output/logs
 # output/parquet
