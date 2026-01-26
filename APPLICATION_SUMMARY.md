@@ -173,12 +173,16 @@ SCD41_DATA/
 │   ├── plots/               # Generated plots
 │   └── logs/                # Processing logs
 ├── testing/
-│   ├── process_data.ipynb   # Example Jupyter notebook
 │   └── prototype/           # Development notebooks
+├── process_data.ipynb       # Example Jupyter notebook
+├── README.md                # Quick start guide
+├── APPLICATION_SUMMARY.md   # Detailed documentation
+├── SETUP.md                 # Installation guide
+├── MERGING.md               # Data merging documentation
 ├── Dockerfile               # Container definition
 ├── docker-compose.yaml      # Orchestration config
-├── requirements_dev.txt     # Python dependencies
-└── README.md                # Quick start guide
+├── requirements.txt         # Production dependencies
+└── requirements_dev.txt     # Development dependencies
 ```
 
 ---
