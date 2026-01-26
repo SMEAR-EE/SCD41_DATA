@@ -58,11 +58,11 @@ visualization/
 ├── uptime_plots.py          # Uptime visualizations
 ├── validation_plots.py      # Sensor validation plots
 ├── quality_control.py       # QC analysis plots
-└── taylor_plots.py          # Taylor diagrams (non-functional)
+└── taylor_plots.py          # Taylor diagrams (WIP)
 ```
 
 ## Notes
 
 - All plots share consistent styling via `base_plotter.py`
-- Taylor diagram module exists but is non-functional (safe to ignore)
+- Taylor diagram module is work-in-progress (under active development)
 - Plots auto-save to configured output directory

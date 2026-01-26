@@ -120,7 +120,7 @@ Modular plotting system with multiple plot types:
 5. **Visualization (`visualization/`)**
    - Modular plotting system with base styling
    - Separate modules for uptime, validation, and QC plots
-   - Note: Taylor diagram module exists but is non-functional
+   - Note: Taylor diagram module is work-in-progress (WIP)
 
 6. **Merger (`merger.py`)**
    - `SensorMerger`: Combines multiple sensor outputs
@@ -164,7 +164,7 @@ SCD41_DATA/
 │       ├── uptime_plots.py  # Uptime visualizations
 │       ├── validation_plots.py  # Validation plots
 │       ├── quality_control.py   # QC plots
-│       └── taylor_plots.py      # Taylor diagrams (non-functional)
+│       └── taylor_plots.py      # Taylor diagrams (WIP)
 ├── config/
 │   └── sensors.example.yaml # Configuration template
 ├── output/
@@ -282,7 +282,7 @@ The pipeline is designed for easy extension:
 
 ## Current Limitations & Known Issues
 
-1. **Taylor diagram visualization**: Module exists (`taylor_plots.py`) but noted as non-functional in current version - isolated and safe to ignore or replace
+1. **Taylor diagram visualization**: Module exists (`taylor_plots.py`) and is work-in-progress - under active development
 2. **Single-site focus**: Optimized for SMEAR Estonia station
 3. **File format specificity**: Parsers designed for NodeRED JSON and LGR CSV formats
 4. **No real-time processing**: Batch-oriented, not streaming
