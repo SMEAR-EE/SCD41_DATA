@@ -1,6 +1,5 @@
 """Main sensor data processing pipeline"""
 import logging
-import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import pandas as pd
@@ -16,7 +15,7 @@ class SensorPipeline:
     
     def __init__(self, config: PipelineConfig, force: bool = False):
         """
-        Initialize pipeline
+        Initialise pipeline.
         
         Args:
             config: Pipeline configuration
@@ -33,30 +32,28 @@ class SensorPipeline:
         month: Optional[int] = None
     ):
         """
-        Process single sensor
+        Process single sensor.
         
         Args:
             sensor_config: Configuration for this sensor
             year: Process only this year (None = all)
             month: Process only this month (None = all)
         """
-        self.logger.info(f"=" * 60)
+        self.logger.info("=" * 60)
         self.logger.info(f"Processing sensor: {sensor_config.name}")
-        self.logger.info(f"=" * 60)
+        self.logger.info("=" * 60)
         
-        # Get output paths
+        # Get output paths (now per-sensor directories)
         paths = self.config.get_sensor_output_paths(sensor_config.name)
         
-        # Initialize day processor
+        # Initialise day processor
         day_processor = DayProcessor(sensor_config)
         
         # Group files by day
         daily_files = self._group_files_by_day(sensor_config, day_processor.parser)
         
         if not daily_files:
-            self.logger.error(
-                f"No files found in {sensor_config.input_dir}"
-            )
+            self.logger.error(f"No files found in {sensor_config.input_dir}")
             return
         
         # Filter by date
@@ -75,9 +72,7 @@ class SensorPipeline:
         processed_days = set() if self.force else self._load_processed_days(paths['uptime'])
         
         if self.force and processed_days:
-            self.logger.info(
-                f"Force mode: reprocessing {len(processed_days)} days"
-            )
+            self.logger.info(f"Force mode: reprocessing {len(processed_days)} days")
             self._clear_period_data(paths, year, month)
         
         # Process each day
@@ -109,11 +104,23 @@ class SensorPipeline:
         # Sort output if needed
         self._sort_output(paths['csv'])
         
-        # Export monthly parquets
-        self._export_parquets(sensor_config.name, paths['csv'], year, month)
+        # Export monthly parquets to sensor's parquet directory
+        self._export_parquets(
+            sensor_config.name, 
+            paths['csv'], 
+            paths['parquet_dir'],
+            year, 
+            month
+        )
         
-        # Export monthly CSVs (matching parquet behavior)
-        self._export_monthly_csvs(sensor_config.name, paths['csv'], year, month)
+        # Export monthly CSVs to sensor's csv directory
+        self._export_monthly_csvs(
+            sensor_config.name, 
+            paths['csv'],
+            paths['csv_dir'],
+            year, 
+            month
+        )
         
         self.logger.info(f"✓ {sensor_config.name} complete\n")
 
@@ -123,7 +130,7 @@ class SensorPipeline:
         month: Optional[int] = None
     ):
         """
-        Process all sensors in configuration
+        Process all sensors in configuration.
         
         Args:
             year: Process only this year (None = all)
@@ -220,7 +227,7 @@ class SensorPipeline:
 
     def _clear_period_data(
         self,
-        paths: Dict,
+        paths: Dict[str, Path],
         year: Optional[int],
         month: Optional[int]
     ):
@@ -278,10 +285,15 @@ class SensorPipeline:
         self,
         sensor_name: str,
         csv_path: Path,
+        parquet_dir: Path,
         year: Optional[int],
         month: Optional[int]
     ):
-        """Export monthly parquet files"""
+        """
+        Export monthly parquet files.
+        
+        Output: {parquet_dir}/{sensor_name}_{year}_{month:02d}.parquet
+        """
         if not csv_path.exists():
             return
         
@@ -309,7 +321,7 @@ class SensorPipeline:
         
         # Export each month
         for (y, m), group in df.groupby(['year', 'month']):
-            output_path = self.config.parquet_dir / f"{sensor_name}_{y}_{m:02d}.parquet"
+            output_path = parquet_dir / f"{sensor_name}_{y}_{m:02d}.parquet"
             
             # Drop helper columns
             export_df = group.drop(columns=['year', 'month'])
@@ -324,16 +336,17 @@ class SensorPipeline:
         self,
         sensor_name: str,
         csv_path: Path,
+        csv_dir: Path,
         year: Optional[int],
         month: Optional[int]
     ):
         """
-        Export monthly CSV files (matching parquet behavior).
+        Export monthly CSV files.
         
-        Output: {sensor_name}_{year}_{month:02d}.csv in same directory as main CSV.
+        Output: {csv_dir}/{sensor_name}_{year}_{month:02d}.csv
         
-        This gives consistent file organization:
-        - {sensor}_10min.csv         → Combined (working file)
+        This gives consistent file organisation:
+        - {sensor}_10min.csv          → Combined (working file)
         - {sensor}_{year}_{month}.csv → Monthly (publication-ready)
         - {sensor}_{year}_{month}.parquet → Monthly (efficient storage)
         """
@@ -364,7 +377,7 @@ class SensorPipeline:
         
         # Export each month
         for (y, m), group in df.groupby(['year', 'month']):
-            output_path = csv_path.parent / f"{sensor_name}_{y}_{m:02d}.csv"
+            output_path = csv_dir / f"{sensor_name}_{y}_{m:02d}.csv"
             
             # Drop helper columns
             export_df = group.drop(columns=['year', 'month'])

@@ -1,4 +1,14 @@
-# Sensor Configuration
+# Sensor Configuration for SMEAR Estonia CO2 Dataset
+# =================================================
+#
+# Directory structure (per-sensor outputs):
+#   output/sensors/{sensor_name}/csv/      - CSV files
+#   output/sensors/{sensor_name}/parquet/  - Parquet files
+#   output/sensors/{sensor_name}/plots/    - Visualisations
+#   output/merged/csv/                     - Merged CSVs
+#   output/merged/parquet/                 - Merged parquets
+#   output/logs/                           - Processing logs
+
 sensors:
   - name: CO2_SCT1_2M
     sensor_type: scd41
@@ -53,9 +63,12 @@ sensors:
 # Excluded sensors (log but skip processing)
 excluded_sensor_ids: ['D']
 
-# Output directories
-output_dir: output/individual
-parquet_dir: output/individual/parquet
-merged_dir: output/merged
-log_dir: output/logs
-plots_dir: output/plots
+# Output directories (new per-sensor structure)
+sensors_dir: output/sensors    # Per-sensor outputs (csv/, parquet/, plots/)
+merged_dir: output/merged      # Merged outputs (csv/, parquet/)
+log_dir: output/logs           # Processing logs
+
+# Legacy keys (deprecated - kept for backwards compatibility during migration)
+# output_dir: output/individual
+# parquet_dir: output/individual/parquet
+# plots_dir: output/plots
