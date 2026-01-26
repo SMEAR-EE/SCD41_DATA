@@ -56,8 +56,6 @@ sensors:
 
 ## 📖 Documentation
 
-- **Release notes**: See [`CHANGELOG.md`](CHANGELOG.md) for version history and release notes
-- **Release checklist**: See [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for release preparation steps
 - **Detailed overview**: See [`APPLICATION_SUMMARY.md`](APPLICATION_SUMMARY.md) for architecture, features, and technical details
 - **Setup guide**: See [`SETUP.md`](SETUP.md) for installation and configuration
 - **Data merging**: See [`MERGING.md`](MERGING.md) for information on how sensor data is merged
@@ -100,8 +98,7 @@ Dataset: [DOI pending]
 
 ## 📦 Version
 
-**Current Release:** v0.1.0 (Release Candidate)  
-See [CHANGELOG.md](CHANGELOG.md) for release notes and version history.
+**Current Release:** v0.1.0 (Release Candidate)
 
 ## 📄 License
 
