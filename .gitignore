@@ -1,7 +1,7 @@
 testing/IOT/
 testing/IOT.zip
 # config/sensors.yaml
-output/
+# output/
 output_backup_20260126_193423/
 output/logs
 
