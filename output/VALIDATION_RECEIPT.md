@@ -1,6 +1,6 @@
 # SMEAR Estonia CO2 Data Validation Receipt
 
-**Generated:** 2026-01-26T16:25:36.677320
+**Generated:** 2026-01-26T16:27:38.120330
 **Individual Directory:** ``
 **Parquet Directory:** `/home/mbz/Documents/PhD/SCD41_DATA/output/individual/parquet`
 **Merged Directory:** ``
@@ -34,11 +34,11 @@ Comparison of low-cost SCD41 sensor at 2m against LGR reference at 30m.
 
 | Metric | Value |
 |--------|------:|
-| Paired observations | 27,057 |
-| Bias | +98.3 ppm |
-| RMSE | 150.3 ppm |
-| MAE | 99.6 ppm |
-| Correlation | 0.313 |
+| Paired observations | 39,941 |
+| Bias | +88.7 ppm |
+| RMSE | 133.1 ppm |
+| MAE | 89.9 ppm |
+| Correlation | 0.303 |
 
 ---
 
@@ -46,16 +46,16 @@ Comparison of low-cost SCD41 sensor at 2m against LGR reference at 30m.
 
 | Sensor | n | Bias (ppm) | RMSE (ppm) | Correlation |
 |--------|--:|----------:|-----------:|------------:|
-| 30M-A | 11,334 | +84.2 | 101.8 | -0.151 |
-| 30M-B | 10,849 | +118.2 | 160.5 | -0.273 |
-| 30M-C | 21,059 | +115.2 | 131.3 | 0.503 |
+| 30M-A | 18,037 | +84.6 | 99.0 | -0.042 |
+| 30M-B | 17,002 | +138.5 | 169.3 | -0.081 |
+| 30M-C | 31,996 | +118.1 | 130.8 | 0.506 |
 
 ---
 
 ## File Checksums (SHA256)
 
 ```
-c23913c2517c9eeb335ed21aadd5d444057fff899541e42aafaf9a563e2e454b  SMEAR_EE_CO2_merged.csv
+05153c9c5cfebef9ac081240287b9e899e4da4be6c2e3fef3590927092c1369c  SMEAR_EE_CO2_merged.csv
 ```
 
 ---
@@ -142,8 +142,8 @@ c23913c2517c9eeb335ed21aadd5d444057fff899541e42aafaf9a563e2e454b  SMEAR_EE_CO2_m
 | csv_parquet_match:LGR_30M_2025_04 | ✓ | rows: 4320==4320, values: True |
 | csv_parquet_match:LGR_30M_2025_05 | ✓ | rows: 4464==4464, values: True |
 | csv_parquet_match:LGR_30M_2025_06 | ✓ | rows: 4320==4320, values: True |
-| merged_data | ✓ | 30,303 rows, 100 columns, 26.5 MB | 2024-09-01 to 2025-03-31 |
-| data_quality | ✓ | 1 time gaps >10min, bias=98.3 ppm |
+| merged_data | ✓ | 43,407 rows, 100 columns, 38.9 MB | 2024-09-01 to 2025-06-30 |
+| data_quality | ✓ | 1 time gaps >10min, bias=88.7 ppm |
 
 ---
 

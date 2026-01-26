@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-01-26T16:25:36.677320",
+    "generated": "2026-01-26T16:27:38.120330",
     "output_dir": "/home/mbz/Documents/PhD/SCD41_DATA/output/individual",
     "parquet_dir": "/home/mbz/Documents/PhD/SCD41_DATA/output/individual/parquet",
     "merged_dir": "/home/mbz/Documents/PhD/SCD41_DATA/output/merged",
@@ -1224,23 +1224,23 @@
     {
       "name": "merged_data",
       "passed": true,
-      "message": "30,303 rows, 100 columns, 26.5 MB | 2024-09-01 to 2025-03-31",
+      "message": "43,407 rows, 100 columns, 38.9 MB | 2024-09-01 to 2025-06-30",
       "details": {
-        "total_rows": 30303,
+        "total_rows": 43407,
         "total_columns": 100,
         "date_range": {
           "start": "2024-09-01 00:00:00",
-          "end": "2025-03-31 23:50:00"
+          "end": "2025-06-30 23:50:00"
         },
-        "file_size_mb": 26.52,
+        "file_size_mb": 38.9,
         "monthly_parquet_sum_match": true,
-        "monthly_parquet_total_rows": 30303,
+        "monthly_parquet_total_rows": 43407,
         "column_coverage": {
-          "co2_sct1_2m_co2_mean": 91.8,
-          "co2_30m_a_co2_mean": 38.0,
-          "co2_30m_b_co2_mean": 36.3,
-          "co2_30m_c_co2_mean": 71.6,
-          "lgr_30m_CO2_dry_mean": 97.4
+          "co2_sct1_2m_co2_mean": 94.0,
+          "co2_30m_a_co2_mean": 42.2,
+          "co2_30m_b_co2_mean": 39.6,
+          "co2_30m_c_co2_mean": 75.4,
+          "lgr_30m_CO2_dry_mean": 97.9
         }
       },
       "severity": "critical"
@@ -1248,36 +1248,36 @@
     {
       "name": "data_quality",
       "passed": true,
-      "message": "1 time gaps >10min, bias=98.3 ppm",
+      "message": "1 time gaps >10min, bias=88.7 ppm",
       "details": {
         "time_continuity": {
           "gaps_over_10min": 1,
           "largest_gap": "1 days 13:40:00"
         },
         "scd41_2m_vs_lgr": {
-          "n_valid_pairs": 27057,
-          "bias_ppm": 98.3,
-          "rmse_ppm": 150.3,
-          "correlation": 0.313,
-          "mae_ppm": 99.6
+          "n_valid_pairs": 39941,
+          "bias_ppm": 88.7,
+          "rmse_ppm": 133.1,
+          "correlation": 0.303,
+          "mae_ppm": 89.9
         },
         "CO2_30M_A_vs_lgr": {
-          "n_valid_pairs": 11334,
-          "bias_ppm": 84.2,
-          "rmse_ppm": 101.8,
-          "correlation": -0.151
+          "n_valid_pairs": 18037,
+          "bias_ppm": 84.6,
+          "rmse_ppm": 99.0,
+          "correlation": -0.042
         },
         "CO2_30M_B_vs_lgr": {
-          "n_valid_pairs": 10849,
-          "bias_ppm": 118.2,
-          "rmse_ppm": 160.5,
-          "correlation": -0.273
+          "n_valid_pairs": 17002,
+          "bias_ppm": 138.5,
+          "rmse_ppm": 169.3,
+          "correlation": -0.081
         },
         "CO2_30M_C_vs_lgr": {
-          "n_valid_pairs": 21059,
-          "bias_ppm": 115.2,
-          "rmse_ppm": 131.3,
-          "correlation": 0.503
+          "n_valid_pairs": 31996,
+          "bias_ppm": 118.1,
+          "rmse_ppm": 130.8,
+          "correlation": 0.506
         }
       },
       "severity": "info"
@@ -1404,21 +1404,21 @@
     }
   },
   "merged_summary": {
-    "total_rows": 30303,
+    "total_rows": 43407,
     "total_columns": 100,
     "date_range": {
       "start": "2024-09-01 00:00:00",
-      "end": "2025-03-31 23:50:00"
+      "end": "2025-06-30 23:50:00"
     },
-    "file_size_mb": 26.52,
+    "file_size_mb": 38.9,
     "monthly_parquet_sum_match": true,
-    "monthly_parquet_total_rows": 30303,
+    "monthly_parquet_total_rows": 43407,
     "column_coverage": {
-      "co2_sct1_2m_co2_mean": 91.8,
-      "co2_30m_a_co2_mean": 38.0,
-      "co2_30m_b_co2_mean": 36.3,
-      "co2_30m_c_co2_mean": 71.6,
-      "lgr_30m_CO2_dry_mean": 97.4
+      "co2_sct1_2m_co2_mean": 94.0,
+      "co2_30m_a_co2_mean": 42.2,
+      "co2_30m_b_co2_mean": 39.6,
+      "co2_30m_c_co2_mean": 75.4,
+      "lgr_30m_CO2_dry_mean": 97.9
     }
   },
   "quality_metrics": {
@@ -1427,32 +1427,32 @@
       "largest_gap": "1 days 13:40:00"
     },
     "scd41_2m_vs_lgr": {
-      "n_valid_pairs": 27057,
-      "bias_ppm": 98.3,
-      "rmse_ppm": 150.3,
-      "correlation": 0.313,
-      "mae_ppm": 99.6
+      "n_valid_pairs": 39941,
+      "bias_ppm": 88.7,
+      "rmse_ppm": 133.1,
+      "correlation": 0.303,
+      "mae_ppm": 89.9
     },
     "CO2_30M_A_vs_lgr": {
-      "n_valid_pairs": 11334,
-      "bias_ppm": 84.2,
-      "rmse_ppm": 101.8,
-      "correlation": -0.151
+      "n_valid_pairs": 18037,
+      "bias_ppm": 84.6,
+      "rmse_ppm": 99.0,
+      "correlation": -0.042
     },
     "CO2_30M_B_vs_lgr": {
-      "n_valid_pairs": 10849,
-      "bias_ppm": 118.2,
-      "rmse_ppm": 160.5,
-      "correlation": -0.273
+      "n_valid_pairs": 17002,
+      "bias_ppm": 138.5,
+      "rmse_ppm": 169.3,
+      "correlation": -0.081
     },
     "CO2_30M_C_vs_lgr": {
-      "n_valid_pairs": 21059,
-      "bias_ppm": 115.2,
-      "rmse_ppm": 131.3,
-      "correlation": 0.503
+      "n_valid_pairs": 31996,
+      "bias_ppm": 118.1,
+      "rmse_ppm": 130.8,
+      "correlation": 0.506
     }
   },
   "checksums": {
-    "SMEAR_EE_CO2_merged.csv": "c23913c2517c9eeb335ed21aadd5d444057fff899541e42aafaf9a563e2e454b"
+    "SMEAR_EE_CO2_merged.csv": "05153c9c5cfebef9ac081240287b9e899e4da4be6c2e3fef3590927092c1369c"
   }
 }
