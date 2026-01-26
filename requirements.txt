@@ -1,0 +1,12 @@
+# Core data processing dependencies
+pandas==2.3.3
+numpy==2.3.5
+pyarrow==22.0.0
+PyYAML==6.0.3
+
+# Visualization
+matplotlib==3.10.7
+seaborn==0.13.2
+
+# For Taylor diagrams (currently non-functional module)
+SkillMetrics==1.2.4

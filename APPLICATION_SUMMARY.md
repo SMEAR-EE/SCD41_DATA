@@ -119,7 +119,8 @@ Modular plotting system with multiple plot types:
 
 5. **Visualization (`visualization/`)**
    - Modular plotting system with base styling
-   - Separate modules for uptime, validation, QC, and Taylor diagrams
+   - Separate modules for uptime, validation, and QC plots
+   - Note: Taylor diagram module exists but is non-functional
 
 6. **Merger (`merger.py`)**
    - `SensorMerger`: Combines multiple sensor outputs
@@ -163,7 +164,7 @@ SCD41_DATA/
 │       ├── uptime_plots.py  # Uptime visualizations
 │       ├── validation_plots.py  # Validation plots
 │       ├── quality_control.py   # QC plots
-│       └── taylor_plots.py      # Taylor diagrams
+│       └── taylor_plots.py      # Taylor diagrams (non-functional)
 ├── config/
 │   └── sensors.example.yaml # Configuration template
 ├── output/
