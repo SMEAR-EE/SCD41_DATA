@@ -1,0 +1,692 @@
+{
+  "meta": {
+    "generated": "2026-01-26T13:19:11.221998",
+    "output_dir": "output",
+    "sensors": [
+      "CO2_SCT1_2M",
+      "CO2_30M_A",
+      "CO2_30M_B",
+      "CO2_30M_C",
+      "LGR_30M"
+    ]
+  },
+  "checks": [
+    {
+      "name": "column_names:CO2_30M_A_10min.csv",
+      "passed": true,
+      "message": "Clean",
+      "details": {
+        "bad_columns": []
+      }
+    },
+    {
+      "name": "column_names:CO2_30M_B_10min.csv",
+      "passed": true,
+      "message": "Clean",
+      "details": {
+        "bad_columns": []
+      }
+    },
+    {
+      "name": "column_names:CO2_30M_C_10min.csv",
+      "passed": true,
+      "message": "Clean",
+      "details": {
+        "bad_columns": []
+      }
+    },
+    {
+      "name": "column_names:CO2_SCT1_2M_10min.csv",
+      "passed": true,
+      "message": "Clean",
+      "details": {
+        "bad_columns": []
+      }
+    },
+    {
+      "name": "column_names:LGR_30M_10min.csv",
+      "passed": true,
+      "message": "Clean",
+      "details": {
+        "bad_columns": []
+      }
+    },
+    {
+      "name": "file_inventory:CO2_SCT1_2M",
+      "passed": true,
+      "message": "4 CSVs, 4 parquets",
+      "details": {
+        "csv_months": [
+          "09",
+          "10",
+          "11",
+          "12"
+        ],
+        "parquet_months": [
+          "09",
+          "10",
+          "11",
+          "12"
+        ],
+        "csv_parquet_match": true
+      }
+    },
+    {
+      "name": "file_inventory:CO2_30M_A",
+      "passed": true,
+      "message": "3 CSVs, 3 parquets",
+      "details": {
+        "csv_months": [
+          "09",
+          "10",
+          "11"
+        ],
+        "parquet_months": [
+          "09",
+          "10",
+          "11"
+        ],
+        "csv_parquet_match": true
+      }
+    },
+    {
+      "name": "file_inventory:CO2_30M_B",
+      "passed": true,
+      "message": "4 CSVs, 4 parquets",
+      "details": {
+        "csv_months": [
+          "09",
+          "10",
+          "11",
+          "12"
+        ],
+        "parquet_months": [
+          "09",
+          "10",
+          "11",
+          "12"
+        ],
+        "csv_parquet_match": true
+      }
+    },
+    {
+      "name": "file_inventory:CO2_30M_C",
+      "passed": true,
+      "message": "3 CSVs, 3 parquets",
+      "details": {
+        "csv_months": [
+          "10",
+          "11",
+          "12"
+        ],
+        "parquet_months": [
+          "10",
+          "11",
+          "12"
+        ],
+        "csv_parquet_match": true
+      }
+    },
+    {
+      "name": "file_inventory:LGR_30M",
+      "passed": true,
+      "message": "4 CSVs, 4 parquets",
+      "details": {
+        "csv_months": [
+          "09",
+          "10",
+          "11",
+          "12"
+        ],
+        "parquet_months": [
+          "09",
+          "10",
+          "11",
+          "12"
+        ],
+        "csv_parquet_match": true
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_A_2024_09.parquet",
+      "passed": true,
+      "message": "174 rows, 18.4KB, SNAPPY",
+      "details": {
+        "rows": 174,
+        "columns": 13,
+        "size_kb": 18.4,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_A_2024_10.parquet",
+      "passed": true,
+      "message": "2211 rows, 140.3KB, SNAPPY",
+      "details": {
+        "rows": 2211,
+        "columns": 13,
+        "size_kb": 140.3,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_A_2024_11.parquet",
+      "passed": true,
+      "message": "2654 rows, 161.9KB, SNAPPY",
+      "details": {
+        "rows": 2654,
+        "columns": 13,
+        "size_kb": 161.9,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_B_2024_09.parquet",
+      "passed": true,
+      "message": "373 rows, 29.8KB, SNAPPY",
+      "details": {
+        "rows": 373,
+        "columns": 13,
+        "size_kb": 29.8,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_B_2024_10.parquet",
+      "passed": true,
+      "message": "1217 rows, 75.4KB, SNAPPY",
+      "details": {
+        "rows": 1217,
+        "columns": 13,
+        "size_kb": 75.4,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_B_2024_11.parquet",
+      "passed": true,
+      "message": "2796 rows, 158.6KB, SNAPPY",
+      "details": {
+        "rows": 2796,
+        "columns": 13,
+        "size_kb": 158.6,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_B_2024_12.parquet",
+      "passed": true,
+      "message": "1431 rows, 86.9KB, SNAPPY",
+      "details": {
+        "rows": 1431,
+        "columns": 13,
+        "size_kb": 86.9,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_C_2024_10.parquet",
+      "passed": true,
+      "message": "4203 rows, 246.0KB, SNAPPY",
+      "details": {
+        "rows": 4203,
+        "columns": 13,
+        "size_kb": 246.0,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_C_2024_11.parquet",
+      "passed": true,
+      "message": "4280 rows, 233.8KB, SNAPPY",
+      "details": {
+        "rows": 4280,
+        "columns": 13,
+        "size_kb": 233.8,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_30M_C_2024_12.parquet",
+      "passed": true,
+      "message": "4433 rows, 234.9KB, SNAPPY",
+      "details": {
+        "rows": 4433,
+        "columns": 13,
+        "size_kb": 234.9,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_SCT1_2M_2024_09.parquet",
+      "passed": true,
+      "message": "2449 rows, 166.2KB, SNAPPY",
+      "details": {
+        "rows": 2449,
+        "columns": 13,
+        "size_kb": 166.2,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_SCT1_2M_2024_10.parquet",
+      "passed": true,
+      "message": "4293 rows, 282.2KB, SNAPPY",
+      "details": {
+        "rows": 4293,
+        "columns": 13,
+        "size_kb": 282.2,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_SCT1_2M_2024_11.parquet",
+      "passed": true,
+      "message": "4200 rows, 283.6KB, SNAPPY",
+      "details": {
+        "rows": 4200,
+        "columns": 13,
+        "size_kb": 283.6,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:CO2_SCT1_2M_2024_12.parquet",
+      "passed": true,
+      "message": "4340 rows, 293.0KB, SNAPPY",
+      "details": {
+        "rows": 4340,
+        "columns": 13,
+        "size_kb": 293.0,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:LGR_30M_2024_09.parquet",
+      "passed": true,
+      "message": "4320 rows, 1231.3KB, SNAPPY",
+      "details": {
+        "rows": 4320,
+        "columns": 49,
+        "size_kb": 1231.3,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:LGR_30M_2024_10.parquet",
+      "passed": true,
+      "message": "4464 rows, 1292.4KB, SNAPPY",
+      "details": {
+        "rows": 4464,
+        "columns": 49,
+        "size_kb": 1292.4,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:LGR_30M_2024_11.parquet",
+      "passed": true,
+      "message": "4320 rows, 1244.1KB, SNAPPY",
+      "details": {
+        "rows": 4320,
+        "columns": 49,
+        "size_kb": 1244.1,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "parquet:LGR_30M_2024_12.parquet",
+      "passed": true,
+      "message": "4464 rows, 1297.5KB, SNAPPY",
+      "details": {
+        "rows": 4464,
+        "columns": 49,
+        "size_kb": 1297.5,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      }
+    },
+    {
+      "name": "csv_parquet_match:CO2_SCT1_2M_09",
+      "passed": true,
+      "message": "rows: 2449==2449, values: True",
+      "details": {
+        "csv_rows": 2449,
+        "parquet_rows": 2449,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "csv_parquet_match:CO2_SCT1_2M_10",
+      "passed": true,
+      "message": "rows: 4293==4293, values: True",
+      "details": {
+        "csv_rows": 4293,
+        "parquet_rows": 4293,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "csv_parquet_match:CO2_SCT1_2M_11",
+      "passed": true,
+      "message": "rows: 4200==4200, values: True",
+      "details": {
+        "csv_rows": 4200,
+        "parquet_rows": 4200,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "csv_parquet_match:CO2_SCT1_2M_12",
+      "passed": true,
+      "message": "rows: 4340==4340, values: True",
+      "details": {
+        "csv_rows": 4340,
+        "parquet_rows": 4340,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "csv_parquet_match:LGR_30M_09",
+      "passed": true,
+      "message": "rows: 4320==4320, values: True",
+      "details": {
+        "csv_rows": 4320,
+        "parquet_rows": 4320,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "csv_parquet_match:LGR_30M_10",
+      "passed": true,
+      "message": "rows: 4464==4464, values: True",
+      "details": {
+        "csv_rows": 4464,
+        "parquet_rows": 4464,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "csv_parquet_match:LGR_30M_11",
+      "passed": true,
+      "message": "rows: 4320==4320, values: True",
+      "details": {
+        "csv_rows": 4320,
+        "parquet_rows": 4320,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "csv_parquet_match:LGR_30M_12",
+      "passed": true,
+      "message": "rows: 4464==4464, values: True",
+      "details": {
+        "csv_rows": 4464,
+        "parquet_rows": 4464,
+        "rows_match": true,
+        "values_match": true
+      }
+    },
+    {
+      "name": "merged_data",
+      "passed": true,
+      "message": "30303 rows, 100 columns",
+      "details": {
+        "total_rows": 30303,
+        "total_columns": 100,
+        "date_range": {
+          "start": "2024-09-01 00:00:00",
+          "end": "2025-03-31 23:50:00"
+        },
+        "file_size_mb": 26.52,
+        "monthly_parquet_sum_match": true,
+        "monthly_parquet_total_rows": 30303,
+        "column_coverage": {
+          "co2_sct1_2m_co2_mean": 91.8,
+          "co2_30m_a_co2_mean": 38.0,
+          "co2_30m_b_co2_mean": 36.3,
+          "co2_30m_c_co2_mean": 71.6,
+          "lgr_30m_CO2_dry_mean": 97.4
+        }
+      }
+    },
+    {
+      "name": "data_quality",
+      "passed": true,
+      "message": "1 time gaps, bias=98.3 ppm",
+      "details": {
+        "time_continuity": {
+          "gaps_over_10min": 1,
+          "largest_gap": "1 days 13:40:00"
+        },
+        "scd41_2m_vs_lgr": {
+          "n_valid_pairs": 27057,
+          "bias_ppm": 98.3,
+          "rmse_ppm": 150.3,
+          "correlation": 0.313,
+          "mae_ppm": 99.6
+        },
+        "CO2_30M_A_vs_lgr": {
+          "n_valid_pairs": 11334,
+          "bias_ppm": 84.2,
+          "rmse_ppm": 101.8,
+          "correlation": -0.151
+        },
+        "CO2_30M_B_vs_lgr": {
+          "n_valid_pairs": 10849,
+          "bias_ppm": 118.2,
+          "rmse_ppm": 160.5,
+          "correlation": -0.273
+        },
+        "CO2_30M_C_vs_lgr": {
+          "n_valid_pairs": 21059,
+          "bias_ppm": 115.2,
+          "rmse_ppm": 131.3,
+          "correlation": 0.503
+        }
+      }
+    }
+  ],
+  "sensor_summaries": {
+    "CO2_SCT1_2M": {
+      "name": "CO2_SCT1_2M",
+      "total_rows": 15282,
+      "date_range": [
+        "2024-09-12 12:20:00",
+        "2024-12-31 23:10:00"
+      ],
+      "coverage_pct": 96.08,
+      "monthly_csv_count": 4,
+      "parquet_count": 4,
+      "column_count": 13,
+      "file_sizes_kb": {
+        "CO2_SCT1_2M_2024_09.parquet": 166.2,
+        "CO2_SCT1_2M_2024_10.parquet": 282.2,
+        "CO2_SCT1_2M_2024_11.parquet": 283.6,
+        "CO2_SCT1_2M_2024_12.parquet": 293.0
+      }
+    },
+    "CO2_30M_A": {
+      "name": "CO2_30M_A",
+      "total_rows": 5039,
+      "date_range": [
+        "2024-09-19 11:10:00",
+        "2024-11-29 23:50:00"
+      ],
+      "coverage_pct": 48.92,
+      "monthly_csv_count": 3,
+      "parquet_count": 3,
+      "column_count": 13,
+      "file_sizes_kb": {
+        "CO2_30M_A_2024_09.parquet": 18.4,
+        "CO2_30M_A_2024_10.parquet": 140.3,
+        "CO2_30M_A_2024_11.parquet": 161.9
+      }
+    },
+    "CO2_30M_B": {
+      "name": "CO2_30M_B",
+      "total_rows": 5817,
+      "date_range": [
+        "2024-09-19 11:10:00",
+        "2024-12-10 23:50:00"
+      ],
+      "coverage_pct": 48.94,
+      "monthly_csv_count": 4,
+      "parquet_count": 4,
+      "column_count": 13,
+      "file_sizes_kb": {
+        "CO2_30M_B_2024_09.parquet": 29.8,
+        "CO2_30M_B_2024_10.parquet": 75.4,
+        "CO2_30M_B_2024_11.parquet": 158.6,
+        "CO2_30M_B_2024_12.parquet": 86.9
+      }
+    },
+    "CO2_30M_C": {
+      "name": "CO2_30M_C",
+      "total_rows": 12916,
+      "date_range": [
+        "2024-10-02 09:30:00",
+        "2024-12-31 23:40:00"
+      ],
+      "coverage_pct": 99.0,
+      "monthly_csv_count": 3,
+      "parquet_count": 3,
+      "column_count": 13,
+      "file_sizes_kb": {
+        "CO2_30M_C_2024_10.parquet": 246.0,
+        "CO2_30M_C_2024_11.parquet": 233.8,
+        "CO2_30M_C_2024_12.parquet": 234.9
+      }
+    },
+    "LGR_30M": {
+      "name": "LGR_30M",
+      "total_rows": 17568,
+      "date_range": [
+        "2024-09-01 00:00:00",
+        "2024-12-31 23:50:00"
+      ],
+      "coverage_pct": 100.0,
+      "monthly_csv_count": 4,
+      "parquet_count": 4,
+      "column_count": 49,
+      "file_sizes_kb": {
+        "LGR_30M_2024_09.parquet": 1231.3,
+        "LGR_30M_2024_10.parquet": 1292.4,
+        "LGR_30M_2024_11.parquet": 1244.1,
+        "LGR_30M_2024_12.parquet": 1297.5
+      }
+    }
+  },
+  "merged_summary": {
+    "total_rows": 30303,
+    "total_columns": 100,
+    "date_range": {
+      "start": "2024-09-01 00:00:00",
+      "end": "2025-03-31 23:50:00"
+    },
+    "file_size_mb": 26.52,
+    "monthly_parquet_sum_match": true,
+    "monthly_parquet_total_rows": 30303,
+    "column_coverage": {
+      "co2_sct1_2m_co2_mean": 91.8,
+      "co2_30m_a_co2_mean": 38.0,
+      "co2_30m_b_co2_mean": 36.3,
+      "co2_30m_c_co2_mean": 71.6,
+      "lgr_30m_CO2_dry_mean": 97.4
+    }
+  },
+  "quality_metrics": {
+    "time_continuity": {
+      "gaps_over_10min": 1,
+      "largest_gap": "1 days 13:40:00"
+    },
+    "scd41_2m_vs_lgr": {
+      "n_valid_pairs": 27057,
+      "bias_ppm": 98.3,
+      "rmse_ppm": 150.3,
+      "correlation": 0.313,
+      "mae_ppm": 99.6
+    },
+    "CO2_30M_A_vs_lgr": {
+      "n_valid_pairs": 11334,
+      "bias_ppm": 84.2,
+      "rmse_ppm": 101.8,
+      "correlation": -0.151
+    },
+    "CO2_30M_B_vs_lgr": {
+      "n_valid_pairs": 10849,
+      "bias_ppm": 118.2,
+      "rmse_ppm": 160.5,
+      "correlation": -0.273
+    },
+    "CO2_30M_C_vs_lgr": {
+      "n_valid_pairs": 21059,
+      "bias_ppm": 115.2,
+      "rmse_ppm": 131.3,
+      "correlation": 0.503
+    }
+  },
+  "checksums": {
+    "SMEAR_EE_CO2_merged.csv": "c23913c2517c9eeb335ed21aadd5d444057fff899541e42aafaf9a563e2e454b"
+  }
+}
