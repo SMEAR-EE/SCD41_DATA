@@ -1,6 +1,7 @@
 testing/IOT/
 testing/IOT.zip
 config/sensors.yaml
+output/
 # output/individual
 # output/logs
 # output/parquet

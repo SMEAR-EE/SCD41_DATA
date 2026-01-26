@@ -12,7 +12,7 @@ echo "================================================"
 echo ""
 echo "[1/5] Checking Python version..."
 if ! command -v python3 &> /dev/null; then
-    echo "❌ Error: python3 not found. Please install Python 3.8+"
+    echo "❌ Error: python3 not found. Please install Python 3.10+"
     exit 1
 fi
 

@@ -15,7 +15,7 @@ source venv/bin/activate
 edit config/sensors.yaml  # Set your data paths
 
 # 4. Run processing
-jupyter notebook testing/process_data.ipynb
+jupyter notebook process_data.ipynb
 ```
 
 Processed data appears in `output/`.
@@ -51,8 +51,10 @@ sensors:
 ## 📖 Documentation
 
 - **Detailed overview**: See [`APPLICATION_SUMMARY.md`](APPLICATION_SUMMARY.md) for architecture, features, and technical details
+- **Setup guide**: See [`SETUP.md`](SETUP.md) for installation and configuration
+- **Data merging**: See [`MERGING.md`](MERGING.md) for information on how sensor data is merged
 - **Visualization**: See [`src/visualization/README.md`](src/visualization/README.md) for plotting module
-- **Examples**: See [`testing/process_data.ipynb`](testing/process_data.ipynb) for usage patterns
+- **Examples**: See [`process_data.ipynb`](process_data.ipynb) for usage patterns
 
 ## 🐛 Troubleshooting
 

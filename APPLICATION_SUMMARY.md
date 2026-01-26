@@ -214,7 +214,7 @@ SCD41_DATA/
 
 2. **Processing**:
    - Activate environment: `source venv/bin/activate`
-   - Run Jupyter notebook: `jupyter notebook testing/process_data.ipynb`
+   - Run Jupyter notebook: `jupyter notebook process_data.ipynb`
    - Or use Docker: `docker-compose up`
 
 3. **Output**:

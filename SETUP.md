@@ -4,7 +4,7 @@ Quick setup for the sensor data processing pipeline.
 
 ## Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Git (for cloning the repository)
 - ~500 MB disk space for dependencies
 
@@ -33,7 +33,7 @@ This will:
 
 ### 3. Configure Sensors
 
-Edit `sensors.yaml` to point to your data directories:
+Edit `config/sensors.yaml` to point to your data directories:
 
 ```yaml
 sensors:
@@ -62,7 +62,7 @@ source activate.sh
 jupyter notebook
 ```
 
-Open `analysis.ipynb` and run cells.
+Open `process_data.ipynb` and run cells.
 
 ### Option 2: Command Line
 
@@ -72,7 +72,7 @@ python -c "
 from src.config import PipelineConfig
 from src.pipeline import SensorPipeline
 
-config = PipelineConfig.from_yaml('sensors.yaml')
+config = PipelineConfig.from_yaml('config/sensors.yaml')
 pipeline = SensorPipeline(config)
 pipeline.run_all(year=2024, month=9)
 "
@@ -86,7 +86,7 @@ from src.pipeline import SensorPipeline
 from src.merger import merge_all_sensors
 
 # Load config
-config = PipelineConfig.from_yaml('sensors.yaml')
+config = PipelineConfig.from_yaml('config/sensors.yaml')
 
 # Process sensors
 pipeline = SensorPipeline(config)
@@ -117,8 +117,10 @@ SCD41_DATA/
 │   ├── parquet/           # Compressed data
 │   ├── logs/              # Processing logs
 │   └── plots/             # Visualizations
+├── config/
+│   └── sensors.example.yaml # Configuration template
 ├── venv/                  # Python environment (created by setup)
-├── sensors.yaml           # Configuration
+├── sensors.yaml           # Configuration (copy from config/sensors.example.yaml)
 ├── setup.sh              # This setup script
 └── activate.sh           # Quick activation helper
 ```
@@ -126,7 +128,7 @@ SCD41_DATA/
 ## Troubleshooting
 
 ### "python3: command not found"
-Install Python 3.8+ from [python.org](https://python.org)
+Install Python 3.10+ from [python.org](https://python.org)
 
 ### "Permission denied: ./setup.sh"
 ```bash
