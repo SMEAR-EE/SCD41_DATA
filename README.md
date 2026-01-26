@@ -1,6 +1,12 @@
 # SMEAR Estonia CO2 Sensor Processing
 
-Fast, light and reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the SMEAR Estonia atmospheric research station.
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/SMEAR-EE/SCD41_DATA/releases/tag/v0.1.0)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+
+Fast, light and reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the SMEAR (Station for Measuring Ecosystem-Atmosphere Relations) Estonia atmospheric research station.
+
+> **Status:** Release Candidate v0.1.0 - Core features are functional and validated. Future work will focus on refactoring and enhancements.
 
 ## 🚀 Quick Start
 
@@ -85,9 +91,14 @@ Requires editing volume paths in `docker-compose.yaml`.
 ## 📝 Citation
 
 ```
-Zorec, M. et al. (2025). Title TBD.
+Zorec, M. et al. (2025). SMEAR Estonia CO2 Sensor Processing Pipeline.
+Version 0.1.0. GitHub: SMEAR-EE/SCD41_DATA
 Dataset: [DOI pending]
 ```
+
+## 📦 Version
+
+**Current Release:** v0.1.0 (Release Candidate)
 
 ## 📄 License
 
