@@ -219,4 +219,4 @@ The merge can be reproduced by:
 For questions about merge behaviour or data interpretation:
 - Code: `src/merger.py`
 - Logs: `output/logs/processing_*.log`
-- This documentation: `docs/MERGING.md`
+- This documentation: `MERGING.md`

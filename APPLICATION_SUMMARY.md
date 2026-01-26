@@ -119,7 +119,8 @@ Modular plotting system with multiple plot types:
 
 5. **Visualization (`visualization/`)**
    - Modular plotting system with base styling
-   - Separate modules for uptime, validation, QC, and Taylor diagrams
+   - Separate modules for uptime, validation, and QC plots
+   - Note: Taylor diagram module is work-in-progress (WIP)
 
 6. **Merger (`merger.py`)**
    - `SensorMerger`: Combines multiple sensor outputs
@@ -163,7 +164,7 @@ SCD41_DATA/
 │       ├── uptime_plots.py  # Uptime visualizations
 │       ├── validation_plots.py  # Validation plots
 │       ├── quality_control.py   # QC plots
-│       └── taylor_plots.py      # Taylor diagrams
+│       └── taylor_plots.py      # Taylor diagrams (WIP)
 ├── config/
 │   └── sensors.example.yaml # Configuration template
 ├── output/
@@ -172,12 +173,16 @@ SCD41_DATA/
 │   ├── plots/               # Generated plots
 │   └── logs/                # Processing logs
 ├── testing/
-│   ├── process_data.ipynb   # Example Jupyter notebook
 │   └── prototype/           # Development notebooks
+├── process_data.ipynb       # Example Jupyter notebook
+├── README.md                # Quick start guide
+├── APPLICATION_SUMMARY.md   # Detailed documentation
+├── SETUP.md                 # Installation guide
+├── MERGING.md               # Data merging documentation
 ├── Dockerfile               # Container definition
 ├── docker-compose.yaml      # Orchestration config
-├── requirements_dev.txt     # Python dependencies
-└── README.md                # Quick start guide
+├── requirements.txt         # Production dependencies
+└── requirements_dev.txt     # Development dependencies
 ```
 
 ---
@@ -214,7 +219,7 @@ SCD41_DATA/
 
 2. **Processing**:
    - Activate environment: `source venv/bin/activate`
-   - Run Jupyter notebook: `jupyter notebook testing/process_data.ipynb`
+   - Run Jupyter notebook: `jupyter notebook process_data.ipynb`
    - Or use Docker: `docker-compose up`
 
 3. **Output**:
@@ -277,7 +282,7 @@ The pipeline is designed for easy extension:
 
 ## Current Limitations & Known Issues
 
-1. **Taylor diagram visualization**: Module exists (`taylor_plots.py`) but noted as non-functional in current version - isolated and safe to ignore or replace
+1. **Taylor diagram visualization**: Module exists (`taylor_plots.py`) and is work-in-progress - under active development
 2. **Single-site focus**: Optimized for SMEAR Estonia station
 3. **File format specificity**: Parsers designed for NodeRED JSON and LGR CSV formats
 4. **No real-time processing**: Batch-oriented, not streaming
