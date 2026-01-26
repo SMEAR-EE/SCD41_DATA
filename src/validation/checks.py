@@ -1,4 +1,10 @@
-"""Validation check functions.
+"""Validation check functions for per-sensor directory structure.
+
+Directory structure expected:
+    output/sensors/{sensor}/csv/     - CSV files
+    output/sensors/{sensor}/parquet/ - Parquet files
+    output/merged/csv/               - Merged CSVs
+    output/merged/parquet/           - Merged parquets
 
 Each check function returns a list of CheckResult objects.
 """
@@ -6,6 +12,7 @@ Each check function returns a list of CheckResult objects.
 from pathlib import Path
 import re
 import hashlib
+from typing import Optional
 
 import pandas as pd
 import pyarrow.parquet as pq
@@ -15,58 +22,85 @@ from .models import CheckResult, SensorSummary, Severity
 
 
 def discover_year_months(cfg) -> list[tuple[str, str]]:
-    """Discover all year-month combinations from existing files."""
+    """
+    Discover all year-month combinations from existing files.
+    
+    Scans all per-sensor directories for monthly files.
+    """
     year_months = set()
     pattern = re.compile(r'_(\d{4})_(\d{2})\.(?:parquet|csv)$')
     
-    # Check parquet directory
-    parquet_dir = Path(cfg.parquet_dir)
-    if parquet_dir.exists():
-        for f in parquet_dir.glob("*.parquet"):
-            match = pattern.search(f.name)
-            if match:
-                year_months.add((match.group(1), match.group(2)))
-    
-    # Check CSV directory (catches cases where parquets missing)
-    # PipelineConfig uses output_dir for CSVs
-    individual_dir = Path(cfg.output_dir)
-    if individual_dir.exists():
-        for f in individual_dir.glob("*_[0-9][0-9][0-9][0-9]_[0-9][0-9].csv"):
-            match = pattern.search(f.name)
-            if match:
-                year_months.add((match.group(1), match.group(2)))
+    # Scan each sensor's directories
+    sensors_dir = Path(cfg.sensors_dir)
+    if sensors_dir.exists():
+        for sensor_dir in sensors_dir.iterdir():
+            if not sensor_dir.is_dir():
+                continue
+            
+            # Check parquet directory
+            parquet_dir = sensor_dir / 'parquet'
+            if parquet_dir.exists():
+                for f in parquet_dir.glob("*.parquet"):
+                    match = pattern.search(f.name)
+                    if match:
+                        year_months.add((match.group(1), match.group(2)))
+            
+            # Check CSV directory
+            csv_dir = sensor_dir / 'csv'
+            if csv_dir.exists():
+                for f in csv_dir.glob("*_[0-9][0-9][0-9][0-9]_[0-9][0-9].csv"):
+                    match = pattern.search(f.name)
+                    if match:
+                        year_months.add((match.group(1), match.group(2)))
     
     return sorted(year_months)
 
 
 def check_column_names(cfg) -> list[CheckResult]:
-    """Verify no lambda artifacts in column names."""
+    """Verify no lambda artifacts in column names across all sensors."""
     results = []
-    individual_dir = Path(cfg.output_dir)
+    sensors_dir = Path(cfg.sensors_dir)
     
-    for csv_file in sorted(individual_dir.glob("*_10min.csv")):
-        try:
-            df = pd.read_csv(csv_file, nrows=1)
-            bad_cols = [c for c in df.columns if '<lambda>' in c]
-            
-            passed = len(bad_cols) == 0
-            result = CheckResult(
-                name=f"column_names:{csv_file.name}",
-                passed=passed,
-                message="Clean" if passed else f"Lambda artifacts: {bad_cols}",
-                details={"bad_columns": bad_cols},
-                severity=Severity.CRITICAL
-            )
-        except Exception as e:
-            result = CheckResult(
-                name=f"column_names:{csv_file.name}",
-                passed=False,
-                message=f"Read error: {e}",
-                details={"error": str(e)},
-                severity=Severity.CRITICAL
-            )
+    if not sensors_dir.exists():
+        return [CheckResult(
+            name="column_names",
+            passed=False,
+            message=f"Sensors directory not found: {sensors_dir}",
+            severity=Severity.CRITICAL
+        )]
+    
+    # Check each sensor's 10min CSV
+    for sensor_dir in sorted(sensors_dir.iterdir()):
+        if not sensor_dir.is_dir():
+            continue
         
-        results.append(result)
+        csv_dir = sensor_dir / 'csv'
+        if not csv_dir.exists():
+            continue
+        
+        for csv_file in sorted(csv_dir.glob("*_10min.csv")):
+            try:
+                df = pd.read_csv(csv_file, nrows=1)
+                bad_cols = [c for c in df.columns if '<lambda>' in c]
+                
+                passed = len(bad_cols) == 0
+                result = CheckResult(
+                    name=f"column_names:{sensor_dir.name}/{csv_file.name}",
+                    passed=passed,
+                    message="Clean" if passed else f"Lambda artifacts: {bad_cols}",
+                    details={"bad_columns": bad_cols},
+                    severity=Severity.CRITICAL
+                )
+            except Exception as e:
+                result = CheckResult(
+                    name=f"column_names:{sensor_dir.name}/{csv_file.name}",
+                    passed=False,
+                    message=f"Read error: {e}",
+                    details={"error": str(e)},
+                    severity=Severity.CRITICAL
+                )
+            
+            results.append(result)
     
     return results
 
@@ -76,16 +110,18 @@ def check_file_inventory(cfg, sensor_names: list[str]) -> tuple[list[CheckResult
     results = []
     summaries = {}
     
-    individual_dir = Path(cfg.output_dir)
-    parquet_dir = Path(cfg.parquet_dir)
-    
     for sensor in sensor_names:
+        # Get per-sensor directories
+        sensor_dirs = cfg.get_sensor_dirs(sensor)
+        csv_dir = sensor_dirs['csv']
+        parquet_dir = sensor_dirs['parquet']
+        
         # Find monthly CSVs
-        monthly_csvs = sorted(individual_dir.glob(f"{sensor}_[0-9][0-9][0-9][0-9]_[0-9][0-9].csv"))
+        monthly_csvs = sorted(csv_dir.glob(f"{sensor}_[0-9][0-9][0-9][0-9]_[0-9][0-9].csv")) if csv_dir.exists() else []
         months_csv = [f.stem.split('_')[-2] + '-' + f.stem.split('_')[-1] for f in monthly_csvs]
         
         # Find parquet files
-        monthly_pqs = sorted(parquet_dir.glob(f"{sensor}_[0-9][0-9][0-9][0-9]_[0-9][0-9].parquet"))
+        monthly_pqs = sorted(parquet_dir.glob(f"{sensor}_[0-9][0-9][0-9][0-9]_[0-9][0-9].parquet")) if parquet_dir.exists() else []
         months_pq = [f.stem.split('_')[-2] + '-' + f.stem.split('_')[-1] for f in monthly_pqs]
         
         # Calculate stats from parquets
@@ -141,7 +177,9 @@ def check_file_inventory(cfg, sensor_names: list[str]) -> tuple[list[CheckResult
             details={
                 "csv_months": months_csv,
                 "parquet_months": months_pq,
-                "csv_parquet_match": csv_pq_match
+                "csv_parquet_match": csv_pq_match,
+                "csv_dir": str(csv_dir),
+                "parquet_dir": str(parquet_dir)
             },
             severity=Severity.CRITICAL
         ))
@@ -150,60 +188,77 @@ def check_file_inventory(cfg, sensor_names: list[str]) -> tuple[list[CheckResult
 
 
 def check_parquet_integrity(cfg) -> list[CheckResult]:
-    """Validate parquet file integrity, schema, and compression."""
+    """Validate parquet file integrity, schema, and compression across all sensors."""
     results = []
-    parquet_dir = Path(cfg.parquet_dir)
+    sensors_dir = Path(cfg.sensors_dir)
     
-    for pq_file in sorted(parquet_dir.glob("*.parquet")):
-        try:
-            pq_meta = pq.read_metadata(pq_file)
-            df = pd.read_parquet(pq_file)
-            
-            has_ts = 'timestamp' in df.columns
-            ts_dtype_ok = pd.api.types.is_datetime64_any_dtype(df['timestamp']) if has_ts else False
-            nan_cols = [c for c in df.columns if df[c].isna().all()]
-            
-            compression = "SNAPPY"
-            if pq_meta.num_row_groups > 0:
-                compression = str(pq_meta.row_group(0).column(0).compression)
-            
-            issues = []
-            if not has_ts:
-                issues.append("missing timestamp column")
-            if not ts_dtype_ok:
-                issues.append("timestamp not datetime type")
-            if nan_cols:
-                issues.append(f"{len(nan_cols)} all-NaN columns")
-            
-            passed = len(issues) == 0
-            size_kb = pq_file.stat().st_size / 1024
-            
-            result = CheckResult(
-                name=f"parquet:{pq_file.name}",
-                passed=passed,
-                message=f"{len(df)} rows, {size_kb:.1f}KB, {compression}" + 
-                        (f" | Issues: {', '.join(issues)}" if issues else ""),
-                details={
-                    "rows": len(df),
-                    "columns": len(df.columns),
-                    "size_kb": round(size_kb, 1),
-                    "compression": compression,
-                    "has_timestamp": has_ts,
-                    "timestamp_dtype_ok": ts_dtype_ok,
-                    "empty_columns": nan_cols
-                },
-                severity=Severity.CRITICAL if not has_ts else Severity.WARNING if nan_cols else Severity.CRITICAL
-            )
-        except Exception as e:
-            result = CheckResult(
-                name=f"parquet:{pq_file.name}",
-                passed=False,
-                message=f"Read error: {e}",
-                details={"error": str(e)},
-                severity=Severity.CRITICAL
-            )
+    if not sensors_dir.exists():
+        return [CheckResult(
+            name="parquet_integrity",
+            passed=False,
+            message=f"Sensors directory not found: {sensors_dir}",
+            severity=Severity.CRITICAL
+        )]
+    
+    # Check each sensor's parquet directory
+    for sensor_dir in sorted(sensors_dir.iterdir()):
+        if not sensor_dir.is_dir():
+            continue
         
-        results.append(result)
+        parquet_dir = sensor_dir / 'parquet'
+        if not parquet_dir.exists():
+            continue
+        
+        for pq_file in sorted(parquet_dir.glob("*.parquet")):
+            try:
+                pq_meta = pq.read_metadata(pq_file)
+                df = pd.read_parquet(pq_file)
+                
+                has_ts = 'timestamp' in df.columns
+                ts_dtype_ok = pd.api.types.is_datetime64_any_dtype(df['timestamp']) if has_ts else False
+                nan_cols = [c for c in df.columns if df[c].isna().all()]
+                
+                compression = "SNAPPY"
+                if pq_meta.num_row_groups > 0:
+                    compression = str(pq_meta.row_group(0).column(0).compression)
+                
+                issues = []
+                if not has_ts:
+                    issues.append("missing timestamp column")
+                if not ts_dtype_ok:
+                    issues.append("timestamp not datetime type")
+                if nan_cols:
+                    issues.append(f"{len(nan_cols)} all-NaN columns")
+                
+                passed = len(issues) == 0
+                size_kb = pq_file.stat().st_size / 1024
+                
+                result = CheckResult(
+                    name=f"parquet:{sensor_dir.name}/{pq_file.name}",
+                    passed=passed,
+                    message=f"{len(df)} rows, {size_kb:.1f}KB, {compression}" + 
+                            (f" | Issues: {', '.join(issues)}" if issues else ""),
+                    details={
+                        "rows": len(df),
+                        "columns": len(df.columns),
+                        "size_kb": round(size_kb, 1),
+                        "compression": compression,
+                        "has_timestamp": has_ts,
+                        "timestamp_dtype_ok": ts_dtype_ok,
+                        "empty_columns": nan_cols
+                    },
+                    severity=Severity.CRITICAL if not has_ts else Severity.WARNING if nan_cols else Severity.CRITICAL
+                )
+            except Exception as e:
+                result = CheckResult(
+                    name=f"parquet:{sensor_dir.name}/{pq_file.name}",
+                    passed=False,
+                    message=f"Read error: {e}",
+                    details={"error": str(e)},
+                    severity=Severity.CRITICAL
+                )
+            
+            results.append(result)
     
     return results
 
@@ -214,15 +269,17 @@ def check_csv_parquet_consistency(
 ) -> list[CheckResult]:
     """Verify CSV and parquet files contain identical data."""
     results = []
-    individual_dir = Path(cfg.output_dir)
-    parquet_dir = Path(cfg.parquet_dir)
     
     # Check key sensors only
     check_sensors = ["CO2_SCT1_2M", "LGR_30M"]
     
     for sensor in check_sensors:
+        sensor_dirs = cfg.get_sensor_dirs(sensor)
+        csv_dir = sensor_dirs['csv']
+        parquet_dir = sensor_dirs['parquet']
+        
         for year, month in year_months:
-            csv_path = individual_dir / f"{sensor}_{year}_{month}.csv"
+            csv_path = csv_dir / f"{sensor}_{year}_{month}.csv"
             pq_path = parquet_dir / f"{sensor}_{year}_{month}.parquet"
             
             if not (csv_path.exists() and pq_path.exists()):
@@ -273,9 +330,10 @@ def check_csv_parquet_consistency(
     return results
 
 
-def check_merged_data(merged_dir: Path) -> tuple[CheckResult, dict]:
+def check_merged_data(cfg) -> tuple[CheckResult, dict]:
     """Validate the merged dataset."""
-    merged_csv = merged_dir / "SMEAR_EE_CO2_merged.csv"
+    merged_dirs = cfg.get_merged_dirs()
+    merged_csv = merged_dirs['csv'] / "SMEAR_EE_CO2_merged.csv"
     merged_summary = {}
     
     if not merged_csv.exists():
@@ -301,7 +359,7 @@ def check_merged_data(merged_dir: Path) -> tuple[CheckResult, dict]:
         }
         
         # Check monthly parquets
-        merged_pq_dir = merged_dir / "parquet"
+        merged_pq_dir = merged_dirs['parquet']
         if merged_pq_dir.exists():
             monthly_pqs = sorted(merged_pq_dir.glob("*.parquet"))
             if monthly_pqs:
@@ -344,9 +402,10 @@ def check_merged_data(merged_dir: Path) -> tuple[CheckResult, dict]:
     return result, merged_summary
 
 
-def compute_quality_metrics(merged_dir: Path) -> tuple[CheckResult, dict]:
+def compute_quality_metrics(cfg) -> tuple[CheckResult, dict]:
     """Compute data quality metrics including sensor comparison."""
-    merged_csv = merged_dir / "SMEAR_EE_CO2_merged.csv"
+    merged_dirs = cfg.get_merged_dirs()
+    merged_csv = merged_dirs['csv'] / "SMEAR_EE_CO2_merged.csv"
     quality_metrics = {}
     
     if not merged_csv.exists():
@@ -423,7 +482,7 @@ def compute_quality_metrics(merged_dir: Path) -> tuple[CheckResult, dict]:
     return result, quality_metrics
 
 
-def compute_checksums(merged_dir: Path, parquet_dir: Path, include_all: bool = False) -> dict[str, str]:
+def compute_checksums(cfg, include_all: bool = False) -> dict[str, str]:
     """Compute SHA256 checksums for key output files."""
     checksums = {}
     
@@ -434,14 +493,22 @@ def compute_checksums(merged_dir: Path, parquet_dir: Path, include_all: bool = F
                 h.update(chunk)
         return h.hexdigest()
     
+    merged_dirs = cfg.get_merged_dirs()
+    
     # Merged CSV
-    merged_csv = merged_dir / "SMEAR_EE_CO2_merged.csv"
+    merged_csv = merged_dirs['csv'] / "SMEAR_EE_CO2_merged.csv"
     if merged_csv.exists():
         checksums[merged_csv.name] = sha256(merged_csv)
     
-    # Optionally all parquets
+    # Optionally all sensor parquets
     if include_all:
-        for pq_file in sorted(parquet_dir.glob("*.parquet")):
-            checksums[pq_file.name] = sha256(pq_file)
+        sensors_dir = Path(cfg.sensors_dir)
+        for sensor_dir in sorted(sensors_dir.iterdir()):
+            if not sensor_dir.is_dir():
+                continue
+            parquet_dir = sensor_dir / 'parquet'
+            if parquet_dir.exists():
+                for pq_file in sorted(parquet_dir.glob("*.parquet")):
+                    checksums[f"{sensor_dir.name}/{pq_file.name}"] = sha256(pq_file)
     
     return checksums
