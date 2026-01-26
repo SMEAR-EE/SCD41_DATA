@@ -3,6 +3,3 @@ contact_links:
   - name: Documentation
     url: https://github.com/SMEAR-EE/SCD41_DATA/blob/main/README.md
     about: Check the documentation for setup and usage instructions
-  - name: Discussion Forum
-    url: https://github.com/SMEAR-EE/SCD41_DATA/discussions
-    about: Ask questions and discuss ideas with the community

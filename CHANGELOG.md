@@ -84,27 +84,12 @@ All documentation is complete and peer-reviewed for initial release.
 
 ### Future Work (Post v0.1.0)
 
-The following items are planned for future releases:
-
-#### v0.2.0 (Refactoring & Organization)
-- Refactor merged directory structure for better organization
-- Implement per-sensor individual outputs with improved naming conventions
-- Consolidate output directory hierarchy
-- Enhanced CLI interface for batch processing
-
-#### v0.3.0 (Visualization & Analysis)
+Future releases may include:
+- Directory structure refactoring and improved output organization
 - Complete Taylor diagram implementation
-- Additional validation metrics (Nash-Sutcliffe, KGE)
-- Interactive plotting support (Plotly/Bokeh)
-- Automated report generation
-
-#### Future Considerations
-- Real-time/streaming processing support
-- Multi-site configuration templates
-- Additional sensor type parsers
-- API for programmatic access
-- Performance optimizations for large datasets
-- Automated CI/CD pipeline
+- Additional validation metrics and visualization tools
+- Multi-site configuration support
+- Performance optimizations
 
 ---
 
@@ -124,7 +109,7 @@ The following items are planned for future releases:
    edit config/sensors.yaml  # Set your data paths
    ```
 
-3. **Run**:
+3. **Run** (local interaction or within bash script):
    ```bash
    source activate.sh
    jupyter notebook process_data.ipynb
@@ -145,7 +130,7 @@ If you use this software in your research, please cite:
 ```
 Zorec, M. et al. (2025). SMEAR Estonia CO2 Sensor Processing Pipeline.
 Version 0.1.0. GitHub: SMEAR-EE/SCD41_DATA
-Dataset: [DOI pending]
+Note: Citation format and DOI will be updated upon article publication and Zenodo release.
 ```
 
 ---

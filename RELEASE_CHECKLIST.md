@@ -15,7 +15,7 @@ This checklist outlines the steps to prepare for the initial release candidate.
 - [x] RELEASE_CHECKLIST.md created (this file)
 
 ### Code Quality
-- [ ] All core modules have proper docstrings
+- [ ] Core modules documented (docstrings optional given complexity)
 - [ ] No obvious bugs or critical issues in main processing pipeline
 - [ ] Error handling is robust and graceful
 - [ ] Logging is comprehensive and informative

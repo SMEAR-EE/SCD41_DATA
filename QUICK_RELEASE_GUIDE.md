@@ -91,7 +91,6 @@ git push origin v0.1.0
    - [Technical Overview](APPLICATION_SUMMARY.md)
    - [Setup Instructions](SETUP.md)
    - [Data Merging](MERGING.md)
-   - [Contributing](CONTRIBUTING.md)
    - [Full Changelog](CHANGELOG.md)
    
    ### ⚠️ Known Limitations
@@ -244,7 +243,6 @@ git tag -a v0.1.0 -m "Release v0.1.0"
 
 If you encounter any issues during the release process:
 - Review [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md)
-- Check [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 - Open an issue on GitHub
 
 ---

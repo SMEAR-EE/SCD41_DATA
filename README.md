@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-Fast, light and reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the SMEAR Estonia atmospheric research station.
+Fast, light and reproducible processing pipeline for SCD41 and LGR CO2 sensor data at the SMEAR (Station for Measuring Ecosystem-Atmosphere Relations) Estonia atmospheric research station.
 
 > **Status:** Release Candidate v0.1.0 - Core features are functional and validated. Future work will focus on refactoring and enhancements.
 

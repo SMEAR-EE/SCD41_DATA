@@ -30,7 +30,6 @@ This release establishes the first official version of the SMEAR Estonia CO2 Sen
 - **MERGING.md** - Data merging behavior documentation
 - **CHANGELOG.md** - Version history and release notes (NEW)
 - **RELEASE_CHECKLIST.md** - Release preparation guide (NEW)
-- **CONTRIBUTING.md** - Contribution guidelines (NEW)
 - **VERSION** - Version tracking file (NEW)
 
 ### Validation ✅
@@ -56,7 +55,6 @@ These are documented and planned for future releases:
 ✓ CHANGELOG.md (NEW)
 ✓ VERSION (NEW)
 ✓ RELEASE_CHECKLIST.md (NEW)
-✓ CONTRIBUTING.md (NEW)
 ✓ README.md (UPDATED - added version badges and documentation links)
 ```
 
@@ -136,25 +134,14 @@ To complete the release, follow these steps:
 
 ## Future Roadmap
 
-### v0.2.0 (Next Minor Release)
-**Focus:** Refactoring and organization
-- Improved directory structure
-- Per-sensor individual outputs
-- Enhanced CLI interface
-
-### v0.3.0 (Future)
-**Focus:** Enhanced visualization and analysis
+Future releases may include:
+- Directory structure refactoring and improved output organization
 - Complete Taylor diagram implementation
-- Additional validation metrics
-- Interactive plotting support
+- Additional validation metrics and visualization tools
+- Multi-site configuration support
+- Performance optimizations
 
-### v1.0.0 (Production Release)
-**Requirements:**
-- All planned features complete
-- Comprehensive test suite
-- Stable API
-- Published research paper
-- DOI for dataset
+Production release (v1.0.0) will be considered when core features are stable and research paper is published.
 
 ## Citation
 
@@ -166,14 +153,14 @@ If you use this software, please cite:
   title = {SMEAR Estonia CO2 Sensor Processing Pipeline},
   version = {0.1.0},
   year = {2025},
-  url = {https://github.com/SMEAR-EE/SCD41_DATA}
+  url = {https://github.com/SMEAR-EE/SCD41_DATA},
+  note = {Citation format and DOI will be updated upon article publication and Zenodo release}
 }
 ```
 
 ## Support
 
 - **Issues:** https://github.com/SMEAR-EE/SCD41_DATA/issues
-- **Discussions:** https://github.com/SMEAR-EE/SCD41_DATA/discussions
 - **Documentation:** See `*.md` files in repository root
 
 ## Release Team
