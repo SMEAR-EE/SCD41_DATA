@@ -4,13 +4,15 @@ Generates comprehensive validation receipts for processed sensor data.
 Designed for data management documentation and quality assurance.
 
 Usage:
-    from src.validation import ValidationReport
+    # RECOMMENDED: Use config file for correct paths
+    from src.validation import validate_outputs
+    report = validate_outputs(config_path="config/sensors.yaml")
     
+    # Alternative: Manual paths
+    from src.validation import ValidationReport
     report = ValidationReport(output_dir="output")
     report.run_all()
     report.print_summary()
-    report.export_json("output/validation_report.json")
-    report.export_markdown("output/VALIDATION_RECEIPT.md")
 """
 
 from pathlib import Path
@@ -87,9 +89,20 @@ class ValidationReport:
     Parameters
     ----------
     output_dir : str or Path
-        Base output directory containing individual/, parquet/, merged/ subdirs
+        Base output directory (used if config_path not provided)
+    config_path : str or Path, optional
+        Path to sensors.yaml config file. RECOMMENDED for correct path detection.
     sensors : list[str], optional
         List of sensor names to validate. Defaults to standard SMEAR EE sensors.
+    
+    Examples
+    --------
+    # Recommended: Use config file
+    >>> report = ValidationReport(config_path="config/sensors.yaml")
+    >>> report.run_all().print_summary()
+    
+    # Alternative: Manual (assumes default directory structure)
+    >>> report = ValidationReport(output_dir="output")
     """
     
     DEFAULT_SENSORS = ["CO2_SCT1_2M", "CO2_30M_A", "CO2_30M_B", "CO2_30M_C", "LGR_30M"]
@@ -104,7 +117,7 @@ class ValidationReport:
         "file_inventory": (
             "Confirms CSV and Parquet files exist for each sensor/month. "
             "PASS = matching CSV and Parquet counts (both formats should have identical months). "
-            "FAIL = missing files or CSV/Parquet mismatch."
+            "FAIL = missing files or CSV/Parquet mismatch — re-run pipeline to generate missing files."
         ),
         "parquet": (
             "Validates Parquet file integrity and metadata. "
@@ -134,14 +147,21 @@ class ValidationReport:
     def __init__(
         self, 
         output_dir: str | Path = "output",
+        config_path: str | Path | None = None,
         sensors: list[str] | None = None
     ):
-        self.output_dir = Path(output_dir)
-        self.individual_dir = self.output_dir / "individual"
-        self.parquet_dir = self.output_dir / "parquet"
-        self.merged_dir = self.output_dir / "merged"
+        # If config provided, read paths from it (RECOMMENDED)
+        if config_path is not None:
+            self._load_config(config_path)
+        else:
+            # Default structure - may not match your actual layout!
+            self.output_dir = Path(output_dir)
+            self.individual_dir = self.output_dir / "individual"
+            self.parquet_dir = self.output_dir / "parquet"
+            self.merged_dir = self.output_dir / "merged"
+            self._config_sensors = None
         
-        self.sensors = sensors or self.DEFAULT_SENSORS
+        self.sensors = sensors or self._config_sensors or self.DEFAULT_SENSORS
         
         # Dynamically discover year-month patterns from existing files
         self._year_month_patterns = self._discover_year_months()
@@ -153,15 +173,54 @@ class ValidationReport:
         self.quality_metrics: dict = {}
         self.timestamp = datetime.now().isoformat()
     
+    def _load_config(self, config_path: str | Path) -> None:
+        """Load directory paths from sensors.yaml config file."""
+        import yaml
+        
+        config_path = Path(config_path)
+        if not config_path.exists():
+            raise FileNotFoundError(f"Config file not found: {config_path}")
+        
+        with open(config_path) as f:
+            config = yaml.safe_load(f)
+        
+        # Extract paths from config - matches your sensors.yaml structure:
+        #   output_dir: output/individual
+        #   parquet_dir: output/individual/parquet
+        #   merged_dir: output/merged
+        self.individual_dir = Path(config.get('output_dir', 'output/individual'))
+        self.parquet_dir = Path(config.get('parquet_dir', 'output/parquet'))
+        self.merged_dir = Path(config.get('merged_dir', 'output/merged'))
+        
+        # Set output_dir to common parent for report exports
+        self.output_dir = self.individual_dir.parent
+        
+        # Extract sensor names from config
+        if 'sensors' in config:
+            self._config_sensors = [s['name'] for s in config['sensors']]
+        else:
+            self._config_sensors = None
+    
     def _discover_year_months(self) -> list[tuple[str, str]]:
-        """Discover all year-month combinations from existing parquet files."""
-        pattern = re.compile(r'_(\d{4})_(\d{2})\.parquet$')
+        """Discover all year-month combinations from existing files."""
         year_months = set()
         
-        for pq_file in self.parquet_dir.glob("*.parquet"):
-            match = pattern.search(pq_file.name)
-            if match:
-                year_months.add((match.group(1), match.group(2)))
+        # Pattern for YYYY_MM in filenames
+        pattern = re.compile(r'_(\d{4})_(\d{2})\.(?:parquet|csv)$')
+        
+        # Check parquet directory
+        if self.parquet_dir.exists():
+            for pq_file in self.parquet_dir.glob("*.parquet"):
+                match = pattern.search(pq_file.name)
+                if match:
+                    year_months.add((match.group(1), match.group(2)))
+        
+        # Also check CSV directory (catches cases where parquets missing)
+        if self.individual_dir.exists():
+            for csv_file in self.individual_dir.glob("*_[0-9][0-9][0-9][0-9]_[0-9][0-9].csv"):
+                match = pattern.search(csv_file.name)
+                if match:
+                    year_months.add((match.group(1), match.group(2)))
         
         return sorted(year_months)
         
@@ -427,7 +486,8 @@ class ValidationReport:
                 name="merged_data",
                 passed=False,
                 message="Merged file not found",
-                details={"expected_path": str(merged_csv)}
+                details={"expected_path": str(merged_csv)},
+                severity=Severity.CRITICAL
             ))
             return {}
         
@@ -473,7 +533,7 @@ class ValidationReport:
             self.checks.append(CheckResult(
                 name="merged_data",
                 passed=True,
-                message=f"{len(df):,} rows, {len(df.columns)} columns, {self.merged_summary.get('file_size_mb', 0):.1f} MB | {self.merged_summary['date_range']['start'][:10]} to {self.merged_summary['date_range']['end'][:10]}",
+                message=f"{len(df):,} rows, {len(df.columns)} columns, {self.merged_summary['file_size_mb']:.1f} MB | {self.merged_summary['date_range']['start'][:10]} to {self.merged_summary['date_range']['end'][:10]}",
                 details=self.merged_summary,
                 severity=Severity.CRITICAL
             ))
@@ -553,7 +613,7 @@ class ValidationReport:
                 passed=True,
                 message=f"{len(gaps)} time gaps >10min, bias={self.quality_metrics.get('scd41_2m_vs_lgr', {}).get('bias_ppm', 'N/A')} ppm",
                 details=self.quality_metrics,
-                severity=Severity.INFO  # Quality metrics are informational, not pass/fail
+                severity=Severity.INFO  # Quality metrics are informational
             ))
             
         except Exception as e:
@@ -572,13 +632,7 @@ class ValidationReport:
     # =========================================================================
     
     def compute_checksums(self, include_all: bool = False) -> dict:
-        """Compute SHA256 checksums for key output files.
-        
-        Parameters
-        ----------
-        include_all : bool
-            If True, checksum all parquet files. If False, only merged outputs.
-        """
+        """Compute SHA256 checksums for key output files."""
         checksums = {}
         
         # Always checksum merged outputs
@@ -615,7 +669,13 @@ class ValidationReport:
         print("SMEAR ESTONIA CO2 DATA VALIDATION RECEIPT")
         print(f"Generated: {self.timestamp}")
         print(f"Output directory: {self.output_dir}")
-        print(f"Year-month range detected: {self._year_month_patterns[0][0]}-{self._year_month_patterns[0][1]} to {self._year_month_patterns[-1][0]}-{self._year_month_patterns[-1][1]}" if self._year_month_patterns else "No data found")
+        print(f"Individual dir:   {self.individual_dir}")
+        print(f"Parquet dir:      {self.parquet_dir}")
+        print(f"Merged dir:       {self.merged_dir}")
+        if self._year_month_patterns:
+            print(f"Year-month range: {self._year_month_patterns[0][0]}-{self._year_month_patterns[0][1]} to {self._year_month_patterns[-1][0]}-{self._year_month_patterns[-1][1]}")
+        else:
+            print("Year-month range: No data found")
         print(sep)
         
         # Group checks by category
@@ -670,17 +730,17 @@ class ValidationReport:
             print(f"    {'Sensor':<15} {'Rows':>10} {'Coverage':>10} {'Months':>8} {'Date Range':<25}")
             print(f"    {'-'*15} {'-'*10} {'-'*10} {'-'*8} {'-'*25}")
             for name, summary in self.sensor_summaries.items():
-                date_str = f"{summary.date_range[0][:10]} → {summary.date_range[1][:10]}"
+                date_str = f"{summary.date_range[0][:10]} → {summary.date_range[1][:10]}" if summary.date_range[0] != "N/A" else "N/A"
                 print(f"    {name:<15} {summary.total_rows:>10,} {summary.coverage_pct:>9.1f}% {len(summary.parquet_files):>8} {date_str:<25}")
-        
-        # Column coverage in merged data
-        if self.merged_summary.get("column_coverage"):
-            print(f"\n    MERGED DATASET COLUMN COVERAGE:")
-            print(f"    (Percentage of rows with non-null values for key CO2 columns)")
-            for col, pct in self.merged_summary["column_coverage"].items():
-                bar_len = int(pct / 5)  # Scale to max 20 chars
-                bar = "█" * bar_len + "░" * (20 - bar_len)
-                print(f"      {col:<30} {bar} {pct:>5.1f}%")
+            
+            # Column coverage in merged data
+            if self.merged_summary.get("column_coverage"):
+                print(f"\n    MERGED DATASET COLUMN COVERAGE:")
+                print(f"    (Percentage of rows with non-null values for key CO2 columns)")
+                for col, pct in self.merged_summary["column_coverage"].items():
+                    bar_len = int(pct / 5)  # Scale to max 20 chars
+                    bar = "█" * bar_len + "░" * (20 - bar_len)
+                    print(f"      {col:<30} {bar} {pct:>5.1f}%")
         
         # Quality metrics highlight
         if self.quality_metrics.get("scd41_2m_vs_lgr"):
@@ -758,7 +818,11 @@ class ValidationReport:
             "meta": {
                 "generated": self.timestamp,
                 "output_dir": str(self.output_dir),
-                "sensors": self.sensors
+                "individual_dir": str(self.individual_dir),
+                "parquet_dir": str(self.parquet_dir),
+                "merged_dir": str(self.merged_dir),
+                "sensors": self.sensors,
+                "year_month_range": self._year_month_patterns
             },
             "checks": [c.to_dict() for c in self.checks],
             "sensor_summaries": {k: v.to_dict() for k, v in self.sensor_summaries.items()},
@@ -787,6 +851,8 @@ class ValidationReport:
             "",
             f"**Generated:** {self.timestamp}",
             f"**Output Directory:** `{self.output_dir}`",
+            f"**Individual Directory:** `{self.individual_dir}`",
+            f"**Parquet Directory:** `{self.parquet_dir}`",
             "",
             "---",
             "",
@@ -810,9 +876,10 @@ class ValidationReport:
                 "|--------|------|----------|--------|------------|"
             ])
             for name, s in self.sensor_summaries.items():
+                date_str = f"{s.date_range[0][:10]} to {s.date_range[1][:10]}" if s.date_range[0] != "N/A" else "N/A"
                 lines.append(
                     f"| {name} | {s.total_rows:,} | {s.coverage_pct:.1f}% | "
-                    f"{len(s.parquet_files)} | {s.date_range[0][:10]} to {s.date_range[1][:10]} |"
+                    f"{len(s.parquet_files)} | {date_str} |"
                 )
             lines.append("")
         
@@ -862,14 +929,15 @@ class ValidationReport:
         
         print(f"Markdown report exported: {filepath}")
         return filepath
-    
-    # =========================================================================
-    # CONVENIENCE: Quick validation function
-    # =========================================================================
 
+
+# =============================================================================
+# CONVENIENCE FUNCTION
+# =============================================================================
 
 def validate_outputs(
     output_dir: str | Path = "output",
+    config_path: str | Path | None = None,
     export_json: bool = True,
     export_markdown: bool = True,
     verbose: bool = True
@@ -879,7 +947,9 @@ def validate_outputs(
     Parameters
     ----------
     output_dir : str or Path
-        Base output directory
+        Base output directory (ignored if config_path provided)
+    config_path : str or Path, optional
+        Path to sensors.yaml config file. RECOMMENDED for correct path detection.
     export_json : bool
         Export JSON report to output/validation_report.json
     export_markdown : bool  
@@ -892,22 +962,29 @@ def validate_outputs(
     ValidationReport
         The completed validation report object
     
-    Example
-    -------
+    Examples
+    --------
+    # RECOMMENDED: Use config file for correct paths
     >>> from src.validation import validate_outputs
-    >>> report = validate_outputs()
+    >>> report = validate_outputs(config_path="config/sensors.yaml")
+    
+    # Alternative: Manual paths (may not match your directory structure)
+    >>> report = validate_outputs(output_dir="output")
     """
-    report = ValidationReport(output_dir=output_dir)
+    report = ValidationReport(output_dir=output_dir, config_path=config_path)
     report.run_all()
     
     if verbose:
         report.print_summary()
     
+    # Determine output directory for exports
+    export_dir = report.output_dir
+    
     if export_json:
-        report.export_json(Path(output_dir) / "validation_report.json")
+        report.export_json(export_dir / "validation_report.json")
     
     if export_markdown:
-        report.export_markdown(Path(output_dir) / "VALIDATION_RECEIPT.md")
+        report.export_markdown(export_dir / "VALIDATION_RECEIPT.md")
     
     return report
 
@@ -916,5 +993,10 @@ def validate_outputs(
 if __name__ == "__main__":
     import sys
     
-    output_dir = sys.argv[1] if len(sys.argv) > 1 else "output"
-    validate_outputs(output_dir=output_dir)
+    if len(sys.argv) > 1 and sys.argv[1].endswith('.yaml'):
+        # Config file provided
+        validate_outputs(config_path=sys.argv[1])
+    else:
+        # Default
+        output_dir = sys.argv[1] if len(sys.argv) > 1 else "output"
+        validate_outputs(output_dir=output_dir)

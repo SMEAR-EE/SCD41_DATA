@@ -45,3 +45,5 @@ tzdata==2025.2
 wcwidth==0.2.14
 wheel==0.45.1
 xlsxwriter==3.2.9
+Jinja2==3.1.6
+MarkupSafe==2.1.3
