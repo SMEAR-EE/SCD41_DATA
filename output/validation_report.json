@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generated": "2026-01-26T13:19:11.221998",
+    "generated": "2026-01-26T13:34:57.420514",
     "output_dir": "output",
     "sensors": [
       "CO2_SCT1_2M",
@@ -17,7 +17,8 @@
       "message": "Clean",
       "details": {
         "bad_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "column_names:CO2_30M_B_10min.csv",
@@ -25,7 +26,8 @@
       "message": "Clean",
       "details": {
         "bad_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "column_names:CO2_30M_C_10min.csv",
@@ -33,7 +35,8 @@
       "message": "Clean",
       "details": {
         "bad_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "column_names:CO2_SCT1_2M_10min.csv",
@@ -41,7 +44,8 @@
       "message": "Clean",
       "details": {
         "bad_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "column_names:LGR_30M_10min.csv",
@@ -49,103 +53,124 @@
       "message": "Clean",
       "details": {
         "bad_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "file_inventory:CO2_SCT1_2M",
-      "passed": true,
-      "message": "4 CSVs, 4 parquets",
+      "passed": false,
+      "message": "7 CSVs, 4 parquets [MISMATCH]",
       "details": {
         "csv_months": [
-          "09",
-          "10",
-          "11",
-          "12"
+          "2024-09",
+          "2024-10",
+          "2024-11",
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
         "parquet_months": [
-          "09",
-          "10",
-          "11",
-          "12"
+          "2024-09",
+          "2024-10",
+          "2024-11",
+          "2024-12"
         ],
-        "csv_parquet_match": true
-      }
+        "csv_parquet_match": false
+      },
+      "severity": "critical"
     },
     {
       "name": "file_inventory:CO2_30M_A",
-      "passed": true,
-      "message": "3 CSVs, 3 parquets",
+      "passed": false,
+      "message": "6 CSVs, 3 parquets [MISMATCH]",
       "details": {
         "csv_months": [
-          "09",
-          "10",
-          "11"
+          "2024-09",
+          "2024-10",
+          "2024-11",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
         "parquet_months": [
-          "09",
-          "10",
-          "11"
+          "2024-09",
+          "2024-10",
+          "2024-11"
         ],
-        "csv_parquet_match": true
-      }
+        "csv_parquet_match": false
+      },
+      "severity": "critical"
     },
     {
       "name": "file_inventory:CO2_30M_B",
-      "passed": true,
-      "message": "4 CSVs, 4 parquets",
+      "passed": false,
+      "message": "7 CSVs, 4 parquets [MISMATCH]",
       "details": {
         "csv_months": [
-          "09",
-          "10",
-          "11",
-          "12"
+          "2024-09",
+          "2024-10",
+          "2024-11",
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
         "parquet_months": [
-          "09",
-          "10",
-          "11",
-          "12"
+          "2024-09",
+          "2024-10",
+          "2024-11",
+          "2024-12"
         ],
-        "csv_parquet_match": true
-      }
+        "csv_parquet_match": false
+      },
+      "severity": "critical"
     },
     {
       "name": "file_inventory:CO2_30M_C",
-      "passed": true,
-      "message": "3 CSVs, 3 parquets",
+      "passed": false,
+      "message": "6 CSVs, 3 parquets [MISMATCH]",
       "details": {
         "csv_months": [
-          "10",
-          "11",
-          "12"
+          "2024-10",
+          "2024-11",
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
         "parquet_months": [
-          "10",
-          "11",
-          "12"
+          "2024-10",
+          "2024-11",
+          "2024-12"
         ],
-        "csv_parquet_match": true
-      }
+        "csv_parquet_match": false
+      },
+      "severity": "critical"
     },
     {
       "name": "file_inventory:LGR_30M",
-      "passed": true,
-      "message": "4 CSVs, 4 parquets",
+      "passed": false,
+      "message": "7 CSVs, 4 parquets [MISMATCH]",
       "details": {
         "csv_months": [
-          "09",
-          "10",
-          "11",
-          "12"
+          "2024-09",
+          "2024-10",
+          "2024-11",
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
         "parquet_months": [
-          "09",
-          "10",
-          "11",
-          "12"
+          "2024-09",
+          "2024-10",
+          "2024-11",
+          "2024-12"
         ],
-        "csv_parquet_match": true
-      }
+        "csv_parquet_match": false
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_A_2024_09.parquet",
@@ -159,7 +184,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_A_2024_10.parquet",
@@ -173,7 +199,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_A_2024_11.parquet",
@@ -187,7 +214,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_B_2024_09.parquet",
@@ -201,7 +229,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_B_2024_10.parquet",
@@ -215,7 +244,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_B_2024_11.parquet",
@@ -229,7 +259,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_B_2024_12.parquet",
@@ -243,7 +274,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_C_2024_10.parquet",
@@ -257,7 +289,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_C_2024_11.parquet",
@@ -271,7 +304,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_30M_C_2024_12.parquet",
@@ -285,7 +319,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_SCT1_2M_2024_09.parquet",
@@ -299,7 +334,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_SCT1_2M_2024_10.parquet",
@@ -313,7 +349,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_SCT1_2M_2024_11.parquet",
@@ -327,7 +364,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:CO2_SCT1_2M_2024_12.parquet",
@@ -341,7 +379,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:LGR_30M_2024_09.parquet",
@@ -355,7 +394,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:LGR_30M_2024_10.parquet",
@@ -369,7 +409,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:LGR_30M_2024_11.parquet",
@@ -383,7 +424,8 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "parquet:LGR_30M_2024_12.parquet",
@@ -397,10 +439,11 @@
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
         "empty_columns": []
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:CO2_SCT1_2M_09",
+      "name": "csv_parquet_match:CO2_SCT1_2M_2024_09",
       "passed": true,
       "message": "rows: 2449==2449, values: True",
       "details": {
@@ -408,10 +451,11 @@
         "parquet_rows": 2449,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:CO2_SCT1_2M_10",
+      "name": "csv_parquet_match:CO2_SCT1_2M_2024_10",
       "passed": true,
       "message": "rows: 4293==4293, values: True",
       "details": {
@@ -419,10 +463,11 @@
         "parquet_rows": 4293,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:CO2_SCT1_2M_11",
+      "name": "csv_parquet_match:CO2_SCT1_2M_2024_11",
       "passed": true,
       "message": "rows: 4200==4200, values: True",
       "details": {
@@ -430,10 +475,11 @@
         "parquet_rows": 4200,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:CO2_SCT1_2M_12",
+      "name": "csv_parquet_match:CO2_SCT1_2M_2024_12",
       "passed": true,
       "message": "rows: 4340==4340, values: True",
       "details": {
@@ -441,10 +487,11 @@
         "parquet_rows": 4340,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:LGR_30M_09",
+      "name": "csv_parquet_match:LGR_30M_2024_09",
       "passed": true,
       "message": "rows: 4320==4320, values: True",
       "details": {
@@ -452,10 +499,11 @@
         "parquet_rows": 4320,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:LGR_30M_10",
+      "name": "csv_parquet_match:LGR_30M_2024_10",
       "passed": true,
       "message": "rows: 4464==4464, values: True",
       "details": {
@@ -463,10 +511,11 @@
         "parquet_rows": 4464,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:LGR_30M_11",
+      "name": "csv_parquet_match:LGR_30M_2024_11",
       "passed": true,
       "message": "rows: 4320==4320, values: True",
       "details": {
@@ -474,10 +523,11 @@
         "parquet_rows": 4320,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
-      "name": "csv_parquet_match:LGR_30M_12",
+      "name": "csv_parquet_match:LGR_30M_2024_12",
       "passed": true,
       "message": "rows: 4464==4464, values: True",
       "details": {
@@ -485,12 +535,13 @@
         "parquet_rows": 4464,
         "rows_match": true,
         "values_match": true
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "merged_data",
       "passed": true,
-      "message": "30303 rows, 100 columns",
+      "message": "30,303 rows, 100 columns, 26.5 MB | 2024-09-01 to 2025-03-31",
       "details": {
         "total_rows": 30303,
         "total_columns": 100,
@@ -508,12 +559,13 @@
           "co2_30m_c_co2_mean": 71.6,
           "lgr_30m_CO2_dry_mean": 97.4
         }
-      }
+      },
+      "severity": "critical"
     },
     {
       "name": "data_quality",
       "passed": true,
-      "message": "1 time gaps, bias=98.3 ppm",
+      "message": "1 time gaps >10min, bias=98.3 ppm",
       "details": {
         "time_continuity": {
           "gaps_over_10min": 1,
@@ -544,7 +596,8 @@
           "rmse_ppm": 131.3,
           "correlation": 0.503
         }
-      }
+      },
+      "severity": "info"
     }
   ],
   "sensor_summaries": {
@@ -556,7 +609,7 @@
         "2024-12-31 23:10:00"
       ],
       "coverage_pct": 96.08,
-      "monthly_csv_count": 4,
+      "monthly_csv_count": 7,
       "parquet_count": 4,
       "column_count": 13,
       "file_sizes_kb": {
@@ -574,7 +627,7 @@
         "2024-11-29 23:50:00"
       ],
       "coverage_pct": 48.92,
-      "monthly_csv_count": 3,
+      "monthly_csv_count": 6,
       "parquet_count": 3,
       "column_count": 13,
       "file_sizes_kb": {
@@ -591,7 +644,7 @@
         "2024-12-10 23:50:00"
       ],
       "coverage_pct": 48.94,
-      "monthly_csv_count": 4,
+      "monthly_csv_count": 7,
       "parquet_count": 4,
       "column_count": 13,
       "file_sizes_kb": {
@@ -609,7 +662,7 @@
         "2024-12-31 23:40:00"
       ],
       "coverage_pct": 99.0,
-      "monthly_csv_count": 3,
+      "monthly_csv_count": 6,
       "parquet_count": 3,
       "column_count": 13,
       "file_sizes_kb": {
@@ -626,7 +679,7 @@
         "2024-12-31 23:50:00"
       ],
       "coverage_pct": 100.0,
-      "monthly_csv_count": 4,
+      "monthly_csv_count": 7,
       "parquet_count": 4,
       "column_count": 49,
       "file_sizes_kb": {

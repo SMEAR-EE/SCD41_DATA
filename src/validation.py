@@ -17,12 +17,21 @@ from pathlib import Path
 from datetime import datetime
 from dataclasses import dataclass, field
 from typing import Optional
+from enum import Enum
 import json
 import hashlib
+import re
 
 import pandas as pd
 import pyarrow.parquet as pq
 import numpy as np
+
+
+class Severity(Enum):
+    """Check severity levels."""
+    CRITICAL = "critical"  # Data integrity issue - must fix
+    WARNING = "warning"    # Potential issue - should investigate
+    INFO = "info"          # Informational only
 
 
 @dataclass
@@ -32,13 +41,15 @@ class CheckResult:
     passed: bool
     message: str
     details: dict = field(default_factory=dict)
+    severity: Severity = Severity.CRITICAL
     
     def to_dict(self) -> dict:
         return {
             "name": self.name,
             "passed": self.passed,
             "message": self.message,
-            "details": self.details
+            "details": self.details,
+            "severity": self.severity.value
         }
 
 
@@ -83,6 +94,43 @@ class ValidationReport:
     
     DEFAULT_SENSORS = ["CO2_SCT1_2M", "CO2_30M_A", "CO2_30M_B", "CO2_30M_C", "LGR_30M"]
     
+    # Descriptions for output documentation
+    DESCRIPTIONS = {
+        "column_names": (
+            "Verifies column names are clean Python identifiers. "
+            "Checks for '<lambda>' artifacts from pandas aggregation bugs. "
+            "PASS = no problematic column names found."
+        ),
+        "file_inventory": (
+            "Confirms CSV and Parquet files exist for each sensor/month. "
+            "PASS = matching CSV and Parquet counts (both formats should have identical months). "
+            "FAIL = missing files or CSV/Parquet mismatch."
+        ),
+        "parquet": (
+            "Validates Parquet file integrity and metadata. "
+            "Checks: timestamp column exists, datetime dtype, no all-NaN columns. "
+            "SNAPPY = compression algorithm (fast, good ratio). "
+            "PASS = file readable with valid schema."
+        ),
+        "csv_parquet_match": (
+            "Confirms CSV and Parquet contain identical data. "
+            "'rows: X==Y' = row counts match. "
+            "'values: True' = numeric values match within floating-point tolerance (rtol=1e-10). "
+            "PASS = both conditions met."
+        ),
+        "merged_data": (
+            "Validates the combined multi-sensor dataset. "
+            "Checks row counts, column counts, date range, and monthly parquet consistency. "
+            "PASS = merged file exists and is readable."
+        ),
+        "data_quality": (
+            "Computes quality metrics for sensor intercomparison. "
+            "Time gaps = periods >10min between consecutive timestamps. "
+            "Bias = mean difference (sensor - reference). "
+            "PASS = metrics computed successfully (does not judge quality thresholds)."
+        )
+    }
+    
     def __init__(
         self, 
         output_dir: str | Path = "output",
@@ -95,12 +143,27 @@ class ValidationReport:
         
         self.sensors = sensors or self.DEFAULT_SENSORS
         
+        # Dynamically discover year-month patterns from existing files
+        self._year_month_patterns = self._discover_year_months()
+        
         # Results storage
         self.checks: list[CheckResult] = []
         self.sensor_summaries: dict[str, SensorSummary] = {}
         self.merged_summary: dict = {}
         self.quality_metrics: dict = {}
         self.timestamp = datetime.now().isoformat()
+    
+    def _discover_year_months(self) -> list[tuple[str, str]]:
+        """Discover all year-month combinations from existing parquet files."""
+        pattern = re.compile(r'_(\d{4})_(\d{2})\.parquet$')
+        year_months = set()
+        
+        for pq_file in self.parquet_dir.glob("*.parquet"):
+            match = pattern.search(pq_file.name)
+            if match:
+                year_months.add((match.group(1), match.group(2)))
+        
+        return sorted(year_months)
         
     def run_all(self) -> "ValidationReport":
         """Run all validation checks and return self for chaining."""
@@ -131,14 +194,16 @@ class ValidationReport:
                     name=f"column_names:{csv_file.name}",
                     passed=passed,
                     message="Clean" if passed else f"Lambda artifacts: {bad_cols}",
-                    details={"bad_columns": bad_cols}
+                    details={"bad_columns": bad_cols},
+                    severity=Severity.CRITICAL
                 )
             except Exception as e:
                 result = CheckResult(
                     name=f"column_names:{csv_file.name}",
                     passed=False,
                     message=f"Read error: {e}",
-                    details={"error": str(e)}
+                    details={"error": str(e)},
+                    severity=Severity.CRITICAL
                 )
             
             results.append(result)
@@ -154,13 +219,13 @@ class ValidationReport:
         """Inventory all CSV and parquet files per sensor."""
         
         for sensor in self.sensors:
-            # Find monthly CSVs
-            monthly_csvs = sorted(self.individual_dir.glob(f"{sensor}_2024_*.csv"))
-            months_csv = [f.stem.split('_')[-1] for f in monthly_csvs]
+            # Find all monthly CSVs (any year)
+            monthly_csvs = sorted(self.individual_dir.glob(f"{sensor}_[0-9][0-9][0-9][0-9]_[0-9][0-9].csv"))
+            months_csv = [f.stem.split('_')[-2] + '-' + f.stem.split('_')[-1] for f in monthly_csvs]
             
-            # Find parquet files
-            monthly_pqs = sorted(self.parquet_dir.glob(f"{sensor}_2024_*.parquet"))
-            months_pq = [f.stem.split('_')[-1] for f in monthly_pqs]
+            # Find all parquet files (any year)
+            monthly_pqs = sorted(self.parquet_dir.glob(f"{sensor}_[0-9][0-9][0-9][0-9]_[0-9][0-9].parquet"))
+            months_pq = [f.stem.split('_')[-2] + '-' + f.stem.split('_')[-1] for f in monthly_pqs]
             
             # Calculate total rows and date range from parquets
             total_rows = 0
@@ -210,12 +275,14 @@ class ValidationReport:
             self.checks.append(CheckResult(
                 name=f"file_inventory:{sensor}",
                 passed=csv_pq_match and len(months_pq) > 0,
-                message=f"{len(months_csv)} CSVs, {len(months_pq)} parquets",
+                message=f"{len(months_csv)} CSVs, {len(months_pq)} parquets" + 
+                        ("" if csv_pq_match else " [MISMATCH]"),
                 details={
                     "csv_months": months_csv,
                     "parquet_months": months_pq,
                     "csv_parquet_match": csv_pq_match
-                }
+                },
+                severity=Severity.CRITICAL
             ))
         
         return self.sensor_summaries
@@ -266,14 +333,16 @@ class ValidationReport:
                         "has_timestamp": has_ts,
                         "timestamp_dtype_ok": ts_dtype_ok,
                         "empty_columns": nan_cols
-                    }
+                    },
+                    severity=Severity.CRITICAL if not has_ts else (Severity.WARNING if nan_cols else Severity.CRITICAL)
                 )
             except Exception as e:
                 result = CheckResult(
                     name=f"parquet:{pq_file.name}",
                     passed=False,
                     message=f"Read error: {e}",
-                    details={"error": str(e)}
+                    details={"error": str(e)},
+                    severity=Severity.CRITICAL
                 )
             
             results.append(result)
@@ -289,11 +358,13 @@ class ValidationReport:
         """Verify CSV and parquet files contain identical data."""
         results = []
         
-        # Check a sample of sensors and months
-        for sensor in ["CO2_SCT1_2M", "LGR_30M"]:
-            for month in ["09", "10", "11", "12"]:
-                csv_path = self.individual_dir / f"{sensor}_2024_{month}.csv"
-                pq_path = self.parquet_dir / f"{sensor}_2024_{month}.parquet"
+        # Check all discovered year-month combinations for key sensors
+        check_sensors = ["CO2_SCT1_2M", "LGR_30M"]
+        
+        for sensor in check_sensors:
+            for year, month in self._year_month_patterns:
+                csv_path = self.individual_dir / f"{sensor}_{year}_{month}.csv"
+                pq_path = self.parquet_dir / f"{sensor}_{year}_{month}.parquet"
                 
                 if not (csv_path.exists() and pq_path.exists()):
                     continue
@@ -318,7 +389,7 @@ class ValidationReport:
                     
                     passed = rows_match and values_match
                     result = CheckResult(
-                        name=f"csv_parquet_match:{sensor}_{month}",
+                        name=f"csv_parquet_match:{sensor}_{year}_{month}",
                         passed=passed,
                         message=f"rows: {len(csv_df)}=={len(pq_df)}, values: {values_match}",
                         details={
@@ -326,14 +397,16 @@ class ValidationReport:
                             "parquet_rows": len(pq_df),
                             "rows_match": rows_match,
                             "values_match": values_match
-                        }
+                        },
+                        severity=Severity.CRITICAL
                     )
                 except Exception as e:
                     result = CheckResult(
-                        name=f"csv_parquet_match:{sensor}_{month}",
+                        name=f"csv_parquet_match:{sensor}_{year}_{month}",
                         passed=False,
                         message=f"Error: {e}",
-                        details={"error": str(e)}
+                        details={"error": str(e)},
+                        severity=Severity.CRITICAL
                     )
                 
                 results.append(result)
@@ -400,8 +473,9 @@ class ValidationReport:
             self.checks.append(CheckResult(
                 name="merged_data",
                 passed=True,
-                message=f"{len(df)} rows, {len(df.columns)} columns",
-                details=self.merged_summary
+                message=f"{len(df):,} rows, {len(df.columns)} columns, {self.merged_summary.get('file_size_mb', 0):.1f} MB | {self.merged_summary['date_range']['start'][:10]} to {self.merged_summary['date_range']['end'][:10]}",
+                details=self.merged_summary,
+                severity=Severity.CRITICAL
             ))
             
         except Exception as e:
@@ -409,7 +483,8 @@ class ValidationReport:
                 name="merged_data",
                 passed=False,
                 message=f"Error: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
+                severity=Severity.CRITICAL
             ))
         
         return self.merged_summary
@@ -476,8 +551,9 @@ class ValidationReport:
             self.checks.append(CheckResult(
                 name="data_quality",
                 passed=True,
-                message=f"{len(gaps)} time gaps, bias={self.quality_metrics.get('scd41_2m_vs_lgr', {}).get('bias_ppm', 'N/A')} ppm",
-                details=self.quality_metrics
+                message=f"{len(gaps)} time gaps >10min, bias={self.quality_metrics.get('scd41_2m_vs_lgr', {}).get('bias_ppm', 'N/A')} ppm",
+                details=self.quality_metrics,
+                severity=Severity.INFO  # Quality metrics are informational, not pass/fail
             ))
             
         except Exception as e:
@@ -485,7 +561,8 @@ class ValidationReport:
                 name="data_quality",
                 passed=False,
                 message=f"Error: {e}",
-                details={"error": str(e)}
+                details={"error": str(e)},
+                severity=Severity.WARNING
             ))
         
         return self.quality_metrics
@@ -531,11 +608,14 @@ class ValidationReport:
     
     def print_summary(self, verbose: bool = True) -> None:
         """Print human-readable validation summary to console."""
-        sep = "=" * 70
+        sep = "=" * 76
+        subsep = "-" * 60
         
         print(f"\n{sep}")
         print("SMEAR ESTONIA CO2 DATA VALIDATION RECEIPT")
         print(f"Generated: {self.timestamp}")
+        print(f"Output directory: {self.output_dir}")
+        print(f"Year-month range detected: {self._year_month_patterns[0][0]}-{self._year_month_patterns[0][1]} to {self._year_month_patterns[-1][0]}-{self._year_month_patterns[-1][1]}" if self._year_month_patterns else "No data found")
         print(sep)
         
         # Group checks by category
@@ -558,39 +638,111 @@ class ValidationReport:
         for cat, label in cat_labels.items():
             if cat in categories:
                 print(f"\n{label}")
-                print("-" * 50)
+                print(subsep)
+                
+                # Print description
+                if cat in self.DESCRIPTIONS:
+                    desc_lines = self.DESCRIPTIONS[cat].split('. ')
+                    for line in desc_lines:
+                        if line.strip():
+                            print(f"  │ {line.strip()}.")
+                    print(f"  │")
+                
+                # Count pass/fail for this category
+                cat_passed = sum(1 for c in categories[cat] if c.passed)
+                cat_total = len(categories[cat])
+                cat_status = "✓ ALL PASSED" if cat_passed == cat_total else f"⚠ {cat_total - cat_passed} ISSUE(S)"
+                print(f"  │ Status: {cat_status} ({cat_passed}/{cat_total})")
+                print(f"  └{'─' * 50}")
+                
                 for check in categories[cat]:
                     status = "✓" if check.passed else "✗"
                     name = check.name.split(":")[-1] if ":" in check.name else check.name
-                    print(f"  {status} {name}: {check.message}")
+                    print(f"    {status} {name}: {check.message}")
         
         # Sensor summary table
         if self.sensor_summaries:
             print(f"\n7. SENSOR SUMMARY")
-            print("-" * 50)
-            print(f"  {'Sensor':<15} {'Rows':>8} {'Coverage':>10} {'Months':>8}")
-            print(f"  {'-'*15} {'-'*8} {'-'*10} {'-'*8}")
+            print(subsep)
+            print(f"  │ Overview of processed sensor data across all months.")
+            print(f"  │ Coverage = (actual rows / expected rows) assuming 10-min intervals.")
+            print(f"  └{'─' * 50}")
+            print(f"    {'Sensor':<15} {'Rows':>10} {'Coverage':>10} {'Months':>8} {'Date Range':<25}")
+            print(f"    {'-'*15} {'-'*10} {'-'*10} {'-'*8} {'-'*25}")
             for name, summary in self.sensor_summaries.items():
-                print(f"  {name:<15} {summary.total_rows:>8} {summary.coverage_pct:>9.1f}% {len(summary.parquet_files):>8}")
+                date_str = f"{summary.date_range[0][:10]} → {summary.date_range[1][:10]}"
+                print(f"    {name:<15} {summary.total_rows:>10,} {summary.coverage_pct:>9.1f}% {len(summary.parquet_files):>8} {date_str:<25}")
+        
+        # Column coverage in merged data
+        if self.merged_summary.get("column_coverage"):
+            print(f"\n    MERGED DATASET COLUMN COVERAGE:")
+            print(f"    (Percentage of rows with non-null values for key CO2 columns)")
+            for col, pct in self.merged_summary["column_coverage"].items():
+                bar_len = int(pct / 5)  # Scale to max 20 chars
+                bar = "█" * bar_len + "░" * (20 - bar_len)
+                print(f"      {col:<30} {bar} {pct:>5.1f}%")
         
         # Quality metrics highlight
         if self.quality_metrics.get("scd41_2m_vs_lgr"):
             print(f"\n8. REFERENCE COMPARISON (SCD41 2m vs LGR)")
-            print("-" * 50)
+            print(subsep)
+            print(f"  │ Comparison of low-cost SCD41 sensor at 2m against LGR reference at 30m.")
+            print(f"  │ Bias = mean(sensor - reference); positive = sensor reads high.")
+            print(f"  │ RMSE = root mean square error; MAE = mean absolute error.")
+            print(f"  │ Correlation = Pearson's r; 1.0 = perfect linear relationship.")
+            print(f"  └{'─' * 50}")
             m = self.quality_metrics["scd41_2m_vs_lgr"]
-            print(f"  n = {m['n_valid_pairs']:,} paired observations")
-            print(f"  Bias:        {m['bias_ppm']:+.1f} ppm")
-            print(f"  RMSE:        {m['rmse_ppm']:.1f} ppm")
-            print(f"  MAE:         {m['mae_ppm']:.1f} ppm")
-            print(f"  Correlation: {m['correlation']:.3f}")
+            print(f"    n = {m['n_valid_pairs']:,} paired observations")
+            print(f"    Bias:        {m['bias_ppm']:+.1f} ppm")
+            print(f"    RMSE:        {m['rmse_ppm']:.1f} ppm")
+            print(f"    MAE:         {m['mae_ppm']:.1f} ppm")
+            print(f"    Correlation: {m['correlation']:.3f}")
         
-        # Overall status
-        passed = sum(1 for c in self.checks if c.passed)
-        total = len(self.checks)
-        status = "PASSED" if passed == total else "ISSUES FOUND"
+        # 30m sensor comparisons if available
+        sensor_30m_metrics = [k for k in self.quality_metrics.keys() if k.startswith("CO2_30M")]
+        if sensor_30m_metrics:
+            print(f"\n9. 30M SENSOR COMPARISONS (vs LGR)")
+            print(subsep)
+            print(f"  │ Low-cost SCD41 sensors at 30m tower height vs LGR reference.")
+            print(f"  └{'─' * 50}")
+            print(f"    {'Sensor':<12} {'n':>8} {'Bias':>10} {'RMSE':>10} {'Corr':>8}")
+            print(f"    {'-'*12} {'-'*8} {'-'*10} {'-'*10} {'-'*8}")
+            for key in sorted(sensor_30m_metrics):
+                m = self.quality_metrics[key]
+                sensor_name = key.replace("_vs_lgr", "").replace("CO2_30M_", "30M-")
+                print(f"    {sensor_name:<12} {m['n_valid_pairs']:>8,} {m['bias_ppm']:>+9.1f} {m['rmse_ppm']:>10.1f} {m['correlation']:>8.3f}")
+        
+        # Overall status with severity breakdown
+        critical_checks = [c for c in self.checks if c.severity == Severity.CRITICAL]
+        warning_checks = [c for c in self.checks if c.severity == Severity.WARNING]
+        
+        critical_passed = sum(1 for c in critical_checks if c.passed)
+        critical_total = len(critical_checks)
+        warning_passed = sum(1 for c in warning_checks if c.passed)
+        warning_total = len(warning_checks)
+        
+        total_passed = sum(1 for c in self.checks if c.passed)
+        total_checks = len(self.checks)
+        
+        # Determine overall status
+        if critical_passed == critical_total:
+            if warning_passed == warning_total:
+                status = "✅ PASSED"
+                status_detail = "All checks passed"
+            else:
+                status = "⚠️  PASSED WITH WARNINGS"
+                status_detail = f"{warning_total - warning_passed} warning(s) to review"
+        else:
+            status = "❌ FAILED"
+            status_detail = f"{critical_total - critical_passed} critical issue(s) require attention"
         
         print(f"\n{sep}")
-        print(f"VALIDATION STATUS: {status} ({passed}/{total} checks passed)")
+        print(f"VALIDATION STATUS: {status}")
+        print(f"  {status_detail}")
+        print(f"  Critical checks: {critical_passed}/{critical_total} passed")
+        if warning_total > 0:
+            print(f"  Warning checks:  {warning_passed}/{warning_total} passed")
+        print(f"  Total checks:    {total_passed}/{total_checks} passed")
         print(sep)
     
     # =========================================================================
