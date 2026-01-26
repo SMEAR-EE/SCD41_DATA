@@ -1,13 +1,45 @@
 {
   "meta": {
-    "generated": "2026-01-26T13:34:57.420514",
-    "output_dir": "output",
+    "generated": "2026-01-26T15:38:24.017443",
+    "output_dir": "/home/mbz/Documents/PhD/SCD41_DATA/output/individual",
+    "parquet_dir": "/home/mbz/Documents/PhD/SCD41_DATA/output/individual/parquet",
+    "merged_dir": "/home/mbz/Documents/PhD/SCD41_DATA/output/merged",
     "sensors": [
       "CO2_SCT1_2M",
       "CO2_30M_A",
       "CO2_30M_B",
       "CO2_30M_C",
       "LGR_30M"
+    ],
+    "year_month_range": [
+      [
+        "2024",
+        "09"
+      ],
+      [
+        "2024",
+        "10"
+      ],
+      [
+        "2024",
+        "11"
+      ],
+      [
+        "2024",
+        "12"
+      ],
+      [
+        "2025",
+        "01"
+      ],
+      [
+        "2025",
+        "02"
+      ],
+      [
+        "2025",
+        "03"
+      ]
     ]
   },
   "checks": [
@@ -58,8 +90,8 @@
     },
     {
       "name": "file_inventory:CO2_SCT1_2M",
-      "passed": false,
-      "message": "7 CSVs, 4 parquets [MISMATCH]",
+      "passed": true,
+      "message": "7 CSVs, 7 parquets",
       "details": {
         "csv_months": [
           "2024-09",
@@ -74,16 +106,19 @@
           "2024-09",
           "2024-10",
           "2024-11",
-          "2024-12"
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
-        "csv_parquet_match": false
+        "csv_parquet_match": true
       },
       "severity": "critical"
     },
     {
       "name": "file_inventory:CO2_30M_A",
-      "passed": false,
-      "message": "6 CSVs, 3 parquets [MISMATCH]",
+      "passed": true,
+      "message": "6 CSVs, 6 parquets",
       "details": {
         "csv_months": [
           "2024-09",
@@ -96,16 +131,19 @@
         "parquet_months": [
           "2024-09",
           "2024-10",
-          "2024-11"
+          "2024-11",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
-        "csv_parquet_match": false
+        "csv_parquet_match": true
       },
       "severity": "critical"
     },
     {
       "name": "file_inventory:CO2_30M_B",
-      "passed": false,
-      "message": "7 CSVs, 4 parquets [MISMATCH]",
+      "passed": true,
+      "message": "7 CSVs, 7 parquets",
       "details": {
         "csv_months": [
           "2024-09",
@@ -120,16 +158,19 @@
           "2024-09",
           "2024-10",
           "2024-11",
-          "2024-12"
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
-        "csv_parquet_match": false
+        "csv_parquet_match": true
       },
       "severity": "critical"
     },
     {
       "name": "file_inventory:CO2_30M_C",
-      "passed": false,
-      "message": "6 CSVs, 3 parquets [MISMATCH]",
+      "passed": true,
+      "message": "6 CSVs, 6 parquets",
       "details": {
         "csv_months": [
           "2024-10",
@@ -142,16 +183,19 @@
         "parquet_months": [
           "2024-10",
           "2024-11",
-          "2024-12"
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
-        "csv_parquet_match": false
+        "csv_parquet_match": true
       },
       "severity": "critical"
     },
     {
       "name": "file_inventory:LGR_30M",
-      "passed": false,
-      "message": "7 CSVs, 4 parquets [MISMATCH]",
+      "passed": true,
+      "message": "7 CSVs, 7 parquets",
       "details": {
         "csv_months": [
           "2024-09",
@@ -166,9 +210,12 @@
           "2024-09",
           "2024-10",
           "2024-11",
-          "2024-12"
+          "2024-12",
+          "2025-01",
+          "2025-02",
+          "2025-03"
         ],
-        "csv_parquet_match": false
+        "csv_parquet_match": true
       },
       "severity": "critical"
     },
@@ -210,6 +257,51 @@
         "rows": 2654,
         "columns": 13,
         "size_kb": 161.9,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_A_2025_01.parquet",
+      "passed": true,
+      "message": "2653 rows, 155.3KB, SNAPPY",
+      "details": {
+        "rows": 2653,
+        "columns": 13,
+        "size_kb": 155.3,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_A_2025_02.parquet",
+      "passed": true,
+      "message": "931 rows, 64.0KB, SNAPPY",
+      "details": {
+        "rows": 931,
+        "columns": 13,
+        "size_kb": 64.0,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_A_2025_03.parquet",
+      "passed": true,
+      "message": "2925 rows, 194.7KB, SNAPPY",
+      "details": {
+        "rows": 2925,
+        "columns": 13,
+        "size_kb": 194.7,
         "compression": "SNAPPY",
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
@@ -278,6 +370,51 @@
       "severity": "critical"
     },
     {
+      "name": "parquet:CO2_30M_B_2025_01.parquet",
+      "passed": true,
+      "message": "2653 rows, 139.7KB, SNAPPY",
+      "details": {
+        "rows": 2653,
+        "columns": 13,
+        "size_kb": 139.7,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_B_2025_02.parquet",
+      "passed": true,
+      "message": "931 rows, 60.4KB, SNAPPY",
+      "details": {
+        "rows": 931,
+        "columns": 13,
+        "size_kb": 60.4,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_B_2025_03.parquet",
+      "passed": true,
+      "message": "1665 rows, 112.8KB, SNAPPY",
+      "details": {
+        "rows": 1665,
+        "columns": 13,
+        "size_kb": 112.8,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
       "name": "parquet:CO2_30M_C_2024_10.parquet",
       "passed": true,
       "message": "4203 rows, 246.0KB, SNAPPY",
@@ -315,6 +452,51 @@
         "rows": 4433,
         "columns": 13,
         "size_kb": 234.9,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_C_2025_01.parquet",
+      "passed": true,
+      "message": "2060 rows, 103.1KB, SNAPPY",
+      "details": {
+        "rows": 2060,
+        "columns": 13,
+        "size_kb": 103.1,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_C_2025_02.parquet",
+      "passed": true,
+      "message": "3696 rows, 215.7KB, SNAPPY",
+      "details": {
+        "rows": 3696,
+        "columns": 13,
+        "size_kb": 215.7,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_30M_C_2025_03.parquet",
+      "passed": true,
+      "message": "3061 rows, 192.9KB, SNAPPY",
+      "details": {
+        "rows": 3061,
+        "columns": 13,
+        "size_kb": 192.9,
         "compression": "SNAPPY",
         "has_timestamp": true,
         "timestamp_dtype_ok": true,
@@ -383,6 +565,51 @@
       "severity": "critical"
     },
     {
+      "name": "parquet:CO2_SCT1_2M_2025_01.parquet",
+      "passed": true,
+      "message": "4193 rows, 286.5KB, SNAPPY",
+      "details": {
+        "rows": 4193,
+        "columns": 13,
+        "size_kb": 286.5,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_SCT1_2M_2025_02.parquet",
+      "passed": true,
+      "message": "4032 rows, 273.9KB, SNAPPY",
+      "details": {
+        "rows": 4032,
+        "columns": 13,
+        "size_kb": 273.9,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:CO2_SCT1_2M_2025_03.parquet",
+      "passed": true,
+      "message": "4464 rows, 305.1KB, SNAPPY",
+      "details": {
+        "rows": 4464,
+        "columns": 13,
+        "size_kb": 305.1,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
       "name": "parquet:LGR_30M_2024_09.parquet",
       "passed": true,
       "message": "4320 rows, 1231.3KB, SNAPPY",
@@ -443,6 +670,51 @@
       "severity": "critical"
     },
     {
+      "name": "parquet:LGR_30M_2025_01.parquet",
+      "passed": true,
+      "message": "4192 rows, 1221.8KB, SNAPPY",
+      "details": {
+        "rows": 4192,
+        "columns": 49,
+        "size_kb": 1221.8,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:LGR_30M_2025_02.parquet",
+      "passed": true,
+      "message": "3590 rows, 1030.9KB, SNAPPY",
+      "details": {
+        "rows": 3590,
+        "columns": 49,
+        "size_kb": 1030.9,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "parquet:LGR_30M_2025_03.parquet",
+      "passed": true,
+      "message": "4464 rows, 1273.8KB, SNAPPY",
+      "details": {
+        "rows": 4464,
+        "columns": 49,
+        "size_kb": 1273.8,
+        "compression": "SNAPPY",
+        "has_timestamp": true,
+        "timestamp_dtype_ok": true,
+        "empty_columns": []
+      },
+      "severity": "critical"
+    },
+    {
       "name": "csv_parquet_match:CO2_SCT1_2M_2024_09",
       "passed": true,
       "message": "rows: 2449==2449, values: True",
@@ -491,6 +763,42 @@
       "severity": "critical"
     },
     {
+      "name": "csv_parquet_match:CO2_SCT1_2M_2025_01",
+      "passed": true,
+      "message": "rows: 4193==4193, values: True",
+      "details": {
+        "csv_rows": 4193,
+        "parquet_rows": 4193,
+        "rows_match": true,
+        "values_match": true
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "csv_parquet_match:CO2_SCT1_2M_2025_02",
+      "passed": true,
+      "message": "rows: 4032==4032, values: True",
+      "details": {
+        "csv_rows": 4032,
+        "parquet_rows": 4032,
+        "rows_match": true,
+        "values_match": true
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "csv_parquet_match:CO2_SCT1_2M_2025_03",
+      "passed": true,
+      "message": "rows: 4464==4464, values: True",
+      "details": {
+        "csv_rows": 4464,
+        "parquet_rows": 4464,
+        "rows_match": true,
+        "values_match": true
+      },
+      "severity": "critical"
+    },
+    {
       "name": "csv_parquet_match:LGR_30M_2024_09",
       "passed": true,
       "message": "rows: 4320==4320, values: True",
@@ -528,6 +836,42 @@
     },
     {
       "name": "csv_parquet_match:LGR_30M_2024_12",
+      "passed": true,
+      "message": "rows: 4464==4464, values: True",
+      "details": {
+        "csv_rows": 4464,
+        "parquet_rows": 4464,
+        "rows_match": true,
+        "values_match": true
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "csv_parquet_match:LGR_30M_2025_01",
+      "passed": true,
+      "message": "rows: 4192==4192, values: True",
+      "details": {
+        "csv_rows": 4192,
+        "parquet_rows": 4192,
+        "rows_match": true,
+        "values_match": true
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "csv_parquet_match:LGR_30M_2025_02",
+      "passed": true,
+      "message": "rows: 3590==3590, values: True",
+      "details": {
+        "csv_rows": 3590,
+        "parquet_rows": 3590,
+        "rows_match": true,
+        "values_match": true
+      },
+      "severity": "critical"
+    },
+    {
+      "name": "csv_parquet_match:LGR_30M_2025_03",
       "passed": true,
       "message": "rows: 4464==4464, values: True",
       "details": {
@@ -603,90 +947,105 @@
   "sensor_summaries": {
     "CO2_SCT1_2M": {
       "name": "CO2_SCT1_2M",
-      "total_rows": 15282,
+      "total_rows": 27971,
       "date_range": [
         "2024-09-12 12:20:00",
-        "2024-12-31 23:10:00"
+        "2025-03-31 23:50:00"
       ],
-      "coverage_pct": 96.08,
+      "coverage_pct": 96.89,
       "monthly_csv_count": 7,
-      "parquet_count": 4,
+      "parquet_count": 7,
       "column_count": 13,
       "file_sizes_kb": {
         "CO2_SCT1_2M_2024_09.parquet": 166.2,
         "CO2_SCT1_2M_2024_10.parquet": 282.2,
         "CO2_SCT1_2M_2024_11.parquet": 283.6,
-        "CO2_SCT1_2M_2024_12.parquet": 293.0
+        "CO2_SCT1_2M_2024_12.parquet": 293.0,
+        "CO2_SCT1_2M_2025_01.parquet": 286.5,
+        "CO2_SCT1_2M_2025_02.parquet": 273.9,
+        "CO2_SCT1_2M_2025_03.parquet": 305.1
       }
     },
     "CO2_30M_A": {
       "name": "CO2_30M_A",
-      "total_rows": 5039,
+      "total_rows": 11548,
       "date_range": [
         "2024-09-19 11:10:00",
-        "2024-11-29 23:50:00"
+        "2025-03-30 23:50:00"
       ],
-      "coverage_pct": 48.92,
+      "coverage_pct": 41.65,
       "monthly_csv_count": 6,
-      "parquet_count": 3,
+      "parquet_count": 6,
       "column_count": 13,
       "file_sizes_kb": {
         "CO2_30M_A_2024_09.parquet": 18.4,
         "CO2_30M_A_2024_10.parquet": 140.3,
-        "CO2_30M_A_2024_11.parquet": 161.9
+        "CO2_30M_A_2024_11.parquet": 161.9,
+        "CO2_30M_A_2025_01.parquet": 155.3,
+        "CO2_30M_A_2025_02.parquet": 64.0,
+        "CO2_30M_A_2025_03.parquet": 194.7
       }
     },
     "CO2_30M_B": {
       "name": "CO2_30M_B",
-      "total_rows": 5817,
+      "total_rows": 11066,
       "date_range": [
         "2024-09-19 11:10:00",
-        "2024-12-10 23:50:00"
+        "2025-03-21 23:50:00"
       ],
-      "coverage_pct": 48.94,
+      "coverage_pct": 41.87,
       "monthly_csv_count": 7,
-      "parquet_count": 4,
+      "parquet_count": 7,
       "column_count": 13,
       "file_sizes_kb": {
         "CO2_30M_B_2024_09.parquet": 29.8,
         "CO2_30M_B_2024_10.parquet": 75.4,
         "CO2_30M_B_2024_11.parquet": 158.6,
-        "CO2_30M_B_2024_12.parquet": 86.9
+        "CO2_30M_B_2024_12.parquet": 86.9,
+        "CO2_30M_B_2025_01.parquet": 139.7,
+        "CO2_30M_B_2025_02.parquet": 60.4,
+        "CO2_30M_B_2025_03.parquet": 112.8
       }
     },
     "CO2_30M_C": {
       "name": "CO2_30M_C",
-      "total_rows": 12916,
+      "total_rows": 21733,
       "date_range": [
         "2024-10-02 09:30:00",
-        "2024-12-31 23:40:00"
+        "2025-03-31 23:10:00"
       ],
-      "coverage_pct": 99.0,
+      "coverage_pct": 83.58,
       "monthly_csv_count": 6,
-      "parquet_count": 3,
+      "parquet_count": 6,
       "column_count": 13,
       "file_sizes_kb": {
         "CO2_30M_C_2024_10.parquet": 246.0,
         "CO2_30M_C_2024_11.parquet": 233.8,
-        "CO2_30M_C_2024_12.parquet": 234.9
+        "CO2_30M_C_2024_12.parquet": 234.9,
+        "CO2_30M_C_2025_01.parquet": 103.1,
+        "CO2_30M_C_2025_02.parquet": 215.7,
+        "CO2_30M_C_2025_03.parquet": 192.9
       }
     },
     "LGR_30M": {
       "name": "LGR_30M",
-      "total_rows": 17568,
+      "total_rows": 29814,
       "date_range": [
         "2024-09-01 00:00:00",
-        "2024-12-31 23:50:00"
+        "2025-03-31 23:50:00"
       ],
-      "coverage_pct": 100.0,
+      "coverage_pct": 97.66,
       "monthly_csv_count": 7,
-      "parquet_count": 4,
+      "parquet_count": 7,
       "column_count": 49,
       "file_sizes_kb": {
         "LGR_30M_2024_09.parquet": 1231.3,
         "LGR_30M_2024_10.parquet": 1292.4,
         "LGR_30M_2024_11.parquet": 1244.1,
-        "LGR_30M_2024_12.parquet": 1297.5
+        "LGR_30M_2024_12.parquet": 1297.5,
+        "LGR_30M_2025_01.parquet": 1221.8,
+        "LGR_30M_2025_02.parquet": 1030.9,
+        "LGR_30M_2025_03.parquet": 1273.8
       }
     }
   },
