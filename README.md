@@ -63,7 +63,6 @@ sensors:
 - **Output Schema**: [`OUTPUT_SCHEMA.md`](OUTPUT_SCHEMA.md) - Detailed column definitions and data formats
 - **Application Summary**: [`APPLICATION_SUMMARY.md`](APPLICATION_SUMMARY.md) - Overview of features and research context
 - **Data Merging**: [`MERGING.md`](MERGING.md) - Information on how sensor data is merged
-- **Changelog**: [`CHANGELOG.md`](CHANGELOG.md) - Version history and release notes
 - **Visualization**: [`src/visualization/README.md`](src/visualization/README.md) - Plotting module documentation
 - **Validation**: [`src/validation/VALIDATION_README.md`](src/validation/VALIDATION_README.md) - Data validation documentation
 - **Examples**: [`process_data.ipynb`](process_data.ipynb) - Jupyter notebook with usage patterns
