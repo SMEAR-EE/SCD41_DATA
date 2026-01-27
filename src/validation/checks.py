@@ -32,7 +32,8 @@ def discover_year_months(cfg) -> list[tuple[str, str]]:
         cfg: PipelineConfig object containing sensors_dir path
     
     Returns:
-        Sorted list of (year, month) tuples as strings, e.g., [('2024', '09'), ('2024', '10')]
+        Sorted list of (year, month) tuples with years and months as strings,
+        e.g., [('2024', '09'), ('2024', '10')]
     """
     year_months = set()
     pattern = re.compile(r'_(\d{4})_(\d{2})\.(?:parquet|csv)$')

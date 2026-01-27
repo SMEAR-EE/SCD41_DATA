@@ -528,8 +528,8 @@ config = PipelineConfig.from_yaml('sensors.yaml')  # Builds entire config
 Multiple sensors sample at different times:
 
 ```
-SCD41_A: 12:00:37, 12:01:41, 12:02:39, ...  (~ 60s intervals)
-SCD41_B: 12:00:12, 12:01:15, 12:02:18, ...  (~ 63s intervals)
+SCD41_A: 12:00:37, 12:01:41, 12:02:39, ...  (irregular ~60s intervals)
+SCD41_B: 12:00:12, 12:01:15, 12:02:18, ...  (irregular ~63s intervals)
 LGR:     12:00:00, 12:01:00, 12:02:00, ...  (exact 60s intervals)
 ```
 

@@ -388,7 +388,7 @@ timestamp,co2_sct1_2m_co2_mean,co2_30m_a_co2_mean,co2_30m_b_co2_mean,lgr_30m_CO2
 2024-09-01 12:10:00,419.2,,427.3,431.2,427.3
 ```
 
-**Note:** Empty cells (` ` in row 2, col 3) represent NaN - sensor had no data at that timestamp.
+**Note:** Empty cells (second row, third column) represent NaN - sensor had no data at that timestamp.
 
 ---
 
