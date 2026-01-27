@@ -25,12 +25,19 @@ class UptimePlots(BasePlotter):
         save: bool = True
     ) -> plt.Figure:
         """
-        Plot daily uptime percentage over time
+        Plot daily uptime percentage over time.
+        
+        Creates a line plot showing uptime percentage for each day, with markers
+        highlighting days below 95% threshold. Useful for identifying sensor
+        downtime periods and maintenance needs.
         
         Args:
-            uptime_csv: Path to uptime log CSV
-            sensor_name: Sensor name for title
-            save: If True, save to output_dir
+            uptime_csv: Path to uptime log CSV file (e.g., CO2_30M_A_uptime.csv)
+            sensor_name: Sensor name for plot title and filename
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object containing the plot
         """
         df = pd.read_csv(uptime_csv)
         
@@ -85,12 +92,19 @@ class UptimePlots(BasePlotter):
         save: bool = True
     ) -> plt.Figure:
         """
-        Plot uptime as monthly heatmap
+        Plot uptime as monthly heatmap (calendar view).
+        
+        Creates a heatmap showing uptime ratio for each day of each month.
+        Colors range from red (low uptime) to green (high uptime). Useful
+        for visualizing seasonal patterns and identifying problem periods.
         
         Args:
-            uptime_csv: Path to uptime log CSV
-            sensor_name: Sensor name for title
-            save: If True, save to output_dir
+            uptime_csv: Path to uptime log CSV file
+            sensor_name: Sensor name for plot title and filename
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object containing the heatmap
         """
         df = pd.read_csv(uptime_csv)
         
@@ -134,11 +148,19 @@ class UptimePlots(BasePlotter):
         save: bool = True
     ) -> plt.Figure:
         """
-        Multi-sensor uptime comparison
+        Multi-sensor uptime comparison.
+        
+        Creates a two-panel plot comparing uptime statistics across sensors:
+        - Left panel: Mean uptime percentage per sensor
+        - Right panel: Number of days below 95% threshold per sensor
         
         Args:
-            uptime_csvs: Dict of {sensor_name: uptime_csv_path}
-            save: If True, save to output_dir
+            uptime_csvs: Dict mapping sensor names to uptime CSV paths
+                         Example: {'CO2_30M_A': Path('CO2_30M_A_uptime.csv'), ...}
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object with two subplots
         """
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
         

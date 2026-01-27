@@ -25,7 +25,14 @@ def discover_year_months(cfg) -> list[tuple[str, str]]:
     """
     Discover all year-month combinations from existing files.
     
-    Scans all per-sensor directories for monthly files.
+    Scans all per-sensor directories for monthly files (both CSV and Parquet)
+    and extracts unique year-month combinations from filenames.
+    
+    Args:
+        cfg: PipelineConfig object containing sensors_dir path
+    
+    Returns:
+        Sorted list of (year, month) tuples as strings, e.g., [('2024', '09'), ('2024', '10')]
     """
     year_months = set()
     pattern = re.compile(r'_(\d{4})_(\d{2})\.(?:parquet|csv)$')
@@ -57,7 +64,22 @@ def discover_year_months(cfg) -> list[tuple[str, str]]:
 
 
 def check_column_names(cfg) -> list[CheckResult]:
-    """Verify no lambda artifacts in column names across all sensors."""
+    """
+    Verify no lambda artifacts in column names across all sensors.
+    
+    Checks all sensor 10min CSV files for column names containing '<lambda>',
+    which indicates a pandas aggregation bug where anonymous functions were
+    used without proper naming.
+    
+    Args:
+        cfg: PipelineConfig object containing sensors_dir path
+    
+    Returns:
+        List of CheckResult objects, one per sensor CSV file checked
+        
+    Raises:
+        None (errors are captured in CheckResult objects)
+    """
     results = []
     sensors_dir = Path(cfg.sensors_dir)
     
@@ -106,7 +128,24 @@ def check_column_names(cfg) -> list[CheckResult]:
 
 
 def check_file_inventory(cfg, sensor_names: list[str]) -> tuple[list[CheckResult], dict[str, SensorSummary]]:
-    """Inventory all CSV and parquet files per sensor."""
+    """
+    Inventory all CSV and parquet files per sensor.
+    
+    For each sensor, counts monthly CSV and Parquet files, verifies they match,
+    and computes statistics including total rows, date range, and data coverage.
+    
+    Args:
+        cfg: PipelineConfig object containing directory paths
+        sensor_names: List of sensor names to check (e.g., ['CO2_SCT1_2M', 'LGR_30M'])
+    
+    Returns:
+        Tuple of (check_results, sensor_summaries):
+            - check_results: List of CheckResult objects for CSV/Parquet match validation
+            - sensor_summaries: Dict mapping sensor names to SensorSummary objects
+            
+    Raises:
+        None (errors are captured in CheckResult objects)
+    """
     results = []
     summaries = {}
     
@@ -188,7 +227,25 @@ def check_file_inventory(cfg, sensor_names: list[str]) -> tuple[list[CheckResult
 
 
 def check_parquet_integrity(cfg) -> list[CheckResult]:
-    """Validate parquet file integrity, schema, and compression across all sensors."""
+    """
+    Validate parquet file integrity, schema, and compression across all sensors.
+    
+    Checks each Parquet file for:
+    - Presence of 'timestamp' column
+    - Correct datetime dtype for timestamp
+    - Compression format (expects SNAPPY)
+    - Empty/all-NaN columns
+    - File readability
+    
+    Args:
+        cfg: PipelineConfig object containing sensors_dir path
+    
+    Returns:
+        List of CheckResult objects, one per Parquet file checked
+        
+    Raises:
+        None (errors are captured in CheckResult objects)
+    """
     results = []
     sensors_dir = Path(cfg.sensors_dir)
     
@@ -267,7 +324,26 @@ def check_csv_parquet_consistency(
     cfg, 
     year_months: list[tuple[str, str]]
 ) -> list[CheckResult]:
-    """Verify CSV and parquet files contain identical data."""
+    """
+    Verify CSV and parquet files contain identical data.
+    
+    Compares monthly CSV and Parquet files for key sensors to ensure:
+    - Row counts match
+    - Numeric values match (within floating-point tolerance)
+    
+    Only checks representative sensors (CO2_SCT1_2M, LGR_30M) to avoid
+    redundant validation across all sensors.
+    
+    Args:
+        cfg: PipelineConfig object containing directory paths
+        year_months: List of (year, month) tuples to check, e.g., [('2024', '09')]
+    
+    Returns:
+        List of CheckResult objects for each sensor-month combination checked
+        
+    Raises:
+        None (errors are captured in CheckResult objects)
+    """
     results = []
     
     # Check key sensors only
@@ -331,7 +407,27 @@ def check_csv_parquet_consistency(
 
 
 def check_merged_data(cfg) -> tuple[CheckResult, dict]:
-    """Validate the merged dataset."""
+    """
+    Validate the merged dataset.
+    
+    Checks the main merged CSV file (SMEAR_EE_CO2_merged.csv) for:
+    - File existence and readability
+    - Total rows and columns
+    - Date range coverage
+    - Consistency with monthly Parquet files
+    - Column coverage statistics for key sensors
+    
+    Args:
+        cfg: PipelineConfig object containing merged_dir path
+    
+    Returns:
+        Tuple of (check_result, merged_summary):
+            - check_result: CheckResult object for merged data validation
+            - merged_summary: Dict with statistics (rows, columns, date_range, coverage, etc.)
+            
+    Raises:
+        None (errors are captured in CheckResult)
+    """
     merged_dirs = cfg.get_merged_dirs()
     merged_csv = merged_dirs['csv'] / "SMEAR_EE_CO2_merged.csv"
     merged_summary = {}
@@ -403,7 +499,32 @@ def check_merged_data(cfg) -> tuple[CheckResult, dict]:
 
 
 def compute_quality_metrics(cfg) -> tuple[CheckResult, dict]:
-    """Compute data quality metrics including sensor comparison."""
+    """
+    Compute data quality metrics including sensor comparison.
+    
+    Analyzes the merged dataset to compute:
+    - Time continuity (gaps > 10 minutes)
+    - Sensor validation statistics (bias, RMSE, correlation, MAE)
+    - Comparison of SCD41 sensors against LGR reference
+    
+    Validation metrics computed:
+    - n_valid_pairs: Number of timestamps with data from both sensors
+    - bias_ppm: Mean difference (sensor - reference)
+    - rmse_ppm: Root mean squared error
+    - correlation: Pearson correlation coefficient
+    - mae_ppm: Mean absolute error
+    
+    Args:
+        cfg: PipelineConfig object containing merged_dir path
+    
+    Returns:
+        Tuple of (check_result, quality_metrics):
+            - check_result: CheckResult object summarizing quality
+            - quality_metrics: Dict with detailed statistics for each sensor comparison
+            
+    Raises:
+        None (errors are captured in CheckResult)
+    """
     merged_dirs = cfg.get_merged_dirs()
     merged_csv = merged_dirs['csv'] / "SMEAR_EE_CO2_merged.csv"
     quality_metrics = {}
@@ -483,7 +604,25 @@ def compute_quality_metrics(cfg) -> tuple[CheckResult, dict]:
 
 
 def compute_checksums(cfg, include_all: bool = False) -> dict[str, str]:
-    """Compute SHA256 checksums for key output files."""
+    """
+    Compute SHA256 checksums for key output files.
+    
+    Generates cryptographic checksums for data integrity verification and
+    reproducibility tracking. Always computes checksum for merged CSV.
+    Optionally includes all sensor Parquet files.
+    
+    Args:
+        cfg: PipelineConfig object containing directory paths
+        include_all: If True, compute checksums for all sensor Parquet files
+                     (default: False, only merged CSV)
+    
+    Returns:
+        Dict mapping file paths to SHA256 hex digest strings
+        Example: {'SMEAR_EE_CO2_merged.csv': 'abc123...', ...}
+        
+    Raises:
+        IOError: If files cannot be read (not caught internally)
+    """
     checksums = {}
     
     def sha256(filepath: Path) -> str:
@@ -518,12 +657,25 @@ def check_verification(cfg) -> list[CheckResult]:
     """
     Run verification checks on processed data.
     
-    Verifies:
-    - Timestamp continuity within each sensor
-    - No duplicate timestamps
-    - Data values within expected ranges
+    Performs comprehensive data integrity checks on each sensor's main CSV file:
+    - Timestamp parsing validity (no unparseable timestamps)
+    - No duplicate timestamps (data corruption check)
+    - Timestamp continuity (gaps > 10 minutes are logged but expected)
+    - No all-NaN data columns
     
-    Returns list of CheckResult objects.
+    Note: Time gaps are expected in real-world sensor data due to downtime,
+    so they generate warnings rather than critical failures.
+    
+    Args:
+        cfg: PipelineConfig object containing sensors_dir path
+    
+    Returns:
+        List of CheckResult objects, one per sensor checked. Each result
+        includes details about rows, invalid timestamps, duplicates, gaps,
+        and empty columns.
+        
+    Raises:
+        None (errors are captured in CheckResult objects)
     """
     results = []
     sensors_dir = Path(cfg.sensors_dir)
