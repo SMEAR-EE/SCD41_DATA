@@ -349,21 +349,87 @@ def verify_pipeline_invariants(input_df, output_df, config):
 
 ---
 
-## 7. Next Steps
+## 7. Verification vs Validation: Conceptual Distinction
+
+These terms are often conflated but serve different purposes:
+
+| Aspect | Validation (current) | Verification (proposed) |
+|--------|----------------------|-------------------------|
+| **Core question** | "Is the data good?" | "Is the code correct?" |
+| **Target** | Output data properties | Processing logic |
+| **Checks** | Schema, completeness, quality metrics | Transformation correctness |
+| **Detects** | Data quality issues | Implementation bugs |
+| **Example** | "No duplicate timestamps exist" | "Resampling computes means correctly" |
+| **Analogy** | Inspecting the finished product | Testing the factory machinery |
+
+**Relationship:** Validation confirms outputs *look right*. Verification confirms the pipeline *did the right thing* to produce them. They are complementary — validation can pass while verification fails (e.g., a bug that produces plausible but incorrect values).
+
+**Recommendation:** Integrate verification checks into the existing validation receipt rather than creating a separate system. This provides a unified quality assurance output.
+
+---
+
+## 8. Implementation Priority: Effort vs Trust Analysis
+
+| Method | Implementation Effort | Trust Gain | Current Scope? | Rationale |
+|--------|----------------------|------------|----------------|-----------|
+| **Invariants** | ~50 lines | Moderate | ✓ Yes | Cheap insurance; catches regressions |
+| **Round-trip** | ~30 lines | Low | ✓ Yes | Verifies parser/serialisation fidelity |
+| **Statistical sanity** | ~40 lines | Low | Optional | Quick anomaly detection |
+| **Synthetic (basic)** | ~200 lines | High | ✗ Later | Requires ground truth design |
+| **Synthetic (full)** | ~500+ lines | Very High | ✗ SW paper | Framework-level effort |
+| **Metamorphic** | ~150 lines | High | ✗ Later | Requires MR identification |
+
+### 8.1 Recommended Implementation Path
+
+**Phase 1: Current dataset paper (minimal effort, immediate value)**
+- Add invariant checks to existing validation module (~50 lines)
+- Add round-trip verification for parsers (~30 lines)
+- Extend validation receipt with "Verification Checks" section
+- Total: ~80 lines of new code
+
+**Phase 2: If pursuing software engineering paper**
+- Design synthetic CO2 time-series generators
+- Implement 5-10 metamorphic relations for resampling
+- Build modular verification framework
+- Evaluate against mutation-tested pipeline versions
+
+### 8.2 Proposed Validation Receipt Extension
+
+The existing receipt structure remains unchanged. A new section is added:
+
+```markdown
+## Verification Checks
+
+| Check | Status | Detail |
+|-------|:------:|--------|
+| no_data_creation | ✓ | Output rows ≤ input rows |
+| unique_timestamps | ✓ | No duplicates in merged index |
+| timestamp_range_preserved | ✓ | 2024-09-01 to 2025-09-30 |
+| schema_integrity | ✓ | Expected columns present |
+| csv_parquet_equivalence | ✓ | Formats match (56,654 rows each) |
+| parser_roundtrip:SCD41 | ✓ | JSON→DataFrame→CSV→DataFrame identical |
+| parser_roundtrip:LGR | ✓ | CSV→DataFrame→CSV→DataFrame identical |
+```
+
+This provides a defensible methodology statement:
+
+> "Pipeline outputs were verified through automated invariant checking (conservation, integrity, consistency) and round-trip tests confirming parser/serialisation fidelity."
+
+---
+
+## 9. Next Steps
 
 ### Immediate (for current dataset paper)
-- [ ] Add brief methodology statement about manual verification
-- [ ] Implement ~20 lines of invariant assertions in pipeline
+- [x] Document verification methods and literature (this report)
+- [ ] Implement invariant + round-trip checks in `src/validation/`
+- [ ] Extend receipt template with verification section
+- [ ] Add methodology statement to paper
 
-### Short-term (if pursuing verification paper)
+### Deferred (software engineering paper)
 - [ ] Scope synthetic data generators for CO2 time-series
-- [ ] Define 5-10 metamorphic relations for resampling
-- [ ] Implement minimal verification module
-- [ ] Test against known-buggy pipeline versions (mutation testing)
-
-### Medium-term
-- [ ] Full framework implementation
-- [ ] Documentation and examples
+- [ ] Define metamorphic relations for resampling operations
+- [ ] Implement full verification framework
+- [ ] Mutation testing evaluation
 - [ ] JOSS submission
 
 ---
