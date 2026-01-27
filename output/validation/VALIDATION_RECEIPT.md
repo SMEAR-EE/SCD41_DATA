@@ -1,6 +1,6 @@
 # SMEAR Estonia CO2 Data Validation Receipt
 
-**Generated:** 2026-01-27T14:12:22.292377
+**Generated:** 2026-01-27T18:21:13.239675
 **Sensors Directory:** `/home/mbz/Documents/PhD/SCD41_DATA/output/sensors`
 **Merged Directory:** `/home/mbz/Documents/PhD/SCD41_DATA/output/merged`
 **Year-Month Range:** 2024-09 to 2025-09
