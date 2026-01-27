@@ -205,7 +205,7 @@ def export_json(report, filepath: str | Path) -> Path:
     with open(filepath, 'w') as f:
         json.dump(report.to_dict(), f, indent=2, default=str)
     
-    print(f"JSON report exported: {filepath}")
+    # print(f"JSON report exported: {filepath}")
     return filepath
 
 
@@ -257,5 +257,5 @@ def export_markdown(report, filepath: str | Path) -> Path:
     with open(filepath, 'w') as f:
         f.write(content)
     
-    print(f"Markdown report exported: {filepath}")
+    # print(f"Markdown report exported: {filepath}")
     return filepath
