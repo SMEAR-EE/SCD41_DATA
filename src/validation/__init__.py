@@ -22,7 +22,9 @@ from pathlib import Path
 
 from .models import Severity, CheckResult, SensorSummary
 from .report import ValidationReport
+import logging
 
+logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = "config/sensors.yaml"
 
@@ -61,15 +63,21 @@ def validate_outputs(
     """
     report = ValidationReport(config_path)
     report.run_all()
-    
+
     if verbose:
         report.print_summary()
     
     if export_json:
         report.export_json()
+        json_path = report.cfg.validation_dir / "validation_report.json"
+        report.export_json(json_path)
+        logger.info("  JSON report: %s", json_path)
     
     if export_markdown:
         report.export_markdown()
+        md_path = report.cfg.validation_dir / "VALIDATION_RECEIPT.md"
+        report.export_markdown(md_path)
+        logger.info("  Markdown receipt: %s", md_path)
     
     return report
 
