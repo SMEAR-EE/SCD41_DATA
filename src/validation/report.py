@@ -151,13 +151,17 @@ class ValidationReport:
     def export_json(self, filepath: str | Path | None = None) -> Path:
         """Export report as JSON."""
         from .output import export_json
+        # if filepath is None:
+        #     filepath = self.cfg.sensors_dir.parent / "validation_report.json"
         if filepath is None:
-            filepath = self.cfg.sensors_dir.parent / "validation_report.json"
+            filepath = self.cfg.validation_dir / "validation_report.json"
         return export_json(self, filepath)
     
     def export_markdown(self, filepath: str | Path | None = None) -> Path:
         """Export report as Markdown using Jinja2 template."""
         from .output import export_markdown
+        # if filepath is None:
+        #     filepath = self.cfg.sensors_dir.parent / "VALIDATION_RECEIPT.md"
         if filepath is None:
-            filepath = self.cfg.sensors_dir.parent / "VALIDATION_RECEIPT.md"
+            filepath = self.cfg.validation_dir / "VALIDATION_RECEIPT.md"
         return export_markdown(self, filepath)

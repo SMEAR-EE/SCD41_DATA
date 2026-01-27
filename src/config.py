@@ -59,9 +59,10 @@ class PipelineConfig:
     excluded_sensor_ids: List[str] = field(default_factory=list)
 
     # Base directories (new structure)
-    sensors_dir: Path = Path("output/sensors")   # Per-sensor outputs
-    merged_dir: Path = Path("output/merged")     # Merged outputs
-    log_dir: Path = Path("output/logs")          # Processing logs
+    sensors_dir: Path = Path("output/sensors")          # Per-sensor outputs
+    merged_dir: Path = Path("output/merged")            # Merged outputs
+    log_dir: Path = Path("output/logs")                 # Processing logs
+    validation_dir: Path = Path("output/validation")    # Validation outputs
 
     # Legacy compatibility properties (deprecated - use get_sensor_output_paths)
     @property
@@ -92,7 +93,8 @@ class PipelineConfig:
             excluded_sensor_ids=data.get('excluded_sensor_ids', []),
             sensors_dir=Path(data.get('sensors_dir', data.get('output_dir', 'output/sensors'))),
             merged_dir=Path(data.get('merged_dir', 'output/merged')),
-            log_dir=Path(data.get('log_dir', 'output/logs'))
+            log_dir=Path(data.get('log_dir', 'output/logs')),
+            validation_dir=Path(data.get("validation_dir", "output/validation"))
         )
 
     def resolve_path(self, p: Path) -> Path:
@@ -105,6 +107,7 @@ class PipelineConfig:
         # Resolve base paths
         self.sensors_dir = self.resolve_path(self.sensors_dir)
         self.merged_dir = self.resolve_path(self.merged_dir)
+        self.validation_dir = self.resolve_path(self.validation_dir)
         self.log_dir = self.resolve_path(self.log_dir)
 
         # Create base directories
@@ -114,6 +117,9 @@ class PipelineConfig:
         # Create merged subdirectories
         (self.merged_dir / "csv").mkdir(parents=True, exist_ok=True)
         (self.merged_dir / "parquet").mkdir(parents=True, exist_ok=True)
+        
+        # Create validation directory
+        self.validation_dir.mkdir(parents=True, exist_ok=True)
 
         # Create per-sensor directories
         for sensor in self.sensors:

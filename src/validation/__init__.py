@@ -1,4 +1,5 @@
-"""SMEAR Estonia CO2 Data Validation Module.
+"""
+SMEAR Estonia CO2 Data Validation Module.
 
 Usage
 -----
@@ -40,11 +41,13 @@ def validate_outputs(
     config_path : str or Path
         Path to sensors.yaml config file. Default: config/sensors.yaml
     export_json : bool
-        Export JSON report to output/validation_report.json
+        Export JSON report to <validation_dir>/validation_report.json
     export_markdown : bool
-        Export Markdown report to output/VALIDATION_RECEIPT.md
+        Export Markdown report to <validation_dir>/VALIDATION_RECEIPT.md
     verbose : bool
         Print summary to console
+    
+    (Note: validation_dir is configurable via sensors.yaml config file)
     
     Returns
     -------
