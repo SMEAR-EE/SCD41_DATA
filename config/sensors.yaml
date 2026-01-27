@@ -8,6 +8,7 @@
 #   output/merged/csv/                     - Merged CSVs
 #   output/merged/parquet/                 - Merged parquets
 #   output/logs/                           - Processing logs
+#   output/validation/                     - Validation receipts
 
 sensors:
   - name: CO2_SCT1_2M
@@ -64,11 +65,7 @@ sensors:
 excluded_sensor_ids: ['D']
 
 # Output directories (new per-sensor structure)
-sensors_dir: output/sensors    # Per-sensor outputs (csv/, parquet/, plots/)
-merged_dir: output/merged      # Merged outputs (csv/, parquet/)
-log_dir: output/logs           # Processing logs
-
-# Legacy keys (deprecated - kept for backwards compatibility during migration)
-# output_dir: output/individual
-# parquet_dir: output/individual/parquet
-# plots_dir: output/plots
+sensors_dir: output/sensors           # Per-sensor outputs (csv/, parquet/, plots/)
+merged_dir: output/merged             # Merged outputs (csv/, parquet/)
+log_dir: output/logs                  # Processing logs
+validation_dir: output/validation     # validation receipt directory
