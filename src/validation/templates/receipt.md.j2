@@ -1,9 +1,8 @@
 # SMEAR Estonia CO2 Data Validation Receipt
 
 **Generated:** {{ timestamp }}
-**Individual Directory:** `{{ cfg.individual_dir }}`
-**Parquet Directory:** `{{ cfg.parquet_dir }}`
-**Merged Directory:** `{{ cfg.merged_dir }}`
+**Sensors Directory:** `{{ cfg.sensors_dir }}`
+**Merged Directory:** `{{ merged_dir }}`
 **Year-Month Range:** {{ year_month_range }}
 
 ---
@@ -62,6 +61,31 @@ Comparison of low-cost SCD41 sensor at 2m against LGR reference at 30m.
 {% set sensor_name = key.replace("_vs_lgr", "").replace("CO2_30M_", "30M-") %}
 | {{ sensor_name }} | {{ "{:,}".format(m.n_valid_pairs) }} | {{ "%+.1f"|format(m.bias_ppm) }} | {{ "%.1f"|format(m.rmse_ppm) }} | {{ "%.3f"|format(m.correlation) }} |
 {% endfor %}
+{% endif %}
+
+---
+
+## Verification Checks
+
+Pipeline processing correctness verified through automated checks.
+
+Time gaps are expected given sensor coverage and are marked as warnings (⚠).
+Duplicate/invalid timestamps would be critical issues (✗).
+
+| Check | Status | Detail |
+|-------|:------:|--------|
+{% for check in verification_checks %}
+| {{ check.name }} | {{ "✓" if check.passed else ("✗" if check.severity.value == "critical" else "⚠") }} | {{ check.message }} |
+{% endfor %}
+
+{% set critical_failures = verification_checks | selectattr("passed", "equalto", false) | selectattr("severity.value", "equalto", "critical") | list %}
+{% set warning_failures = verification_checks | selectattr("passed", "equalto", false) | selectattr("severity.value", "equalto", "warning") | list %}
+{% if critical_failures | length > 0 %}
+**{{ critical_failures | length }} critical issue(s) require attention.**
+{% elif warning_failures | length > 0 %}
+{{ warning_failures | length }} warning(s) - time gaps expected given sensor coverage.
+{% else %}
+All verification checks passed.
 {% endif %}
 
 {% if checksums %}

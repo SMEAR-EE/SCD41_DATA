@@ -512,3 +512,96 @@ def compute_checksums(cfg, include_all: bool = False) -> dict[str, str]:
                     checksums[f"{sensor_dir.name}/{pq_file.name}"] = sha256(pq_file)
     
     return checksums
+
+
+def check_verification(cfg) -> list[CheckResult]:
+    """
+    Run verification checks on processed data.
+    
+    Verifies:
+    - Timestamp continuity within each sensor
+    - No duplicate timestamps
+    - Data values within expected ranges
+    
+    Returns list of CheckResult objects.
+    """
+    results = []
+    sensors_dir = Path(cfg.sensors_dir)
+    
+    if not sensors_dir.exists():
+        return results
+    
+    for sensor_dir in sorted(sensors_dir.iterdir()):
+        if not sensor_dir.is_dir():
+            continue
+        
+        csv_dir = sensor_dir / 'csv'
+        main_csv = csv_dir / f"{sensor_dir.name}_10min.csv"
+        
+        if not main_csv.exists():
+            continue
+        
+        try:
+            df = pd.read_csv(main_csv)
+            
+            # Robust timestamp parsing (same as other functions)
+            df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
+            
+            # Check for unparseable timestamps
+            invalid_ts = df['timestamp'].isna().sum()
+            
+            issues = []
+            
+            if invalid_ts > 0:
+                issues.append(f"{invalid_ts} invalid timestamps")
+            
+            # Check for duplicate timestamps
+            dup_count = df['timestamp'].duplicated().sum()
+            if dup_count > 0:
+                issues.append(f"{dup_count} duplicate timestamps")
+            
+            # Check timestamp continuity (gaps > 10 min)
+            large_gaps = 0
+            if len(df) > 1 and invalid_ts < len(df):
+                df_sorted = df.dropna(subset=['timestamp']).sort_values('timestamp')
+                if len(df_sorted) > 1:
+                    gaps = df_sorted['timestamp'].diff()
+                    large_gaps = (gaps > pd.Timedelta(minutes=10)).sum()
+                    if large_gaps > 0:
+                        issues.append(f"{large_gaps} gaps >10min")
+            
+            # Check for all-NaN data columns (excluding timestamp, qc columns)
+            data_cols = [c for c in df.columns if c != 'timestamp' and not c.endswith('_qc')]
+            all_nan_cols = [c for c in data_cols if df[c].isna().all()]
+            if all_nan_cols:
+                issues.append(f"{len(all_nan_cols)} empty columns")
+            
+            # Determine severity: gaps are expected, but duplicates/invalid timestamps are problems
+            has_critical = dup_count > 0 or invalid_ts > 0 or len(all_nan_cols) > 0
+            
+            passed = len(issues) == 0
+            result = CheckResult(
+                name=f"verification:{sensor_dir.name}",
+                passed=passed,
+                message="OK" if passed else "; ".join(issues),
+                details={
+                    "rows": len(df),
+                    "invalid_timestamps": int(invalid_ts),
+                    "duplicate_timestamps": int(dup_count),
+                    "gaps_over_10min": int(large_gaps),
+                    "empty_columns": all_nan_cols
+                },
+                severity=Severity.CRITICAL if has_critical else Severity.WARNING
+            )
+        except Exception as e:
+            result = CheckResult(
+                name=f"verification:{sensor_dir.name}",
+                passed=False,
+                message=f"Error: {e}",
+                details={"error": str(e)},
+                severity=Severity.CRITICAL
+            )
+        
+        results.append(result)
+    
+    return results

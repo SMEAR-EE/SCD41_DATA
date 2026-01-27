@@ -52,8 +52,7 @@ def print_console_summary(report, verbose: bool = True) -> None:
     print(f"\n{sep}")
     print("SMEAR ESTONIA CO2 DATA VALIDATION RECEIPT")
     print(f"Generated: {report.timestamp}")
-    print(f"Individual dir:   {cfg.output_dir}")
-    print(f"Parquet dir:      {cfg.parquet_dir}")
+    print(f"Sensors dir:      {cfg.sensors_dir}")
     print(f"Merged dir:       {report.merged_dir}")
     if report.year_months:
         ym_start = f"{report.year_months[0][0]}-{report.year_months[0][1]}"
@@ -154,6 +153,36 @@ def print_console_summary(report, verbose: bool = True) -> None:
             sensor_name = key.replace("_vs_lgr", "").replace("CO2_30M_", "30M-")
             print(f"    {sensor_name:<12} {m['n_valid_pairs']:>8,} {m['bias_ppm']:>+9.1f} {m['rmse_ppm']:>10.1f} {m['correlation']:>8.3f}")
     
+    # Verification checks
+    if report.verification_checks:
+        print(f"\n10. VERIFICATION CHECKS")
+        print(subsep)
+        print(f"  │ Checks for duplicate timestamps, time gaps, and empty columns.")
+        print(f"  │ Time gaps are expected (WARNING); duplicates/invalid timestamps are CRITICAL.")
+        print(f"  └{'─' * 50}")
+        
+        passed_count = sum(1 for c in report.verification_checks if c.passed)
+        total_count = len(report.verification_checks)
+        critical_issues = sum(1 for c in report.verification_checks 
+                              if not c.passed and c.severity == Severity.CRITICAL)
+        
+        for check in report.verification_checks:
+            if check.passed:
+                status = "✓"
+            elif check.severity == Severity.CRITICAL:
+                status = "✗"
+            else:
+                status = "⚠"
+            name = check.name.split(":")[-1] if ":" in check.name else check.name
+            print(f"    {status} {name}: {check.message}")
+        
+        if passed_count == total_count:
+            print(f"\n    All {total_count} verification checks passed.")
+        elif critical_issues > 0:
+            print(f"\n    {critical_issues} critical issue(s) require attention.")
+        else:
+            print(f"\n    {total_count - passed_count} warning(s) - time gaps expected given sensor coverage.")
+    
     # Overall status
     status, message, counts = report.get_status()
     status_icon = {"PASSED": "✅", "PASSED_WITH_WARNINGS": "⚠️ ", "FAILED": "❌"}[status]
@@ -215,6 +244,7 @@ def export_markdown(report, filepath: str | Path) -> Path:
         "merged_summary": report.merged_summary,
         "quality_metrics": report.quality_metrics,
         "checksums": report.checksums,
+        "verification_checks": report.verification_checks,
         "status": status,
         "status_icon": status_icon,
         "status_message": status_message,

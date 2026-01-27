@@ -29,20 +29,18 @@ class ValidationReport:
     def __init__(self, config_path: str | Path = "config/sensors.yaml"):
         config_path = Path(config_path)
         
-        # Load pipeline config (handles output_dir, parquet_dir, sensors)
+        # Load pipeline config (handles sensors_dir, merged_dir, sensors)
         self.cfg = PipelineConfig.from_yaml(config_path)
         
-        # Extract merged_dir from yaml (not in PipelineConfig)
-        with open(config_path) as f:
-            raw_config = yaml.safe_load(f)
-        merged_dir_str = raw_config.get('merged_dir', 'output/merged')
-        self.merged_dir = self.cfg.resolve_path(merged_dir_str)
+        # Get merged directory from config
+        self.merged_dir = self.cfg.merged_dir
         
         # Extract sensor names
         self.sensor_names = [s.name for s in self.cfg.sensors]
-        
         self.timestamp = datetime.now().isoformat()
-        
+   
+        self.verification_checks: list[CheckResult] = []
+
         # Discover available data
         self.year_months = checks.discover_year_months(self.cfg)
         
@@ -72,20 +70,21 @@ class ValidationReport:
             self.cfg, self.year_months
         ))
         
-        # 5. Merged data
-        merged_result, self.merged_summary = checks.check_merged_data(self.merged_dir)
+        # 5. Merged data (pass config, not path)
+        merged_result, self.merged_summary = checks.check_merged_data(self.cfg)
         self.checks.append(merged_result)
         
-        # 6. Quality metrics
-        quality_result, self.quality_metrics = checks.compute_quality_metrics(
-            self.merged_dir
-        )
+        # 6. Quality metrics (pass config, not path)
+        quality_result, self.quality_metrics = checks.compute_quality_metrics(self.cfg)
         self.checks.append(quality_result)
         
-        # 7. Checksums
-        self.checksums = checks.compute_checksums(
-            self.merged_dir, self.cfg.parquet_dir
-        )
+        # 7. Checksums (pass config only)
+        self.checksums = checks.compute_checksums(self.cfg)
+        
+        # 8. Verification checks (if implemented)
+        if hasattr(checks, 'check_verification'):
+            self.verification_checks = checks.check_verification(self.cfg)
+            self.checks.extend(self.verification_checks)
         
         return self
     
@@ -131,8 +130,7 @@ class ValidationReport:
         return {
             "meta": {
                 "generated": self.timestamp,
-                "output_dir": str(self.cfg.output_dir),
-                "parquet_dir": str(self.cfg.parquet_dir),
+                "sensors_dir": str(self.cfg.sensors_dir),
                 "merged_dir": str(self.merged_dir),
                 "sensors": self.sensor_names,
                 "year_month_range": self.year_months
@@ -154,12 +152,12 @@ class ValidationReport:
         """Export report as JSON."""
         from .output import export_json
         if filepath is None:
-            filepath = self.cfg.output_dir.parent / "validation_report.json"
+            filepath = self.cfg.sensors_dir.parent / "validation_report.json"
         return export_json(self, filepath)
     
     def export_markdown(self, filepath: str | Path | None = None) -> Path:
         """Export report as Markdown using Jinja2 template."""
         from .output import export_markdown
         if filepath is None:
-            filepath = self.cfg.output_dir.parent / "VALIDATION_RECEIPT.md"
+            filepath = self.cfg.sensors_dir.parent / "VALIDATION_RECEIPT.md"
         return export_markdown(self, filepath)
