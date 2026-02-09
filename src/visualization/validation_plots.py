@@ -24,13 +24,21 @@ class ValidationPlots(BasePlotter):
         save: bool = True
     ) -> plt.Figure:
         """
-        Plot CO2 timeseries for multiple sensors
+        Plot CO2 timeseries for multiple sensors.
+        
+        Overlays CO2 measurements from multiple sensors on a single plot for
+        visual comparison of temporal patterns. Useful for identifying sensor
+        drift, calibration issues, or measurement inconsistencies.
         
         Args:
-            data_csvs: Dict of {sensor_name: csv_path}
-            start_date: Start date (YYYY-MM-DD) or None for all
-            end_date: End date (YYYY-MM-DD) or None for all
-            save: If True, save to output_dir
+            data_csvs: Dict mapping sensor names to 10min CSV paths
+                       Example: {'LGR_30M': Path('LGR_30M_10min.csv'), ...}
+            start_date: Optional start date filter in 'YYYY-MM-DD' format
+            end_date: Optional end date filter in 'YYYY-MM-DD' format
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object containing the timeseries plot
         """
         fig, ax = plt.subplots(figsize=(16, 6))
         
@@ -73,14 +81,22 @@ class ValidationPlots(BasePlotter):
         save: bool = True
     ) -> plt.Figure:
         """
-        Scatter plot: reference vs test sensor
+        Scatter plot: reference vs test sensor.
+        
+        Creates a scatter plot comparing test sensor measurements against
+        reference sensor measurements. Includes 1:1 line and validation
+        statistics (correlation, RMSE, bias, sample count).
         
         Args:
-            reference_csv: Path to reference sensor CSV
-            test_csv: Path to test sensor CSV
-            reference_name: Reference sensor name (e.g., "LGR")
-            test_name: Test sensor name (e.g., "CO2_30M_1")
-            save: If True, save to output_dir
+            reference_csv: Path to reference sensor 10min CSV (e.g., LGR)
+            test_csv: Path to test sensor 10min CSV (e.g., SCD41)
+            reference_name: Reference sensor name for axis labels
+            test_name: Test sensor name for axis labels
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object containing the scatter plot, or None if
+            no overlapping data exists between sensors
         """
         # Load data
         ref = pd.read_csv(reference_csv, parse_dates=['timestamp'])
@@ -152,14 +168,25 @@ class ValidationPlots(BasePlotter):
         save: bool = True
     ) -> plt.Figure:
         """
-        Plot difference (test - reference) over time
+        Plot difference (test - reference) over time.
+        
+        Creates a two-panel plot for bias analysis:
+        - Top panel: Difference timeseries with zero line and mean bias
+        - Bottom panel: Histogram of differences showing distribution
+        
+        Useful for identifying systematic bias, drift over time, and
+        outliers in sensor measurements.
         
         Args:
-            reference_csv: Path to reference sensor CSV
-            test_csv: Path to test sensor CSV
-            reference_name: Reference sensor name
-            test_name: Test sensor name
-            save: If True, save to output_dir
+            reference_csv: Path to reference sensor 10min CSV
+            test_csv: Path to test sensor 10min CSV
+            reference_name: Reference sensor name for labels
+            test_name: Test sensor name for labels
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object with two subplots, or None if no
+            overlapping data exists between sensors
         """
         # Load data
         ref = pd.read_csv(reference_csv, parse_dates=['timestamp'])

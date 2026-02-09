@@ -19,12 +19,20 @@ class QualityControlPlots(BasePlotter):
         save: bool = True
     ) -> plt.Figure:
         """
-        Visualize QC flag distribution
+        Visualize QC flag distribution for all variables.
+        
+        Creates a multi-panel bar chart showing the count and percentage
+        of each QC flag for each measured variable (CO2, temperature, humidity, etc.).
+        Useful for identifying systematic data quality issues.
         
         Args:
-            data_csv: Path to processed sensor CSV
-            sensor_name: Sensor name for title
-            save: If True, save to output_dir
+            data_csv: Path to processed sensor 10min CSV file
+            sensor_name: Sensor name for plot title and filename
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object with subplots for each variable, or None
+            if no QC columns are found in the CSV
         """
         df = pd.read_csv(data_csv)
         

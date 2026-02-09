@@ -56,11 +56,16 @@ sensors:
 
 ## 📖 Documentation
 
-- **Detailed overview**: See [`APPLICATION_SUMMARY.md`](APPLICATION_SUMMARY.md) for architecture, features, and technical details
-- **Setup guide**: See [`SETUP.md`](SETUP.md) for installation and configuration
-- **Data merging**: See [`MERGING.md`](MERGING.md) for information on how sensor data is merged
-- **Visualization**: See [`src/visualization/README.md`](src/visualization/README.md) for plotting module
-- **Examples**: See [`process_data.ipynb`](process_data.ipynb) for usage patterns
+- **Quick Start**: This README (you are here!)
+- **Setup Guide**: [`SETUP.md`](SETUP.md) - Installation, configuration, and troubleshooting
+- **API Reference**: [`API_REFERENCE.md`](API_REFERENCE.md) - Complete API documentation for all classes and functions
+- **Architecture**: [`ARCHITECTURE.md`](ARCHITECTURE.md) - Technical design, data flow, and component architecture
+- **Output Schema**: [`OUTPUT_SCHEMA.md`](OUTPUT_SCHEMA.md) - Detailed column definitions and data formats
+- **Application Summary**: [`APPLICATION_SUMMARY.md`](APPLICATION_SUMMARY.md) - Overview of features and research context
+- **Data Merging**: [`MERGING.md`](MERGING.md) - Information on how sensor data is merged
+- **Visualization**: [`src/visualization/README.md`](src/visualization/README.md) - Plotting module documentation
+- **Validation**: [`src/validation/VALIDATION_README.md`](src/validation/VALIDATION_README.md) - Data validation documentation
+- **Examples**: [`process_data.ipynb`](process_data.ipynb) - Jupyter notebook with usage patterns
 
 ## 🐛 Troubleshooting
 
