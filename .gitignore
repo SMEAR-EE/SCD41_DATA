@@ -1,9 +1,16 @@
 testing/IOT/
 testing/IOT.zip
-# config/sensors.yaml
+config/sensors.yaml
 output/
+
+
 output_backup_20260126_193423/
-output/logs
+
+*.parquet
+*.csv
+*.log
+__pycache__/
+.ipynb_checkpoints/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
