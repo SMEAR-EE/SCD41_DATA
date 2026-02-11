@@ -34,7 +34,7 @@ Processes many sensors (4x SCD41, 1x LGR reference) with:
 - **Multi-out** CSV and Parquet formats
 - **Visuals** uptime, validation, and QC plots
 
-## Output Structure
+## (Default) Output Structure
 
 | Output | Location |
 |--------|----------|

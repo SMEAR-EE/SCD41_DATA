@@ -15,7 +15,7 @@ def _pooled_sd(x):
     
     Formula: sqrt(sum(sd^2)) / n
     
-    This is the correct way to combine multiple standard deviation
+    This is an acceptable way to combine multiple standard deviation
     measurements when averaging values that each have their own uncertainty.
     
     Named function (not lambda) to avoid '<lambda>' in pandas column names.
