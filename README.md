@@ -90,7 +90,7 @@ Requires editing volume paths in `docker-compose.yaml`.
 ## Requirements
 
 - Python 3.10+
-- ~500 MB disk space
+- ~500 MB disk space (plus disk space for raw and processed data)
 - Dependencies: pandas, numpy, pyarrow, matplotlib, seaborn
 
 ## Citation
@@ -98,7 +98,7 @@ Requires editing volume paths in `docker-compose.yaml`.
 ```
 Zorec, M. et al. (2025). SMEAR Estonia CO2 Sensor Processing Pipeline.
 Version 0.1.0. GitHub: SMEAR-EE/SCD41_DATA
-Dataset: [DOI pending]
+Dataset available at: [(DOI pending) 10.xxxx/zenodo.xxxxx]
 ```
 
 ## Version
