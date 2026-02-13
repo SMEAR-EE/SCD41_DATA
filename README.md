@@ -1,7 +1,7 @@
 # SMEAR Estonia CO2 Sensor Processing
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/SMEAR-EE/SCD41_DATA/releases/tag/v0.1.0)
-[![License](https://img.shields.io/badge/license-apacheV2-white.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache_2.0-white.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 Fast, light and reproducible post-processing pipeline for SCD41 and LGR CO2 raw sensor data at the Estonian Station for Measuring Ecosystem-Atmosphere Relations (SMEAR; [smear.emu.ee](https://smear.emu.ee/)).
