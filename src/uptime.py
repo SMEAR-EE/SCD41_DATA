@@ -48,7 +48,7 @@ class UptimeCalculator:
         downtime = float(gaps.sum()) if len(gaps) > 0 else 0.0
         uptime_ratio = (total_time - downtime) / total_time if total_time > 0 else 0.0
         
-        # likely uptime calc bug ~here for LGR data
+        # likely uptime calc bug ~here~ for LGR data
 
         # Sample-based uptime
         expected_samples = total_time / expected
