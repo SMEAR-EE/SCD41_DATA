@@ -68,7 +68,7 @@ class BasePlotter:
     def _setup_style(self):
         """Configure matplotlib for publication-quality plots"""
         # plt.style.use('seaborn-v0_8-darkgrid')
-        plt.style.use('ggplot')
+        plt.style.use('ggplot') # has subscript support in fonts
         plt.rcParams.update({
             'figure.dpi': 150,
             'savefig.dpi': 300,
