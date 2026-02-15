@@ -55,7 +55,8 @@ class ValidationPlots(BasePlotter):
             co2_col = self._detect_co2_column(df)
             
             # Plot
-            ax.plot(df['timestamp'], df[co2_col], label=sensor_name, alpha=0.7)
+            ax.plot(df['timestamp'], df[co2_col], label=sensor_name,
+                    alpha=0.7, marker='.', markersize=1.5, linewidth=0.8)
         
         ax.set_ylabel('CO₂ (ppm)', fontsize=12)
         ax.set_xlabel('Date', fontsize=12)
@@ -222,7 +223,8 @@ class ValidationPlots(BasePlotter):
         # Panel 1: Timeseries
         ax1 = fig.add_subplot(gs[0])
         ax1.plot(merged['timestamp'], merged['diff'], 
-                color='steelblue', alpha=0.7, linewidth=0.8)
+                color='steelblue', alpha=0.7, linewidth=0.8,
+                marker='.', markersize=1.5)
         ax1.axhline(0, color='red', linestyle='--', linewidth=1.5, alpha=0.7)
         ax1.axhline(mean_diff, color='green', linestyle='-', linewidth=1.5, alpha=0.7,
                    label=f'Mean = {mean_diff:.2f} ppm')
@@ -308,6 +310,7 @@ class ValidationPlots(BasePlotter):
         
         ax.plot(co2['timestamp'], vals,
                 color='steelblue', alpha=0.8, linewidth=0.8,
+                marker='.', markersize=2,
                 label=sensor_name)
         
         # Mean line
