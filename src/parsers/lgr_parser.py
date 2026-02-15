@@ -177,11 +177,11 @@ class LGRParser(BaseSensorParser):
             df.loc[df['CO2_dry'] < self.config.co2_range[0], 'co2_qc'] = 'BELOW_RANGE'
             df.loc[df['CO2_dry'] > self.config.co2_range[1], 'co2_qc'] = 'ABOVE_RANGE'
         
-        # Flag extreme values that might indicate sensor issues
-        if 'CO2_dry' in df.columns:
-            # Flag unrealistic values (< 300 or > 1000 ppm is very unusual for ambient air)
-            df.loc[df['CO2_dry'] < 300, 'co2_qc'] = 'UNREALISTIC_LOW'
-            df.loc[df['CO2_dry'] > 1000, 'co2_qc'] = 'UNREALISTIC_HIGH'
+        # # Flag extreme values that might indicate sensor issues
+        # if 'CO2_dry' in df.columns:
+        #     # Flag unrealistic values (< 330 or > 800 ppm = unusual for ambient air)
+        #     df.loc[df['CO2_dry'] < 330, 'co2_qc'] = 'UNREALISTIC_LOW'
+        #     df.loc[df['CO2_dry'] > 800, 'co2_qc'] = 'UNREALISTIC_HIGH'
         
         # Flag temperature issues (instrument operating range)
         if 'GasT_C' in df.columns:
