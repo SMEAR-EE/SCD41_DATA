@@ -234,10 +234,14 @@ class ValidationPlots(BasePlotter):
                         color='green', alpha=0.2, label=f'±1σ = {std_diff:.2f} ppm')
         
         ax1.set_ylabel('Difference (ppm)', fontsize=12)
+        ax1.set_xlabel('Date', fontsize=12)
         ax1.set_title(f'Difference: {test_name} - {reference_name}',
                      fontsize=14, fontweight='bold')
         ax1.legend(loc='best')
         ax1.grid(True, alpha=0.3)
+        
+        # Format date tick labels on the timeseries panel
+        ax1.tick_params(axis='x', rotation=30)
         
         # Panel 2: Histogram
         ax2 = fig.add_subplot(gs[1])
@@ -248,7 +252,6 @@ class ValidationPlots(BasePlotter):
         ax2.set_ylabel('Count', fontsize=12)
         ax2.grid(axis='y', alpha=0.3)
         
-        fig.autofmt_xdate()
         plt.tight_layout()
         
         if save:
@@ -259,7 +262,7 @@ class ValidationPlots(BasePlotter):
     
     def plot_co2_timeseries(
         self,
-        data_csv: Path,
+        data: 'Path | pd.DataFrame',
         sensor_name: str,
         period_label: Optional[str] = None,
         save: bool = True
@@ -272,7 +275,8 @@ class ValidationPlots(BasePlotter):
         monthly subsets.
         
         Args:
-            data_csv: Path to sensor CSV file (10min or monthly)
+            data: Path to sensor CSV file, or a pre-loaded DataFrame
+                  (must contain 'timestamp' and a recognised CO2 column)
             sensor_name: Sensor name for title and filename
             period_label: Optional period label (e.g., '2024_09') appended
                           to filename. If None, uses 'full'.
@@ -281,18 +285,21 @@ class ValidationPlots(BasePlotter):
         Returns:
             matplotlib Figure object, or None if no CO2 data found
         """
-        df = pd.read_csv(data_csv, parse_dates=['timestamp'])
+        if isinstance(data, pd.DataFrame):
+            df = data
+        else:
+            df = pd.read_csv(data, parse_dates=['timestamp'])
         
         try:
             co2_col = self._detect_co2_column(df)
         except ValueError:
-            self.logger.warning(f"No CO2 column in {data_csv}")
+            self.logger.warning("No CO2 column in data for %s", sensor_name)
             return None
         
         co2 = df[['timestamp', co2_col]].dropna()
         
         if co2.empty:
-            self.logger.warning(f"No valid CO2 data in {data_csv}")
+            self.logger.warning("No valid CO2 data for %s", sensor_name)
             return None
         
         # Statistics
