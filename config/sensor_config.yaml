@@ -52,11 +52,12 @@ sensors:
     humidity_range: [0, 100]
 
   - name: LGR_30M
-    sensor_type: lgr_csv
+    sensor_type: l    expected_interval: 1
+gr_csv
     sensor_id: null
     input_dir: #path to IOT/GASES/co2ch4
     altitude_m: 30
-    expected_interval: 1
+    expected_interval: 120 # LGR returns a new sample every ~117 seconds
     co2_range: [0, 20000]
     temp_range: null
     humidity_range: null
