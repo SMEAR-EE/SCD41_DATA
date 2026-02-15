@@ -43,7 +43,9 @@ class ValidationPlots(BasePlotter):
         fig, ax = plt.subplots(figsize=(16, 6))
         
         for sensor_name, csv_path in data_csvs.items():
-            df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+            # df = pd.read_csv(csv_path, parse_dates=['timestamp'])
+            df = pd.read_csv(csv_path)
+            df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed')
             
             # Filter date range
             if start_date:
@@ -100,8 +102,12 @@ class ValidationPlots(BasePlotter):
             no overlapping data exists between sensors
         """
         # Load data
-        ref = pd.read_csv(reference_csv, parse_dates=['timestamp'])
-        test = pd.read_csv(test_csv, parse_dates=['timestamp'])
+        # ref = pd.read_csv(reference_csv, parse_dates=['timestamp'])
+        ref = pd.read_csv(reference_csv)
+        ref['timestamp'] = pd.to_datetime(ref['timestamp'], format='mixed')
+        # test = pd.read_csv(test_csv, parse_dates=['timestamp'])
+        test = pd.read_csv(test_csv)
+        test['timestamp'] = pd.to_datetime(test['timestamp'], format='mixed')
         
         # Get CO2 columns
         ref_col = self._detect_co2_column(ref)
@@ -139,7 +145,7 @@ class ValidationPlots(BasePlotter):
         
         # Stats text
         stats_text = f'R = {corr:.3f}\nRMSE = {rmse:.2f} ppm\nBias = {bias:.2f} ppm\nn = {len(merged)}'
-        ax.text(0.05, 0.95, stats_text, transform=ax.transAxes,
+        ax.text(0.70, 0.20, stats_text, transform=ax.transAxes,
                fontsize=11, verticalalignment='top',
                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
         
@@ -190,8 +196,12 @@ class ValidationPlots(BasePlotter):
             overlapping data exists between sensors
         """
         # Load data
-        ref = pd.read_csv(reference_csv, parse_dates=['timestamp'])
-        test = pd.read_csv(test_csv, parse_dates=['timestamp'])
+        # ref = pd.read_csv(reference_csv, parse_dates=['timestamp'])
+        ref = pd.read_csv(reference_csv)
+        ref['timestamp'] = pd.to_datetime(ref['timestamp'], format='mixed')
+        # test = pd.read_csv(test_csv, parse_dates=['timestamp'])
+        test = pd.read_csv(test_csv)
+        test['timestamp'] = pd.to_datetime(test['timestamp'], format='mixed')
         
         # Get CO2 columns
         ref_col = self._detect_co2_column(ref)
@@ -288,8 +298,9 @@ class ValidationPlots(BasePlotter):
         if isinstance(data, pd.DataFrame):
             df = data
         else:
-            df = pd.read_csv(data, parse_dates=['timestamp'])
-        
+            # df = pd.read_csv(data, parse_dates=['timestamp'])
+            df = pd.read_csv(data)
+            df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed')
         try:
             co2_col = self._detect_co2_column(df)
         except ValueError:
