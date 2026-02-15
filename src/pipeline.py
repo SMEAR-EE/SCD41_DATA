@@ -75,8 +75,8 @@ class SensorPipeline:
             self.logger.info(f"Force mode: reprocessing {len(processed_days)} days")
             self._clear_period_data(paths, year, month)
         
-        # Process each day
-        first_write = not paths['csv'].exists() or self.force
+        # Process each day (handle force=True overwrite case)
+        first_write = not paths['csv'].exists() or (self.force and year is None and month is None)
         processed_count = 0
         
         for day_key in keys:
