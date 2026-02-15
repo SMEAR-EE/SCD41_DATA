@@ -117,6 +117,7 @@ class PipelineConfig:
         # Create merged subdirectories
         (self.merged_dir / "csv").mkdir(parents=True, exist_ok=True)
         (self.merged_dir / "parquet").mkdir(parents=True, exist_ok=True)
+        (self.merged_dir / "plots").mkdir(parents=True, exist_ok=True)
         
         # Create validation directory
         self.validation_dir.mkdir(parents=True, exist_ok=True)
@@ -169,12 +170,13 @@ class PipelineConfig:
         Get directory paths for merged outputs.
         
         Returns:
-            Dict with keys: 'base', 'csv', 'parquet'
+            Dict with keys: 'base', 'csv', 'parquet', 'plots'
         """
         return {
             'base': self.merged_dir,
             'csv': self.merged_dir / 'csv',
-            'parquet': self.merged_dir / 'parquet'
+            'parquet': self.merged_dir / 'parquet',
+            'plots': self.merged_dir / 'plots'
         }
 
     def get_all_sensor_names(self) -> List[str]:
