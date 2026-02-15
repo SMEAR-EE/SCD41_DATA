@@ -173,10 +173,10 @@ class SCD41Parser(BaseSensorParser):
             df.loc[df['humidity'] < self.config.humidity_range[0], 'humidity_qc'] = 'BELOW_RANGE'
             df.loc[df['humidity'] > self.config.humidity_range[1], 'humidity_qc'] = 'ABOVE_RANGE'
         
-        # Flag suspicious CO2 spikes (>500 ppm/min)
+        # Flag suspicious CO2 spikes (>200 ppm/min)
         if len(df) > 1:
             co2_diff = df['co2'].diff().abs()
-            df.loc[co2_diff > 500, 'co2_qc'] = 'SPIKE'
+            df.loc[co2_diff > 200, 'co2_qc'] = 'SPIKE'
         
         # Log QC summary
         qc_issues = (df['co2_qc'] != 'OK').sum()
