@@ -52,7 +52,7 @@ class ValidationPlots(BasePlotter):
                 df = df[df['timestamp'] <= end_date]
             
             # Get CO2 column
-            co2_col = 'co2_mean' if 'co2_mean' in df.columns else 'co2'
+            co2_col = self._detect_co2_column(df)
             
             # Plot
             ax.plot(df['timestamp'], df[co2_col], label=sensor_name, alpha=0.7)
@@ -103,8 +103,8 @@ class ValidationPlots(BasePlotter):
         test = pd.read_csv(test_csv, parse_dates=['timestamp'])
         
         # Get CO2 columns
-        ref_col = 'co2_mean' if 'co2_mean' in ref.columns else 'co2'
-        test_col = 'co2_mean' if 'co2_mean' in test.columns else 'co2'
+        ref_col = self._detect_co2_column(ref)
+        test_col = self._detect_co2_column(test)
         
         # Merge on timestamp
         merged = pd.merge(
@@ -193,8 +193,8 @@ class ValidationPlots(BasePlotter):
         test = pd.read_csv(test_csv, parse_dates=['timestamp'])
         
         # Get CO2 columns
-        ref_col = 'co2_mean' if 'co2_mean' in ref.columns else 'co2'
-        test_col = 'co2_mean' if 'co2_mean' in test.columns else 'co2'
+        ref_col = self._detect_co2_column(ref)
+        test_col = self._detect_co2_column(test)
         
         # Merge on timestamp
         merged = pd.merge(

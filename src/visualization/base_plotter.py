@@ -5,6 +5,7 @@ Provides consistent matplotlib styling for all plot modules.
 
 import logging
 from pathlib import Path
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -15,7 +16,16 @@ class BasePlotter:
     - Consistent matplotlib styling
     - Output directory management
     - Logging setup
+    - CO2 column detection across sensor types
     """
+    
+    # Column names in priority order (most specific first)
+    CO2_COLUMN_NAMES = [
+        'CO2_dry_mean', 'co2_dry_mean',
+        'CO2_dry', 'co2_dry',
+        'co2_mean', 'CO2_mean',
+        'co2', 'CO2',
+    ]
     
     def __init__(self, output_dir: Path):
         """
@@ -28,6 +38,29 @@ class BasePlotter:
         
         # Set publication-quality defaults
         self._setup_style()
+    
+    def _detect_co2_column(self, df: pd.DataFrame) -> str:
+        """Detect CO2 column name across sensor types.
+        
+        Checks a priority-ordered list of known column names
+        used by different parsers (SCD41: co2_mean, LGR: CO2_dry_mean, etc.).
+        
+        Args:
+            df: DataFrame to inspect
+            
+        Returns:
+            Column name string
+            
+        Raises:
+            ValueError: If no recognised CO2 column is found
+        """
+        for col in self.CO2_COLUMN_NAMES:
+            if col in df.columns:
+                return col
+        raise ValueError(
+            f"No recognised CO2 column found. "
+            f"Available columns: {list(df.columns)}"
+        )
     
     def _setup_style(self):
         """Configure matplotlib for publication-quality plots"""
