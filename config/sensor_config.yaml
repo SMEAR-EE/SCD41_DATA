@@ -18,8 +18,8 @@ sensors:
     input_dir: #path to IOT/CO2-SCT1-2M
     altitude_m: 2
     expected_interval: 60
-    co2_range: [0, 5000]
-    temp_range: [-40, 70]
+    co2_range: [300, 1000] # rare to exceed ~600 ppm; 1k+ anomalous @30m AGL
+    temp_range: [-10, 60]
     humidity_range: [0, 100]
 
   - name: CO2_30M_A
@@ -28,8 +28,8 @@ sensors:
     input_dir: #path to IOT/CO2-30M/CO2-30M
     altitude_m: 30
     expected_interval: 60
-    co2_range: [0, 5000]
-    temp_range: [-40, 70]
+    co2_range: [300, 1000]
+    temp_range: [-10, 60]
     humidity_range: [0, 100]
 
   - name: CO2_30M_B
@@ -38,8 +38,8 @@ sensors:
     input_dir: #path to IOT/CO2-30M/CO2-30M
     altitude_m: 30
     expected_interval: 60
-    co2_range: [0, 5000]
-    temp_range: [-40, 70]
+    co2_range: [300, 1000]
+    temp_range: [-10, 60]
     humidity_range: [0, 100]
 
   - name: CO2_30M_C
@@ -48,8 +48,8 @@ sensors:
     input_dir: #path to IOT/CO2-30M/CO2-30M
     altitude_m: 30
     expected_interval: 60
-    co2_range: [0, 5000]
-    temp_range: [-40, 70]
+    co2_range: [300, 1000]
+    temp_range: [-10, 60]
     humidity_range: [0, 100]
 
   - name: LGR_30M
@@ -57,16 +57,16 @@ sensors:
     sensor_id: null
     input_dir: #path to IOT/GASES/co2ch4
     altitude_m: 30
-    expected_interval: 120 # LGR returns a new sample every ~117 seconds
-    co2_range: [0, 20000]
-    temp_range: null
-    humidity_range: null
+    expected_interval: 120       # LGR sample rate ~117s
+    co2_range: [350, 600]        # actual range in datasheet: [0, 20000] 
+    temp_range: [5, 45]          # operating temp from datasheet: https://envicontrol.com/storage/app/media/uploaded-files/UGGA%20LGR%20GLA132-GGA.pdf
+    humidity_range: null         # H2O is in ppm not %RH, different column semantics
 
 # Excluded sensors (log but skip processing)
 excluded_sensor_ids: ['D']
 
 # Output directories (new per-sensor structure)
 sensors_dir: output/sensors           # Per-sensor outputs (csv/, parquet/, plots/)
-merged_dir: output/merged             # Merged outputs (csv/, parquet/)
+merged_dir: output/merged             # Merged outputs (csv/, parquet/, plots/)
 log_dir: output/logs                  # Processing logs
 validation_dir: output/validation     # validation receipt directory
