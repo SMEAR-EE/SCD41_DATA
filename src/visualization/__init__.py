@@ -44,7 +44,7 @@ __all__ = [
 ]
 
 
-def generate_all_plots(config):
+def generate_all_plots(config, show: bool = False):
     """
     Generate all standard plots using pipeline configuration.
     
@@ -57,14 +57,25 @@ def generate_all_plots(config):
     
     Args:
         config: PipelineConfig object with sensor configuration
+        show: If True, display plots inline in notebooks.
+              If False (default), save only — figures are closed
+              immediately to suppress notebook output.
+    
+    Example:
+        generate_all_plots(config)              # save only, quiet
+        generate_all_plots(config, show=True)   # save + display inline
     """
     import logging
+    import re
+    import matplotlib.pyplot as plt
     logger = logging.getLogger(__name__)
+
+    close = not show   # close figures after save to suppress display
 
     merged_plots_dir = config.get_merged_dirs()['plots']
 
     # Shared plotters for multi-sensor / merged plots
-    validation_plotter = ValidationPlots(merged_plots_dir)
+    validation_plotter = ValidationPlots(merged_plots_dir, close_after_save=close)
 
     if TAYLOR_AVAILABLE:
         taylor_plotter = TaylorDiagram(merged_plots_dir)
@@ -85,10 +96,12 @@ def generate_all_plots(config):
         plots_dir = paths['plots_dir']
         uptime_csv = paths['uptime']
         data_csv = paths['csv']
+        csv_dir = paths['csv_dir']
 
         # Per-sensor plotters save into the sensor's own plots/ dir
-        uptime_plotter = UptimePlots(plots_dir)
-        qc_plotter = QualityControlPlots(plots_dir)
+        uptime_plotter = UptimePlots(plots_dir, close_after_save=close)
+        qc_plotter = QualityControlPlots(plots_dir, close_after_save=close)
+        co2_plotter = ValidationPlots(plots_dir, close_after_save=close)
 
         if uptime_csv.exists():
             logger.info("  %s: Uptime timeseries", sensor_name)
@@ -104,14 +117,36 @@ def generate_all_plots(config):
         if data_csv.exists():
             logger.info("  %s: QC summary", sensor_name)
             qc_plotter.plot_qc_summary(data_csv, sensor_name)
+
+            # Per-sensor CO2 timeseries (full dataset)
+            logger.info("  %s: CO2 timeseries (full)", sensor_name)
+            co2_plotter.plot_co2_timeseries(data_csv, sensor_name)
+
             data_csvs[sensor_name] = data_csv
         else:
             logger.debug("  %s: No 10min CSV at %s", sensor_name, data_csv)
 
+        # Monthly CO2 timeseries
+        # Pattern: {sensor_name}_2024_09.csv (exclude _10min.csv, _uptime.csv)
+        monthly_pattern = re.compile(
+            rf'^{re.escape(sensor_name)}_\d{{4}}_\d{{2}}\.csv$'
+        )
+        monthly_csvs = sorted(
+            f for f in csv_dir.iterdir()
+            if f.is_file() and monthly_pattern.match(f.name)
+        )
+        for monthly_csv in monthly_csvs:
+            # Extract period label like "2024_09"
+            period = monthly_csv.stem.replace(f"{sensor_name}_", "")
+            logger.info("  %s: CO2 timeseries (%s)", sensor_name, period)
+            co2_plotter.plot_co2_timeseries(
+                monthly_csv, sensor_name, period_label=period)
+
     # -- 2. Multi-sensor summary plots (-> merged/plots/) -----------------
     if len(uptime_csvs) > 1:
         logger.info("  Multi-sensor uptime summary")
-        uptime_summary_plotter = UptimePlots(merged_plots_dir)
+        uptime_summary_plotter = UptimePlots(
+            merged_plots_dir, close_after_save=close)
         uptime_summary_plotter.plot_summary(uptime_csvs)
 
     if len(data_csvs) > 1:
@@ -151,7 +186,8 @@ def generate_all_plots(config):
             continue
 
         # Per-sensor validation plots -> that sensor's plots/ dir
-        sensor_validation = ValidationPlots(test_paths['plots_dir'])
+        sensor_validation = ValidationPlots(
+            test_paths['plots_dir'], close_after_save=close)
 
         logger.info("  %s vs %s: Scatter", sensor_name, ref_sensor.name)
         sensor_validation.plot_scatter(
@@ -170,7 +206,9 @@ def generate_all_plots(config):
 
     if len(scd_csvs) > 0 and taylor_plotter is not None:
         logger.info("  Taylor diagram")
-        taylor_plotter.plot(lgr_csv, scd_csvs, ref_sensor.name)
+        taylor_fig = taylor_plotter.plot(lgr_csv, scd_csvs, ref_sensor.name)
+        if close and taylor_fig is not None:
+            plt.close(taylor_fig)
     elif taylor_plotter is None:
         logger.info("  Taylor diagram: Skipped (install SkillMetrics)")
 

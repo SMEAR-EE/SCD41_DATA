@@ -27,13 +27,16 @@ class BasePlotter:
         'co2', 'CO2',
     ]
     
-    def __init__(self, output_dir: Path):
+    def __init__(self, output_dir: Path, close_after_save: bool = False):
         """
         Args:
             output_dir: Where to save plots
+            close_after_save: If True, close figures after saving to prevent
+                              inline display in notebooks (default: False)
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.close_after_save = close_after_save
         self.logger = logging.getLogger(self.__class__.__name__)
         
         # Set publication-quality defaults
@@ -88,3 +91,5 @@ class BasePlotter:
         filepath = self.output_dir / filename
         fig.savefig(filepath, dpi=300, bbox_inches='tight')
         self.logger.info(f"Saved: {filename}")
+        if self.close_after_save:
+            plt.close(fig)

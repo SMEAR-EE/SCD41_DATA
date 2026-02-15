@@ -254,3 +254,100 @@ class ValidationPlots(BasePlotter):
             self._save_figure(fig, filename)
         
         return fig
+    
+    def plot_co2_timeseries(
+        self,
+        data_csv: Path,
+        sensor_name: str,
+        period_label: Optional[str] = None,
+        save: bool = True
+    ) -> plt.Figure:
+        """
+        Plot CO2 timeseries for a single sensor with summary statistics.
+        
+        Creates a timeseries of CO2 readings annotated with mean, std,
+        min/max, and sample count. Works for both full datasets and
+        monthly subsets.
+        
+        Args:
+            data_csv: Path to sensor CSV file (10min or monthly)
+            sensor_name: Sensor name for title and filename
+            period_label: Optional period label (e.g., '2024_09') appended
+                          to filename. If None, uses 'full'.
+            save: If True, save plot to output_dir as PNG (default: True)
+            
+        Returns:
+            matplotlib Figure object, or None if no CO2 data found
+        """
+        df = pd.read_csv(data_csv, parse_dates=['timestamp'])
+        
+        try:
+            co2_col = self._detect_co2_column(df)
+        except ValueError:
+            self.logger.warning(f"No CO2 column in {data_csv}")
+            return None
+        
+        co2 = df[['timestamp', co2_col]].dropna()
+        
+        if co2.empty:
+            self.logger.warning(f"No valid CO2 data in {data_csv}")
+            return None
+        
+        # Statistics
+        vals = co2[co2_col]
+        stats = {
+            'mean': vals.mean(),
+            'std': vals.std(),
+            'min': vals.min(),
+            'max': vals.max(),
+            'n': len(vals),
+        }
+        
+        # Create plot
+        fig, ax = plt.subplots(figsize=(14, 6))
+        
+        ax.plot(co2['timestamp'], vals,
+                color='steelblue', alpha=0.8, linewidth=0.8,
+                label=sensor_name)
+        
+        # Mean line
+        ax.axhline(stats['mean'], color='green', linestyle='-',
+                   linewidth=1.5, alpha=0.7,
+                   label=f"Mean = {stats['mean']:.1f} ppm")
+        
+        # +/- 1 std band
+        ax.fill_between(
+            co2['timestamp'],
+            stats['mean'] - stats['std'],
+            stats['mean'] + stats['std'],
+            color='green', alpha=0.1,
+            label=f"\u00b11\u03c3 = {stats['std']:.1f} ppm")
+        
+        # Stats annotation
+        stats_text = (f"n = {stats['n']}\n"
+                      f"Mean = {stats['mean']:.1f} ppm\n"
+                      f"\u03c3 = {stats['std']:.1f} ppm\n"
+                      f"Range = [{stats['min']:.0f}, {stats['max']:.0f}] ppm")
+        ax.text(0.98, 0.95, stats_text, transform=ax.transAxes,
+                fontsize=10, verticalalignment='top', horizontalalignment='right',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        
+        # Styling
+        title = f'{sensor_name}: CO\u2082 Timeseries'
+        if period_label:
+            title += f' ({period_label})'
+        ax.set_title(title, fontsize=14, fontweight='bold')
+        ax.set_ylabel('CO\u2082 (ppm)', fontsize=12)
+        ax.set_xlabel('Date', fontsize=12)
+        ax.legend(loc='upper left')
+        ax.grid(True, alpha=0.3)
+        
+        fig.autofmt_xdate()
+        plt.tight_layout()
+        
+        if save:
+            suffix = period_label if period_label else 'full'
+            filename = f"{sensor_name}_co2_timeseries_{suffix}.png"
+            self._save_figure(fig, filename)
+        
+        return fig
