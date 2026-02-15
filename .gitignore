@@ -3,8 +3,7 @@ config/sensors.yaml
 output/
 
 
-output_backup_20260126_193423/
-output_backup_20260215_130600/
+output.bak/
 
 *.parquet
 *.csv
