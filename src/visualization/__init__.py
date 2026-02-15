@@ -48,88 +48,131 @@ def generate_all_plots(config):
     """
     Generate all standard plots using pipeline configuration.
     
-    Automatically reads:
-    - config.output_dir  → processed 10min CSVs + uptime CSVs
-    - config.plots_dir   → where to save plots
+    Routing:
+    - Per-sensor plots   -> output/sensors/{name}/plots/
+    - Multi-sensor plots -> output/merged/plots/
+    
+    Reads processed 10min CSVs and uptime CSVs from each sensor's
+    csv/ directory via config.get_sensor_output_paths().
     
     Args:
         config: PipelineConfig object with sensor configuration
     """
-    from pathlib import Path
-    
-    individual_dir = config.output_dir
-    output_dir = config.plots_dir
-    sensor_names = [s.name for s in config.sensors]
-    
-    # Initialize plotters
-    uptime_plotter = UptimePlots(output_dir)
-    validation_plotter = ValidationPlots(output_dir)
-    qc_plotter = QualityControlPlots(output_dir)
-    
-    # Taylor diagram only if SkillMetrics is installed
+    import logging
+    logger = logging.getLogger(__name__)
+
+    merged_plots_dir = config.get_merged_dirs()['plots']
+
+    # Shared plotters for multi-sensor / merged plots
+    validation_plotter = ValidationPlots(merged_plots_dir)
+
     if TAYLOR_AVAILABLE:
-        taylor_plotter = TaylorDiagram(output_dir)
+        taylor_plotter = TaylorDiagram(merged_plots_dir)
     else:
-        print("  ⚠ Taylor diagrams skipped (SkillMetrics not installed)")
-        print("    Install with: pip install SkillMetrics")
+        logger.warning("Taylor diagrams skipped (SkillMetrics not installed). "
+                       "Install with: pip install SkillMetrics")
         taylor_plotter = None
-    
-    print("Generating plots...")
-    
-    uptime_csvs = {}
-    data_csvs = {}
-    
-    # 1. Per-sensor plots
-    for sensor in sensor_names:
-        uptime_csv = individual_dir / f"{sensor}_uptime.csv"
-        data_csv = individual_dir / f"{sensor}_10min.csv"
-        
+
+    logger.info("Generating plots...")
+
+    uptime_csvs = {}       # sensor_name -> uptime CSV path
+    data_csvs = {}         # sensor_name -> 10min CSV path
+    sensor_names = [s.name for s in config.sensors]
+
+    # -- 1. Per-sensor plots (-> sensors/{name}/plots/) -------------------
+    for sensor_name in sensor_names:
+        paths = config.get_sensor_output_paths(sensor_name)
+        plots_dir = paths['plots_dir']
+        uptime_csv = paths['uptime']
+        data_csv = paths['csv']
+
+        # Per-sensor plotters save into the sensor's own plots/ dir
+        uptime_plotter = UptimePlots(plots_dir)
+        qc_plotter = QualityControlPlots(plots_dir)
+
         if uptime_csv.exists():
-            print(f"  - {sensor}: Uptime timeseries")
-            uptime_plotter.plot_timeseries(uptime_csv, sensor)
-            
-            print(f"  - {sensor}: Uptime heatmap")
-            uptime_plotter.plot_heatmap(uptime_csv, sensor)
-            
-            uptime_csvs[sensor] = uptime_csv
-        
+            logger.info("  %s: Uptime timeseries", sensor_name)
+            uptime_plotter.plot_timeseries(uptime_csv, sensor_name)
+
+            logger.info("  %s: Uptime heatmap", sensor_name)
+            uptime_plotter.plot_heatmap(uptime_csv, sensor_name)
+
+            uptime_csvs[sensor_name] = uptime_csv
+        else:
+            logger.debug("  %s: No uptime CSV at %s", sensor_name, uptime_csv)
+
         if data_csv.exists():
-            print(f"  - {sensor}: QC summary")
-            qc_plotter.plot_qc_summary(data_csv, sensor)
-            data_csvs[sensor] = data_csv
-    
-    # 2. Multi-sensor summary plots
+            logger.info("  %s: QC summary", sensor_name)
+            qc_plotter.plot_qc_summary(data_csv, sensor_name)
+            data_csvs[sensor_name] = data_csv
+        else:
+            logger.debug("  %s: No 10min CSV at %s", sensor_name, data_csv)
+
+    # -- 2. Multi-sensor summary plots (-> merged/plots/) -----------------
     if len(uptime_csvs) > 1:
-        print("  - Multi-sensor uptime summary")
-        uptime_plotter.plot_summary(uptime_csvs)
-    
+        logger.info("  Multi-sensor uptime summary")
+        uptime_summary_plotter = UptimePlots(merged_plots_dir)
+        uptime_summary_plotter.plot_summary(uptime_csvs)
+
     if len(data_csvs) > 1:
-        print("  - CO2 timeseries comparison")
+        logger.info("  CO2 timeseries comparison")
         validation_plotter.plot_timeseries(data_csvs)
-    
-    # 3. Reference comparison (LGR)
-    lgr_csv = individual_dir / "LGR_30M_10min.csv"
-    if lgr_csv.exists():
-        test_sensors = [s for s in sensor_names if s.startswith("CO2_")]
-        
-        for sensor in test_sensors:
-            test_csv = individual_dir / f"{sensor}_10min.csv"
-            if test_csv.exists():
-                print(f"  - {sensor} vs LGR: Scatter")
-                validation_plotter.plot_scatter(lgr_csv, test_csv, "LGR", sensor)
-                
-                print(f"  - {sensor} vs LGR: Difference")
-                validation_plotter.plot_difference(lgr_csv, test_csv, "LGR", sensor)
-        
-        scd_csvs = {s: individual_dir / f"{s}_10min.csv"
-                    for s in test_sensors
-                    if (individual_dir / f"{s}_10min.csv").exists()}
-        
-        if len(scd_csvs) > 1:
-            if taylor_plotter is not None:
-                print("  - Taylor diagram")
-                taylor_plotter.plot(lgr_csv, scd_csvs, "LGR")
-            else:
-                print("  - Taylor diagram: Skipped (install SkillMetrics)")
-    
-    print(f"\n✓ All plots saved to: {output_dir}")
+
+    # -- 3. Reference comparison (LGR) ------------------------------------
+    ref_sensors = [s for s in config.sensors
+                   if 'lgr' in s.sensor_type.lower()]
+    if not ref_sensors:
+        logger.warning("No LGR reference sensor found in config; "
+                       "skipping validation plots")
+        logger.info("Plot generation complete. Per-sensor: sensors/*/plots/, "
+                    "multi-sensor: %s", merged_plots_dir)
+        return
+
+    ref_sensor = ref_sensors[0]
+    ref_paths = config.get_sensor_output_paths(ref_sensor.name)
+    lgr_csv = ref_paths['csv']
+
+    if not lgr_csv.exists():
+        logger.warning("LGR CSV not found at %s; "
+                       "skipping reference comparison plots", lgr_csv)
+        logger.info("Plot generation complete. Per-sensor: sensors/*/plots/, "
+                    "multi-sensor: %s", merged_plots_dir)
+        return
+
+    test_sensors = [s.name for s in config.sensors
+                    if s.name.startswith("CO2_")]
+
+    for sensor_name in test_sensors:
+        test_paths = config.get_sensor_output_paths(sensor_name)
+        test_csv = test_paths['csv']
+
+        if not test_csv.exists():
+            logger.debug("  %s: No 10min CSV for validation", sensor_name)
+            continue
+
+        # Per-sensor validation plots -> that sensor's plots/ dir
+        sensor_validation = ValidationPlots(test_paths['plots_dir'])
+
+        logger.info("  %s vs %s: Scatter", sensor_name, ref_sensor.name)
+        sensor_validation.plot_scatter(
+            lgr_csv, test_csv, ref_sensor.name, sensor_name)
+
+        logger.info("  %s vs %s: Difference", sensor_name, ref_sensor.name)
+        sensor_validation.plot_difference(
+            lgr_csv, test_csv, ref_sensor.name, sensor_name)
+
+    # Taylor diagram (multi-sensor -> merged/plots/)
+    scd_csvs = {}
+    for sensor_name in test_sensors:
+        test_csv = config.get_sensor_output_paths(sensor_name)['csv']
+        if test_csv.exists():
+            scd_csvs[sensor_name] = test_csv
+
+    if len(scd_csvs) > 0 and taylor_plotter is not None:
+        logger.info("  Taylor diagram")
+        taylor_plotter.plot(lgr_csv, scd_csvs, ref_sensor.name)
+    elif taylor_plotter is None:
+        logger.info("  Taylor diagram: Skipped (install SkillMetrics)")
+
+    logger.info("Plot generation complete. Per-sensor: sensors/*/plots/, "
+                "multi-sensor: %s", merged_plots_dir)
