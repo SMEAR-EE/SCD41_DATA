@@ -7,6 +7,7 @@
 #   output/sensors/{sensor_name}/plots/    - Visualisations
 #   output/merged/csv/                     - Merged CSVs
 #   output/merged/parquet/                 - Merged parquets
+#   output/merged/plots/                   - Merged plots
 #   output/logs/                           - Processing logs
 #   output/validation/                     - Validation receipts
 
@@ -52,8 +53,7 @@ sensors:
     humidity_range: [0, 100]
 
   - name: LGR_30M
-    sensor_type: l    expected_interval: 1
-gr_csv
+    sensor_type: lgr_csv
     sensor_id: null
     input_dir: #path to IOT/GASES/co2ch4
     altitude_m: 30
