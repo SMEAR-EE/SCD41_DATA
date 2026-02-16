@@ -69,6 +69,8 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
               'comparison'      - multi-sensor CO2 overlay
               'scatter'         - per-sensor scatter vs reference
               'difference'      - per-sensor difference vs reference
+              'scatter_hue'     - 2x2 scatter panels coloured by temp/RH
+              'timeseries_hue'  - stacked timeseries coloured by temp/RH
               'taylor'          - Taylor diagram
     
     Example:
@@ -215,6 +217,57 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
             logger.info("  %s vs %s: Difference", sensor_name, ref_sensor.name)
             sensor_validation.plot_difference(
                 lgr_csv, test_csv, ref_sensor.name, sensor_name)
+
+    # -- 4. Hue-mapped panel plots (merged CSV -> merged/plots/) --------
+    if 'scatter_hue' not in skip or 'timeseries_hue' not in skip:
+        merged_csv_dir = config.get_merged_dirs()['csv']
+        merged_csvs = sorted(merged_csv_dir.glob("*merged*.csv"))
+
+        if not merged_csvs:
+            logger.warning("No merged CSV found in %s; "
+                           "skipping hue panel plots", merged_csv_dir)
+        else:
+            # Prefer the full merged file (no YYYY_MM date segment)
+            # over monthly slices like *_2024_09_merged.csv
+            monthly_pat = re.compile(r'_\d{4}_\d{2}_merged')
+            full = [f for f in merged_csvs if not monthly_pat.search(f.stem)]
+            merged_csv = full[0] if full else merged_csvs[-1]  # fallback: largest by name
+            logger.info("  Loading merged CSV: %s", merged_csv.name)
+
+            import pandas as _pd
+            merged_df = _pd.read_csv(merged_csv)
+            merged_df["timestamp"] = _pd.to_datetime(
+                merged_df["timestamp"], format="mixed")
+
+            try:
+                lgr_co2_col, sensor_map = ValidationPlots.build_sensor_map(
+                    merged_df, test_sensors)
+            except ValueError as exc:
+                logger.warning("Cannot build sensor map: %s", exc)
+                sensor_map = []
+
+            if sensor_map:
+                hue_plotter = ValidationPlots(
+                    merged_plots_dir, close_after_save=close)
+
+                if 'scatter_hue' not in skip:
+                    for hue in ("temp", "rh"):
+                        cmap = "RdYlBu_r" if hue == "temp" else "YlGnBu"
+                        logger.info("  Scatter panel (%s hue)", hue)
+                        hue_plotter.plot_scatter_panel_hue(
+                            merged_df, lgr_co2_col, sensor_map,
+                            hue_var=hue, cmap=cmap)
+
+                if 'timeseries_hue' not in skip:
+                    for hue in ("temp", "rh"):
+                        cmap = "RdYlBu_r" if hue == "temp" else "YlGnBu"
+                        logger.info("  Timeseries (%s hue)", hue)
+                        hue_plotter.plot_timeseries_hue(
+                            merged_df, lgr_co2_col, sensor_map,
+                            hue_var=hue, cmap=cmap)
+            else:
+                logger.warning("No SCD41 sensors found in merged CSV; "
+                               "skipping hue panel plots")
 
     # Taylor diagram (multi-sensor -> merged/plots/)
     if 'taylor' not in skip:
