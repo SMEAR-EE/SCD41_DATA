@@ -1,12 +1,12 @@
 # SMEAR Estonia CO2 Sensor Processing
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/SMEAR-EE/SCD41_DATA/releases/tag/v0.1.0)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/SMEAR-EE/SCD41_DATA/releases/tag/v0.2.0)
 [![License](https://img.shields.io/badge/license-Apache_2.0-white.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 Fast, light and reproducible post-processing pipeline for SCD41 and LGR CO2 raw sensor data at the Estonian Station for Measuring Ecosystem-Atmosphere Relations (SMEAR; [smear.emu.ee](https://smear.emu.ee/)).
 
-> **Status:** Release Candidate v0.1.0 - most features functional and validated. Future work: test and refactor
+> **Status:** v0.2.0 - Stable release with comprehensive validation suite and enhanced data quality reporting
 
 ## Quick Start
 
@@ -31,6 +31,7 @@ Processed data appears in `output/`.
 Processes many sensors (4x SCD41, 1x LGR reference) with:
 - **Time-synced resampling** to 10-min intervals (epoch-aligned)
 - **Quality control** tracking uptime, data quality flags, validation report
+- **Comprehensive validation** suite with JSON/Markdown reports and coverage metrics
 - **Multi-out** CSV and Parquet formats
 - **Visuals** uptime, validation, and QC plots
 
@@ -61,9 +62,9 @@ sensors:
 - **API Reference**: [`API_REFERENCE.md`](API_REFERENCE.md) - Complete API docs for all classes and functions
 - **Architecture**: [`ARCHITECTURE.md`](ARCHITECTURE.md) - Technical design, data flow, and component architecture
 - **Output Schema**: [`OUTPUT_SCHEMA.md`](OUTPUT_SCHEMA.md) - Detailed column definitions and data formats
-- **Application Summary**: [`APPLICATION_SUMMARY.md`](APPLICATION_SUMMARY.md) - Overview of features and research context
-- **Data Merging**: [`MERGING.md`](MERGING.md) - Information on sensor data merging
-- **Visualization**: [`src/visualization/README.md`](src/visualization/README.md) - Plotting module docs
+- **Application Summary**: [`src/APPLICATION_SUMMARY.md`](src/APPLICATION_SUMMARY.md) - Overview of features and research context
+- **Data Merging**: [`src/MERGING.md`](src/MERGING.md) - Information on sensor data merging
+- **Visualization**: [`src/visualization/PLOT_README.md`](src/visualization/PLOT_README.md) - Plotting module docs
 - **Validation**: [`src/validation/VALIDATION_README.md`](src/validation/VALIDATION_README.md) - Data validation docs
 - **Examples**: [`process_data.ipynb`](process_data.ipynb) - Jupyter notebook with usage patterns
 
@@ -96,16 +97,16 @@ Requires editing volume paths in `docker-compose.yaml`.
 ## Citation
 
 ```
-Zorec, M. et al. (2025). SMEAR Estonia CO2 Sensor Processing Pipeline.
-Version 0.1.0. GitHub: SMEAR-EE/SCD41_DATA
+Zorec, M. et al. (2026). SMEAR Estonia CO2 Sensor Processing Pipeline.
+Version 0.2.0. GitHub: SMEAR-EE/SCD41_DATA
 Dataset available at: [(DOI pending) 10.xxxx/zenodo.xxxxx]
 ```
 
 ## Version
 
-**Current Release:** v0.1.0 (Release Candidate)
+**Current Release:** v0.2.0 (Stable)
 
 ## License
 
-Software application licensed with the Apache v2.0 license, see the [LICENSE](LICENSE) file for more.
-Dataset licensed under CC BY 4.0, available on [Zenodo.org/#](https://zenodo.org/)
+Software application licensed under the Apache License 2.0 (see [LICENSE](LICENSE) file).
+Dataset licensed under CC BY 4.0, available on [Zenodo.org/#](https://zenodo.org/).
