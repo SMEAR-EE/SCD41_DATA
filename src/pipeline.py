@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Tuple
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+import json
 
 from .config import PipelineConfig, SensorConfig
 from .processor import DayProcessor
@@ -122,6 +123,8 @@ class SensorPipeline:
             month
         )
         
+        self._export_coverage_summary(sensor_config.name, paths)
+
         self.logger.info(f"✓ {sensor_config.name} complete\n")
 
     def run_all(
@@ -280,6 +283,73 @@ class SensorPipeline:
             self.logger.info("Sorting CSV by timestamp...")
             df = df.sort_values('timestamp')
             df.to_csv(csv_path, index=False)
+    
+    def _export_coverage_summary(self, sensor_name: str, paths: Dict):
+        """Generate coverage summary JSON for a sensor."""
+        
+        uptime_path = paths['uptime']
+        if not uptime_path.exists():
+            return
+        
+        df = pd.read_csv(uptime_path)
+        # pd.to_datetime(df[['year', 'month', 'day']])
+        df['date'] = pd.to_datetime(
+            df[['year', 'month', 'day']].rename(
+                columns={'year': 'year', 'month': 'month', 'day': 'day'}
+            )
+        )
+        df = df.sort_values('date')
+        
+        first = df['date'].min()
+        last = df['date'].max()
+        
+        # Find missing days
+        full_range = pd.date_range(first, last, freq='D')
+        present = set(df['date'].dt.normalize())
+        missing_days = sorted(set(full_range) - present)
+        
+        # Collapse consecutive missing days into ranges
+        missing_ranges = []
+        if missing_days:
+            range_start = missing_days[0]
+            prev = missing_days[0]
+            for d in missing_days[1:]:
+                if (d - prev).days > 1:
+                    missing_ranges.append({
+                        'start': range_start.strftime('%Y-%m-%d'),
+                        'end': prev.strftime('%Y-%m-%d')
+                    })
+                    range_start = d
+                prev = d
+            missing_ranges.append({
+                'start': range_start.strftime('%Y-%m-%d'),
+                'end': prev.strftime('%Y-%m-%d')
+            })
+        
+        # Expected 10-min records across operational window
+        expected = len(pd.date_range(first, last, freq='10min'))
+        actual = len(pd.read_csv(paths['csv']))
+        
+        summary = {
+            'sensor': sensor_name,
+            'first_observation': first.strftime('%Y-%m-%d'),
+            'last_observation': last.strftime('%Y-%m-%d'),
+            'expected_records_10min': expected,
+            'actual_records': actual,
+            'coverage_pct': round(100 * actual / expected, 1),
+            'days_present': len(present),
+            'days_missing': len(missing_days),
+            'missing_ranges': missing_ranges
+        }
+        out_path = self.config.get_sensor_dirs(sensor_name)['base'] / f"{sensor_name}_coverage.json"
+
+        with open(out_path, 'w') as f:
+            json.dump(summary, f, indent=2)
+        
+        self.logger.info(
+            f"Coverage: {summary['coverage_pct']}% "
+            f"({summary['days_missing']} days missing) → {out_path.name}"
+        )
 
     def _export_parquets(
         self,
