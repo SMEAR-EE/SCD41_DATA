@@ -108,16 +108,29 @@ class UptimePlots(BasePlotter):
         """
         df = pd.read_csv(uptime_csv)
         
-        # Create pivot table (month x day)
+        # Build a sortable year-month key and a readable label
+        df['ym_sort'] = df['year'] * 100 + df['month'] # e.g. 202409
+        df['ym_label'] = df.apply(lambda r: f"{int(r['year'])}-{int(r['month']):02d}", axis=1) # e.g. "2024-09"
+
+        # pivoting on labels; days = columns
         pivot = df.pivot_table(
-            index='month',
+            index='ym_label',
             columns='day',
             values='uptime_ratio',
             aggfunc='mean'
         )
+
+        # Sort chronologically using the numeric key
+        sort_order = (
+            df.drop_duplicates('ym_label')
+            .sort_values('ym_sort')['ym_label']
+            .tolist()
+        )
         
-        # Create plot
-        fig, ax = plt.subplots(figsize=(16, 8))
+        pivot = pivot.reindex(sort_order)
+
+        # Plot... heatmap renders index top-to-bottom: earliest month = top (reading order)
+        fig, ax = plt.subplots(figsize=(16, max(6, len(pivot) * 0.6)))
         
         sns.heatmap(
             pivot,
