@@ -252,7 +252,7 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
 
                 if 'scatter_hue' not in skip:
                     for hue in ("temp", "rh"):
-                        cmap = "RdYlBu_r" if hue == "temp" else "YlGnBu"
+                        cmap = "RdYlBu_r" if hue == "temp" else "cividis"
                         logger.info("  Scatter panel (%s hue)", hue)
                         hue_plotter.plot_scatter_panel_hue(
                             merged_df, lgr_co2_col, sensor_map,
@@ -260,7 +260,7 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
 
                 if 'timeseries_hue' not in skip:
                     for hue in ("temp", "rh"):
-                        cmap = "RdYlBu_r" if hue == "temp" else "YlGnBu"
+                        cmap = "RdYlBu_r" if hue == "temp" else "cividis"
                         logger.info("  Timeseries (%s hue)", hue)
                         hue_plotter.plot_timeseries_hue(
                             merged_df, lgr_co2_col, sensor_map,

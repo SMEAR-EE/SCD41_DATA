@@ -475,7 +475,7 @@ class ValidationPlots(BasePlotter):
 
             sc = ax.scatter(
                 ref, test, c=hue, cmap=cmap, vmin=vmin, vmax=vmax,
-                s=6, alpha=0.5, edgecolors="none", rasterized=True,
+                s=10, alpha=0.7, edgecolors="face", linewidths=0.15,rasterized=True,
             )
 
             lo = min(ref.min(), test.min())
@@ -488,9 +488,10 @@ class ValidationPlots(BasePlotter):
                 f"Bias = {bias:+.1f} ppm\n"
                 f"n = {len(sub):,}"
             )
+            # stats box
             ax.text(
-                0.04, 0.96, stats_txt, transform=ax.transAxes,
-                fontsize=9, va="top", ha="left",
+                0.96, 0.04, stats_txt, transform=ax.transAxes,
+                fontsize=9, va="bottom", ha="right",
                 bbox=dict(
                     boxstyle="round,pad=0.3", fc="white",
                     ec="gray", alpha=0.85,
@@ -501,7 +502,7 @@ class ValidationPlots(BasePlotter):
             ax.set_ylabel(f"{info['label']} CO\u2082 (ppm)", fontsize=10)
             ax.set_title(info["label"], fontsize=12, fontweight="bold")
             ax.set_aspect("equal", adjustable="box")
-            ax.grid(True, alpha=0.25)
+            ax.grid(True, alpha=0.2)
 
         # Hide unused axes when sensor count is odd
         for ax in axes[n_sensors:]:
@@ -600,7 +601,7 @@ class ValidationPlots(BasePlotter):
             sc = ax.scatter(
                 sub["timestamp"], sub[co2_col],
                 c=sub[hue_col], cmap=cmap, vmin=vmin, vmax=vmax,
-                s=3, alpha=0.5, edgecolors="none", rasterized=True,
+                s=5, alpha=0.7, edgecolors="face", linewidths=0.15, rasterized=True,
             )
 
             # LGR reference as grey backdrop
@@ -608,13 +609,13 @@ class ValidationPlots(BasePlotter):
             ax.plot(
                 df.loc[lgr_mask, "timestamp"],
                 df.loc[lgr_mask, lgr_co2_col],
-                color="gray", alpha=0.3, lw=0.5, label="LGR (ref)",
+                color="gray", alpha=0.65, lw=1.0, label="LGR (ref)",
             )
 
             ax.set_ylabel("CO\u2082 (ppm)", fontsize=10)
             ax.set_title(info["label"], fontsize=11, fontweight="bold",
                          loc="left")
-            ax.grid(True, alpha=0.25)
+            ax.grid(True, alpha=0.2)
             ax.legend(loc="upper right", fontsize=8, framealpha=0.8)
 
         axes[-1].set_xlabel("Date", fontsize=11)
