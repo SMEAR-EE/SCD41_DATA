@@ -451,6 +451,7 @@ df_filtered <- df %>%
 
 ## Version History
 
+- **v0.2.0** (2026-02): Added comprehensive validation suite, enhanced data quality reporting
 - **v0.1.0** (2024-10): Initial schema documentation
   - Per-sensor directory structure
   - 10-minute resampling
