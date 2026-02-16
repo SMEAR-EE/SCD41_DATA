@@ -36,6 +36,21 @@ class QualityControlPlots(BasePlotter):
         """
         df = pd.read_csv(data_csv)
         
+        # TODO (v0.2.0): MISSING flag injection should move upstream to
+        # DayProcessor._resample_10min() in processor.py. After resampling,
+        # reindex against the full day range (00:00–23:50 at 10min freq)
+        # and tag empty QC slots as 'MISSING'. Once the pipeline CSVs
+        # contain MISSING natively, remove the expected-range calculation
+        # below and simplify back to just counting flags from the CSV.
+        # See also: v0.3.0 note on merged uptime parquet consolidation.
+        
+        # Calculate expected vs actual records
+        df['timestamp'] = pd.to_datetime(df['timestamp'], format='ISO8601')
+        expected_range = pd.date_range(df['timestamp'].min(), df['timestamp'].max(), freq='10min')
+        n_expected = len(expected_range)
+        n_actual = len(df)
+        n_missing = n_expected - n_actual
+        
         # Find QC columns
         qc_cols = [c for c in df.columns if c.endswith('_qc')]
         
@@ -56,19 +71,27 @@ class QualityControlPlots(BasePlotter):
             # Count QC flags
             qc_counts = df[qc_col].value_counts()
             
-            # Bar plot
-            qc_counts.plot(kind='bar', ax=ax, color='steelblue', alpha=0.8)
+            # Count existing flags, then add missing records
+            qc_counts = df[qc_col].value_counts().to_dict()
+            if n_missing > 0:
+                qc_counts['MISSING'] = n_missing
+        
+            qc_series = pd.Series(qc_counts).sort_values(ascending=False)
+            
+            # paint MISSING readings differently
+            colors = ['coral' if k == 'MISSING' else 'steelblue' for k in qc_series.index]
+            
+            qc_series.plot(kind='bar', ax=ax, color=colors, alpha=0.8)
+            
+            total = n_expected # ... percentage labels use n_expected as denominator
+            for i, (flag, count) in enumerate(qc_series.items()):
+                pct = 100 * count / total
+                ax.text(i, count, f'{pct:.1f}%', ha='center', va='bottom', fontsize=9)
+            
             ax.set_title(f'{var_name} QC Flags', fontsize=12, fontweight='bold')
             ax.set_ylabel('Count', fontsize=10)
             ax.set_xlabel('QC Flag', fontsize=10)
             ax.grid(axis='y', alpha=0.3)
-            
-            # Add percentage labels
-            total = qc_counts.sum()
-            for i, (flag, count) in enumerate(qc_counts.items()):
-                pct = 100 * count / total
-                ax.text(i, count, f'{pct:.1f}%',
-                       ha='center', va='bottom', fontsize=9)
         
         fig.suptitle(f'{sensor_name}: Quality Control Summary',
                     fontsize=14, fontweight='bold')
