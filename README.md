@@ -39,9 +39,9 @@ Processes many sensors (4x SCD41, 1x LGR reference) with:
 
 | Output | Location |
 |--------|----------|
-| Processed CSVs | `output/individual/` |
-| Monthly Parquet | `output/parquet/` |
-| Plots | `output/plots/` |
+| Sensors | `output/sensors/` |
+| Merged | `output/merged/` |
+| Validation | `output/validation/` |
 | Logs | `output/logs/` |
 
 ## Configuration
@@ -70,9 +70,9 @@ sensors:
 
 ## Troubleshooting
 
-**Import errors**: Ensure virtual environment is active: `source venv/bin/activate`
+**Import errors?** Ensure virtual environment is active: `source venv/bin/activate`
 
-**No data found**: Check paths in `config/sensors.yaml` and logs: `tail -f output/logs/processing.log`
+**No data found?** Check paths in `config/sensors.yaml` and logs: `tail -f output/logs/<logfile>.log`
 
 **Reprocess data**:
 ```python
@@ -80,13 +80,11 @@ pipeline = SensorPipeline(config, force=True)
 pipeline.run_all(year=2024, month=10)
 ```
 
-## Docker Deployment
+## Container
 
-```bash
-docker-compose up
-```
+`docker-compose up` or `podman-compose up`
 
-Requires editing volume paths in `docker-compose.yaml`.
+>Note: requires editing volume paths in `docker-compose.yaml`.
 
 ## Requirements
 
