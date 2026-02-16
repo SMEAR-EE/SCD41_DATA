@@ -62,7 +62,7 @@ sensors:
 - **API Reference**: [`API_REFERENCE.md`](API_REFERENCE.md) - Complete API docs for all classes and functions
 - **Architecture**: [`ARCHITECTURE.md`](ARCHITECTURE.md) - Technical design, data flow, and component architecture
 - **Output Schema**: [`OUTPUT_SCHEMA.md`](OUTPUT_SCHEMA.md) - Detailed column definitions and data formats
-- **Application Summary**: [`src/APPLICATION_SUMMARY.md`](src/APPLICATION_SUMMARY.md) - Overview of features and research context
+- **Application Summary**: [`src/APPLICATION_SUMMARY.md`](src/APPLICATION_SUMMARY.md) - Overviews features & research context
 - **Data Merging**: [`src/MERGING.md`](src/MERGING.md) - Information on sensor data merging
 - **Visualization**: [`src/visualization/PLOT_README.md`](src/visualization/PLOT_README.md) - Plotting module docs
 - **Validation**: [`src/validation/VALIDATION_README.md`](src/validation/VALIDATION_README.md) - Data validation docs
