@@ -5,7 +5,7 @@
 **SMEAR Estonia CO2 Sensor Processing** is a fast, reproducible Python-based data processing pipeline designed for atmospheric CO2 monitoring at the SMEAR Estonia research station. The application processes data from multiple CO2 sensors (SCD41 and LGR) and produces time-synchronized, quality-controlled datasets suitable for scientific analysis.
 
 **Repository**: SMEAR-EE/SCD41_DATA  
-**License**: MIT License (Copyright 2025 Matevž Borjan Zorec)  
+**License**: Apache License 2.0 (Copyright 2026 Matevž Borjan Zorec)  
 **Python Version**: 3.10+ (Docker image uses 3.12)
 
 ---

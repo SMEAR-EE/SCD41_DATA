@@ -23,7 +23,7 @@ What actually happened.
 ## Environment
 - **OS:** [e.g. Ubuntu 22.04, macOS 13]
 - **Python Version:** [e.g. 3.10.5]
-- **Package Version:** [e.g. 0.1.0]
+- **Package Version:** [e.g. 0.2.0]
 - **Installation Method:** [pip/conda/Docker]
 
 ## Error Messages / Logs
