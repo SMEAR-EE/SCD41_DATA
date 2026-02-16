@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
 from .base_plotter import BasePlotter
-
+import json
 
 class QualityControlPlots(BasePlotter):
     """Generate QC analysis plots"""
@@ -24,6 +24,8 @@ class QualityControlPlots(BasePlotter):
         Creates a multi-panel bar chart showing the count and percentage
         of each QC flag for each measured variable (CO2, temperature, humidity, etc.).
         Useful for identifying systematic data quality issues.
+        Uses coverage JSON (from pipeline) for MISSING count when available,
+        falls back to timestamp-based estimation otherwise.
         
         Args:
             data_csv: Path to processed sensor 10min CSV file
@@ -35,20 +37,22 @@ class QualityControlPlots(BasePlotter):
             if no QC columns are found in the CSV
         """
         df = pd.read_csv(data_csv)
-        
-        # TODO (v0.2.0): MISSING flag injection should move upstream to
-        # DayProcessor._resample_10min() in processor.py. After resampling,
-        # reindex against the full day range (00:00–23:50 at 10min freq)
-        # and tag empty QC slots as 'MISSING'. Once the pipeline CSVs
-        # contain MISSING natively, remove the expected-range calculation
-        # below and simplify back to just counting flags from the CSV.
-        # See also: v0.3.0 note on merged uptime parquet consolidation.
-        
-        # Calculate expected vs actual records
-        df['timestamp'] = pd.to_datetime(df['timestamp'], format='ISO8601')
-        expected_range = pd.date_range(df['timestamp'].min(), df['timestamp'].max(), freq='10min')
-        n_expected = len(expected_range)
         n_actual = len(df)
+        
+        # Try loading coverage summary from sensor root dir
+        coverage_json = data_csv.parent.parent / f"{sensor_name}_coverage.json"
+        if coverage_json.exists():
+            self.logger.info(f"Using coverage JSON for {sensor_name}")
+            with open(coverage_json) as f:
+                coverage = json.load(f)
+            n_expected = coverage['expected_records_10min']
+        else:
+            # Fallback: estimate from timestamp range
+            self.logger.warning(f"No coverage JSON for {sensor_name}, estimating from timestamps")
+            df['timestamp'] = pd.to_datetime(df['timestamp'], format='ISO8601')
+            expected_range = pd.date_range(df['timestamp'].min(), df['timestamp'].max(), freq='10min')
+            n_expected = len(expected_range)
+    
         n_missing = n_expected - n_actual
         
         # Find QC columns
