@@ -49,11 +49,16 @@ class UptimePlots(BasePlotter):
         # Drop invalid dates
         df = df.dropna(subset=['date'])
         
-        # Create plot
+        # Reindex to full date range so that missing days become NaN
+        full_range = pd.date_range(df['date'].min(), df['date'].max(), freq='D')
+        daily = df.groupby('date')['uptime_pct'].mean()
+        daily = daily.reindex(full_range)  # gaps become NaN → line breaks
+        
+        # Create plot 
         fig, ax = plt.subplots(figsize=(14, 6))
         
-        # Plot with markers
-        ax.plot(df['date'], df['uptime_pct'], marker='o', linewidth=1.5, 
+        # Plot with markers ...line breaks naturally at NaN gaps
+        ax.plot(daily.index, daily.values, marker='o', linewidth=1.5, 
                 markersize=4, color='steelblue', label='Daily Uptime')
         
         # Add 95% threshold line
