@@ -49,7 +49,7 @@ Main configuration container for the entire processing pipeline.
 from src.config import PipelineConfig
 
 # Load from YAML
-config = PipelineConfig.from_yaml('config/sensors.yaml')
+config = PipelineConfig.from_yaml('config/sensor_config.yaml')
 
 # Access properties
 print(config.sensors_dir)      # Per-sensor output directory
@@ -75,7 +75,7 @@ print(config.sensors)          # List of SensorConfig objects
 - `iter_sensor_csvs() -> Dict[str, Path]`  
   Iterate over all sensor 10min CSV paths
 
-**Example Configuration (sensors.yaml):**
+**Example Configuration (sensor_config.yaml):**
 
 ```yaml
 sensors:
@@ -128,7 +128,7 @@ Orchestrates full sensor data processing workflow.
 from src.config import PipelineConfig
 from src.pipeline import SensorPipeline
 
-config = PipelineConfig.from_yaml('config/sensors.yaml')
+config = PipelineConfig.from_yaml('config/sensor_config.yaml')
 
 # Create pipeline
 pipeline = SensorPipeline(config, force=False)
@@ -175,7 +175,7 @@ Merge multiple sensor outputs into time-aligned dataset.
 from src.merger import SensorMerger, merge_all_sensors
 from src.config import PipelineConfig
 
-config = PipelineConfig.from_yaml('config/sensors.yaml')
+config = PipelineConfig.from_yaml('config/sensor_config.yaml')
 
 # Method 1: Using convenience function (recommended)
 merged_df = merge_all_sensors(
@@ -512,7 +512,7 @@ Orchestrates validation checks and report generation.
 ```python
 from src.validation import ValidationReport
 
-report = ValidationReport('config/sensors.yaml')
+report = ValidationReport('config/sensor_config.yaml')
 report.run_all()
 
 # Access results
@@ -554,7 +554,7 @@ report = validate_outputs()
 
 # Custom config
 report = validate_outputs(
-    config_path='config/sensors.yaml',
+    config_path='config/sensor_config.yaml',
     export_json=True,
     export_markdown=True,
     verbose=True
@@ -563,7 +563,7 @@ report = validate_outputs(
 
 **Parameters:**
 
-- `config_path` - Path to sensors.yaml (default: 'config/sensors.yaml')
+- `config_path` - Path to sensor_config.yaml (default: 'config/sensor_config.yaml')
 - `export_json` - Export JSON report (default: True)
 - `export_markdown` - Export Markdown receipt (default: True)
 - `verbose` - Print summary to console (default: True)
@@ -584,7 +584,7 @@ Convenience function to merge all sensors.
 from src.merger import merge_all_sensors
 from src.config import PipelineConfig
 
-config = PipelineConfig.from_yaml('config/sensors.yaml')
+config = PipelineConfig.from_yaml('config/sensor_config.yaml')
 
 # Method 1: Use config (recommended)
 merged = merge_all_sensors(
@@ -678,7 +678,7 @@ from src.validation import validate_outputs
 from src.visualization import generate_all_plots
 
 # 1. Load configuration
-config = PipelineConfig.from_yaml('config/sensors.yaml')
+config = PipelineConfig.from_yaml('config/sensor_config.yaml')
 
 # 2. Process all sensors
 pipeline = SensorPipeline(config, force=False)

@@ -39,7 +39,7 @@ The pipeline is a **batch-oriented ETL (Extract, Transform, Load) system** desig
 ┌──────────────────────────────────────────────────────────┐
 │                     Processing Pipeline                   │
 │  • Python 3.10+ (pandas, numpy, pyarrow)                 │
-│  • Configuration: YAML (sensors.yaml)                    │
+│  • Configuration: YAML (config/sensor_config.yaml)          │
 │  • Logging: Python logging module                        │
 └──────────────────────────────────────────────────────────┘
                            ↓
@@ -287,7 +287,7 @@ output/
 ```
 ┌────────────────────────────────────┐
 │        PipelineConfig              │
-│  • Load from sensors.yaml          │
+│  • Load from config/sensor_config.yaml │
 │  • Resolve paths                   │
 │  • Create directories              │
 │  • Provide sensor configs          │
@@ -514,7 +514,7 @@ sensors:
 ```
 
 ```python
-config = PipelineConfig.from_yaml('sensors.yaml')  # Builds entire config
+config = PipelineConfig.from_yaml('config/sensor_config.yaml')  # Builds entire config
 ```
 
 **Benefit:** Separates configuration from code, supports validation.

@@ -1,23 +1,27 @@
-FROM python:3.12-slim
+# ---- Stage 1: Build ----
+FROM python:3.12-alpine AS builder
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONUNBUFFERED=1
+RUN apk add --no-cache gcc musl-dev linux-headers
+
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ---- Stage 2: Runtime ----
+FROM python:3.12-alpine
 
 WORKDIR /app
 
-COPY requirements.txt /app/
+# Copy installed packages from builder
+COPY --from=builder /install /usr/local
 
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt
+# Copy application source only
+COPY src/ /app/src/
 
-COPY src /app/src
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
-RUN mkdir -p /app/output/individual \
-    /app/output/parquet \
-    /app/output/logs \
-    /app/output/plots \
-    /app/config
+# Output dirs created at runtime by config.py
+# Config, output, and data dirs are mounted as volumes
 
-ENV PYTHONPATH=/app/src
-
-ENTRYPOINT ["python", "-m", "pipeline"]
+ENTRYPOINT ["python", "-m", "src.pipeline"]

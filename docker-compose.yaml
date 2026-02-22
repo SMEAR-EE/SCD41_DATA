@@ -1,17 +1,35 @@
-version: "3.9"
-
 services:
   smear-co2:
     build: .
     container_name: smear_co2_processor
 
+    # Volume Mounts
+    # ─────────────
+    # config: Sensor configuration (read-only)
+    #   The container reads config/sensor_config.yaml.
+    #   NOTE: input_dir paths in the YAML must use the container-side
+    #   mount paths (e.g. /data/scd41/CO2-SCT1-2M), not host paths.
+    #
+    # output: Pipeline writes all results here.
+    #   Subdirs (sensors/, merged/, logs/, validation/) are created
+    #   automatically by the pipeline at runtime.
+    #
+    # data (read-only): Raw sensor data directories.
+    #   Mount each data source to a path that matches what you set
+    #   in config/sensor_config.yaml input_dir fields.
+    #   Example: if sensor_config.yaml has input_dir: /data/scd41/CO2-SCT1-2M
+    #   then mount the host directory containing that sensor's raw files
+    #   to /data/scd41 in the container.
     volumes:
-      - ./config:/app/config:ro    # Load user config
-      - ./output:/app/output       # Save outputs
-      - /absolute/path/SCD41:/data/scd41:ro
-      - /absolute/path/LGR:/data/lgr:ro
+      - ./config:/app/config:ro
+      - ./output:/app/output
+      # ── Edit these to point to your raw data directories ──
+      # - /host/path/to/SCD41_data:/data/scd41:ro
+      # - /host/path/to/LGR_data:/data/lgr:ro
 
     environment:
       PYTHONUNBUFFERED: "1"
 
+    # Batch job — don't restart on exit
+    restart: "no"
     tty: true
