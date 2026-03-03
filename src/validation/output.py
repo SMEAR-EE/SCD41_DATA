@@ -140,19 +140,22 @@ def print_console_summary(report, verbose: bool = True) -> None:
         print(f"    RMSE:        {m['rmse_ppm']:.1f} ppm")
         print(f"    MAE:         {m['mae_ppm']:.1f} ppm")
         print(f"    Correlation: {m['correlation']:.3f}")
+        print(f"    Std:         {m['std_ppm']:.1f} ppm")
     
     # 30m comparisons
     sensor_30m = [k for k in report.quality_metrics if k.startswith("CO2_30M")]
     if sensor_30m:
         print(f"\n9. 30M SENSOR COMPARISONS (vs LGR)")
         print(subsep)
-        print(f"    {'Sensor':<12} {'n':>8} {'Bias':>10} {'RMSE':>10} {'Corr':>8}")
-        print(f"    {'-'*12} {'-'*8} {'-'*10} {'-'*10} {'-'*8}")
+        # Header
+        print(f"    {'Sensor':<12} {'n':>8} {'Bias':>10} {'RMSE':>10} {'Std':>8} {'Corr':>8}")
+        print(f"    {'-'*12} {'-'*8} {'-'*10} {'-'*10} {'-'*8} {'-'*8}")
+        
         for key in sorted(sensor_30m):
             m = report.quality_metrics[key]
             sensor_name = key.replace("_vs_lgr", "").replace("CO2_30M_", "30M-")
-            print(f"    {sensor_name:<12} {m['n_valid_pairs']:>8,} {m['bias_ppm']:>+9.1f} {m['rmse_ppm']:>10.1f} {m['correlation']:>8.3f}")
-    
+            # Row
+            print(f"    {sensor_name:<12} {m['n_valid_pairs']:>8,} {m['bias_ppm']:>+9.1f} {m['rmse_ppm']:>10.1f} {m['std_ppm']:>8.1f} {m['correlation']:>8.3f}")    
     # Verification checks
     if report.verification_checks:
         print(f"\n10. VERIFICATION CHECKS")

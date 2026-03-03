@@ -40,6 +40,7 @@ Comparison of low-cost SCD41 sensor at 2m against LGR reference at 30m.
 | Bias | {{ "%+.1f"|format(quality_metrics.scd41_2m_vs_lgr.bias_ppm) }} ppm |
 | RMSE | {{ "%.1f"|format(quality_metrics.scd41_2m_vs_lgr.rmse_ppm) }} ppm |
 | MAE | {{ "%.1f"|format(quality_metrics.scd41_2m_vs_lgr.mae_ppm) }} ppm |
+| Std | {{ "%.1f"|format(quality_metrics.scd41_2m_vs_lgr.std_ppm) }} ppm |
 | Correlation | {{ "%.3f"|format(quality_metrics.scd41_2m_vs_lgr.correlation) }} |
 {% endif %}
 
@@ -54,12 +55,12 @@ Comparison of low-cost SCD41 sensor at 2m against LGR reference at 30m.
 
 ## 30M Sensor Comparisons (vs LGR)
 
-| Sensor | n | Bias (ppm) | RMSE (ppm) | Correlation |
-|--------|--:|----------:|-----------:|------------:|
+| Sensor | n | Bias (ppm) | RMSE (ppm) | Std (ppm) | Correlation |
+|--------|--:|-----------:|-----------:|----------:|------------:|
 {% for key in sensor_30m|sort %}
 {% set m = quality_metrics[key] %}
 {% set sensor_name = key.replace("_vs_lgr", "").replace("CO2_30M_", "30M-") %}
-| {{ sensor_name }} | {{ "{:,}".format(m.n_valid_pairs) }} | {{ "%+.1f"|format(m.bias_ppm) }} | {{ "%.1f"|format(m.rmse_ppm) }} | {{ "%.3f"|format(m.correlation) }} |
+| {{ sensor_name }} | {{ "{:,}".format(m.n_valid_pairs) }} | {{ "%+.1f"|format(m.bias_ppm) }} | {{ "%.1f"|format(m.rmse_ppm) }} | {{ "%.1f"|format(m.std_ppm) }} | {{ "%.3f"|format(m.correlation) }} |
 {% endfor %}
 {% endif %}
 

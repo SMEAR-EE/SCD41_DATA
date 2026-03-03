@@ -582,7 +582,8 @@ def compute_quality_metrics(cfg) -> tuple[CheckResult, dict]:
                     "bias_ppm": round(diff.mean(), 1),
                     "rmse_ppm": round(np.sqrt((diff**2).mean()), 1),
                     "correlation": round(df[scd_col][valid].corr(df[lgr_col][valid]), 3),
-                    "mae_ppm": round(diff.abs().mean(), 1)
+                    "mae_ppm": round(diff.abs().mean(), 1),
+                    "std_ppm": round(diff.std(), 1)
                 }
         
         # 30m sensor comparisons
@@ -597,7 +598,8 @@ def compute_quality_metrics(cfg) -> tuple[CheckResult, dict]:
                         "n_valid_pairs": int(valid.sum()),
                         "bias_ppm": round(diff.mean(), 1),
                         "rmse_ppm": round(np.sqrt((diff**2).mean()), 1),
-                        "correlation": round(df[sensor_col][valid].corr(df[lgr_col][valid]), 3)
+                        "correlation": round(df[sensor_col][valid].corr(df[lgr_col][valid]), 3),
+                        "std_ppm": round(diff.std(), 1)
                     }
         
         bias = quality_metrics.get('scd41_2m_vs_lgr', {}).get('bias_ppm', 'N/A')
