@@ -257,7 +257,7 @@ class SensorMerger:
             base_name: Base name for output files
         """
         self.logger.info("Exporting monthly merged CSV files...")
-        
+        merged_df = merged_df.copy()
         # Ensure timestamp is index
         if 'timestamp' in merged_df.columns:
             merged_df = merged_df.set_index('timestamp')
