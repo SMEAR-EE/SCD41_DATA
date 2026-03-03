@@ -296,6 +296,13 @@ class SensorMerger:
         """
         self.logger.info("Exporting monthly merged Parquet files...")
         
+        # Export full combined parquet first
+        full_df = merged_df.reset_index() if 'timestamp' not in merged_df.columns else merged_df.copy()
+        full_path = self.parquet_dir / f"{base_name}_merged.parquet"
+        table = pa.Table.from_pandas(full_df, preserve_index=False)
+        pq.write_table(table, full_path, compression='snappy')
+        self.logger.info(f"  Saved full: {full_path.name} ({len(full_df)} rows)")
+        
         # Ensure timestamp is in the dataframe (reset index if needed)
         if 'timestamp' not in merged_df.columns:
             merged_df = merged_df.reset_index()
