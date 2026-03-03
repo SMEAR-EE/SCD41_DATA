@@ -402,6 +402,28 @@ class SensorPipeline:
             
             self.logger.info(f"Exported {len(export_df)} rows → {output_path.name}")
 
+        # Export combined parquet (mirrors {sensor}_10min.csv)
+        combined_path = parquet_dir / f"{sensor_name}_10min.parquet"
+        
+        # Re-read full CSV (unfiltered) for combined export
+        full_df = pd.read_csv(csv_path)
+        # or alternative - stashing...
+        # full_df = df.copy()  # preserve unfiltered for combined export
+        full_df['timestamp'] = pd.to_datetime(full_df['timestamp'], format='mixed', errors='coerce')
+        
+        table = pa.Table.from_pandas(full_df, preserve_index=False)
+        pq.write_table(table, combined_path, compression='snappy')
+        
+        self.logger.info(f"Exported combined {len(full_df)} rows → {combined_path.name}")
+
+
+        # alternative // Export combined parquet (mirrors {sensor}_10min.csv)
+        # combined_path = parquet_dir / f"{sensor_name}_10min.parquet"
+        # export_full = full_df.drop(columns=['year', 'month'])
+        # table = pa.Table.from_pandas(export_full, preserve_index=False)
+        # pq.write_table(table, combined_path, compression='snappy')
+        # self.logger.info(f"Exported combined {len(export_full)} rows → {combined_path.name}")
+
     def _export_monthly_csvs(
         self,
         sensor_name: str,
