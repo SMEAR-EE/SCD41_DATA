@@ -164,6 +164,12 @@ def check_file_inventory(cfg, sensor_names: list[str]) -> tuple[list[CheckResult
         monthly_pqs = sorted(parquet_dir.glob(f"{sensor}_[0-9][0-9][0-9][0-9]_[0-9][0-9].parquet")) if parquet_dir.exists() else []
         months_pq = [f.stem.split('_')[-2] + '-' + f.stem.split('_')[-1] for f in monthly_pqs]
         
+        # Check for combined files
+        combined_csv = csv_dir / f"{sensor}_10min.csv"
+        combined_pq = parquet_dir / f"{sensor}_10min.parquet"
+        has_combined_csv = combined_csv.exists()
+        has_combined_pq = combined_pq.exists()
+
         # Calculate stats from parquets
         total_rows = 0
         min_date, max_date = None, None
@@ -211,7 +217,8 @@ def check_file_inventory(cfg, sensor_names: list[str]) -> tuple[list[CheckResult
         csv_pq_match = set(months_csv) == set(months_pq)
         results.append(CheckResult(
             name=f"file_inventory:{sensor}",
-            passed=csv_pq_match and len(months_pq) > 0,
+            # passed=csv_pq_match and len(months_pq) > 0,
+            passed=csv_pq_match and len(months_pq) > 0 and has_combined_csv,
             message=f"{len(months_csv)} CSVs, {len(months_pq)} parquets" + 
                     ("" if csv_pq_match else " [MISMATCH]"),
             details={
@@ -348,7 +355,8 @@ def check_csv_parquet_consistency(
     results = []
     
     # Check key sensors only
-    check_sensors = ["CO2_SCT1_2M", "LGR_30M"]
+    # check_sensors = ["CO2_SCT1_2M", "LGR_30M"]
+    check_sensors = ["CO2_SCT1_2M", "CO2_30M_A", "CO2_30M_B", "CO2_30M_C", "LGR_30M"]
     
     for sensor in check_sensors:
         sensor_dirs = cfg.get_sensor_dirs(sensor)
@@ -463,7 +471,16 @@ def check_merged_data(cfg) -> tuple[CheckResult, dict]:
                 total_pq_rows = sum(len(pd.read_parquet(p)) for p in monthly_pqs)
                 merged_summary["monthly_parquet_sum_match"] = total_pq_rows == len(df)
                 merged_summary["monthly_parquet_total_rows"] = total_pq_rows
-        
+       
+        # Check combined merged parquet
+        merged_pq_combined = merged_pq_dir / "SMEAR_EE_CO2_merged.parquet"
+        if merged_pq_combined.exists():
+            pq_df = pd.read_parquet(merged_pq_combined)
+            merged_summary["combined_parquet_rows"] = len(pq_df)
+            merged_summary["combined_parquet_match"] = len(pq_df) == len(df)
+        else:
+            merged_summary["combined_parquet_exists"] = False
+       
         # Column coverage
         key_cols = [
             'co2_sct1_2m_co2_mean', 
