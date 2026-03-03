@@ -59,6 +59,7 @@ sensors:
 
 - **Quick Start**: This README (you are here!)
 - **Setup Guide**: [`SETUP.md`](SETUP.md) - Installation, configuration, and troubleshooting
+- **Container Deployment**: [`DOCKER.md`](DOCKER.md) - Docker/Podman setup, volume mounts, and configuration
 - **API Reference**: [`API_REFERENCE.md`](API_REFERENCE.md) - Complete API docs for all classes and functions
 - **Architecture**: [`ARCHITECTURE.md`](ARCHITECTURE.md) - Technical design, data flow, and component architecture
 - **Output Schema**: [`OUTPUT_SCHEMA.md`](OUTPUT_SCHEMA.md) - Detailed column definitions and data formats
@@ -80,17 +81,21 @@ pipeline = SensorPipeline(config, force=True)
 pipeline.run_all(year=2024, month=10)
 ```
 
-## Container
+## Container Deployment
 
-`docker-compose up` or `podman-compose up`
+`docker compose up` or `podman-compose up`
 
->Note: requires editing volume paths in `docker-compose.yaml`.
+See [`DOCKER.md`](DOCKER.md) for full setup instructions: volume mounts, config path notes, Docker/Podman commands, and output structure.
+
+> Requires editing volume paths in `docker-compose.yaml` — see DOCKER.md for details.
 
 ## Requirements
 
 - Python 3.10+
-- ~500 MB disk space (plus disk space for raw and processed data)
-- Dependencies: pandas, numpy, pyarrow, matplotlib, seaborn
+- 8 GB RAM minimum, 16 GB recommended (pandas loads large DataFrames day-by-day)
+- Modern multi-core CPU (e.g. Intel Core i5/Ultra 5 or equivalent)
+- ~500 MB disk space for dependencies, plus space for raw and processed data
+- Dependencies installed via `requirements.txt`: pandas, numpy, pyarrow, matplotlib, seaborn
 
 ## Citation
 
