@@ -24,14 +24,8 @@ from .base_plotter import BasePlotter
 from .uptime_plots import UptimePlots
 from .validation_plots import ValidationPlots
 from .quality_control import QualityControlPlots
-# from .taylor_diagram_custom import TaylorPlotter
-# Taylor diagram requires optional SkillMetrics package
-try:
-    from .taylor_plots import TaylorDiagram
-    TAYLOR_AVAILABLE = True
-except ImportError:
-    TAYLOR_AVAILABLE = False
-    TaylorDiagram = None
+from .taylor_diagram_custom import TaylorDiagram, TaylorPlotter
+TAYLOR_AVAILABLE = True
 
 __all__ = [
     'BasePlotter',
@@ -40,7 +34,8 @@ __all__ = [
     'QualityControlPlots',
     'TaylorDiagram',
     'generate_all_plots',
-    'TAYLOR_AVAILABLE'
+    'TAYLOR_AVAILABLE',
+    'TaylorPlotter'
 ]
 
 
@@ -92,7 +87,7 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
     validation_plotter = ValidationPlots(merged_plots_dir, close_after_save=close)
 
     if TAYLOR_AVAILABLE and 'taylor' not in skip:
-        taylor_plotter = TaylorDiagram(merged_plots_dir)
+        taylor_plotter = TaylorPlotter(merged_plots_dir, close_after_save=close)
     else:
         if not TAYLOR_AVAILABLE and 'taylor' not in skip:
             logger.warning("Taylor diagrams skipped (SkillMetrics not installed). "
