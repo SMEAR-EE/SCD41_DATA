@@ -326,6 +326,109 @@ class SensorMerger:
             
             self.logger.info(f"  Saved: {filename} ({len(export_df)} rows)")
 
+    def merge_uptimes(
+        self,
+        uptime_csvs: Dict[str, Path],
+        reporting_threshold: float = 0.5,
+        reference_sensor: Optional[str] = None,
+        output_name: str = "SMEAR_EE_CO2_uptime_merged.csv",
+    ) -> pd.DataFrame:
+        """
+        Merge per-sensor daily uptime CSVs into a single wide-format table.
+
+        Each sensor becomes a column holding its daily uptime_ratio.
+        Summary columns flag how many SCD41 sensors were reporting above
+        the threshold on each day, and whether the reference instrument
+        was active.
+
+        Args:
+            uptime_csvs: {sensor_name: path_to_uptime_csv}
+            reporting_threshold: Minimum uptime_ratio to count as "reporting"
+            reference_sensor: Name of reference sensor (e.g. 'LGR_30M')
+            output_name: Filename for merged output
+
+        Returns:
+            Wide-format DataFrame sorted by date
+        """
+        self.logger.info(f"Merging {len(uptime_csvs)} uptime CSVs...")
+
+        frames = []
+        for sensor_name, csv_path in uptime_csvs.items():
+            if not Path(csv_path).exists():
+                self.logger.warning(f"  Uptime CSV not found: {csv_path}")
+                continue
+
+            df = pd.read_csv(csv_path, usecols=['year', 'month', 'day', 'uptime_ratio'])
+            df['sensor'] = sensor_name.lower()
+            frames.append(df)
+            self.logger.info(f"  {sensor_name}: {len(df)} daily records")
+
+        if not frames:
+            self.logger.error("No uptime data loaded — cannot merge")
+            return pd.DataFrame()
+
+        long = pd.concat(frames, ignore_index=True)
+
+        # Pivot to wide: one column per sensor
+        wide = long.pivot_table(
+            index=['year', 'month', 'day'],
+            columns='sensor',
+            values='uptime_ratio',
+            aggfunc='first',      # one row per sensor per day expected
+        ).reset_index()
+
+        # Flatten column index left over from pivot
+        wide.columns.name = None
+
+        # Build proper date column
+        wide['date'] = pd.to_datetime(wide[['year', 'month', 'day']])
+
+        # Identify SCD41 columns (everything except reference and date scaffolding)
+        ref_col = reference_sensor.lower() if reference_sensor else None
+        scaffold = {'year', 'month', 'day', 'date'}
+        if ref_col:
+            scaffold.add(ref_col)
+        scd_cols = [c for c in wide.columns if c not in scaffold]
+
+        # Count SCD41 sensors reporting above threshold per day
+        reporting_mask = wide[scd_cols].ge(reporting_threshold)
+        wide['scd_reporting'] = reporting_mask.sum(axis=1).astype(int)
+
+        # Reference sensor flag (True where absent / below threshold)
+        if ref_col and ref_col in wide.columns:
+            wide['ref_reporting'] = wide[ref_col].ge(reporting_threshold).fillna(False)
+        elif reference_sensor:
+            self.logger.warning(f"  Reference sensor '{reference_sensor}' not found in uptime data")
+
+        wide = wide.sort_values('date').reset_index(drop=True)
+
+        # Save
+        output_path = self.output_dir / output_name
+        wide.to_csv(output_path, index=False)
+        self.logger.info(f"✓ Saved merged uptime: {output_path}")
+
+        # Summary stats
+        total_days = len(wide)
+        mean_overlap = wide['scd_reporting'].mean()
+        days_all_scd = (wide['scd_reporting'] == len(scd_cols)).sum()
+        days_none = (wide['scd_reporting'] == 0).sum()
+
+        self.logger.info(
+            f"  {total_days} days | "
+            f"mean SCD overlap: {mean_overlap:.1f} | "
+            f"all reporting: {days_all_scd} days | "
+            f"none reporting: {days_none} days"
+        )
+
+        if ref_col and 'ref_reporting' in wide.columns:
+            ref_days = wide['ref_reporting'].sum()
+            both = (wide['ref_reporting'] & (wide['scd_reporting'] > 0)).sum()
+            self.logger.info(
+                f"  LGR active: {ref_days} days | "
+                f"LGR + ≥1 SCD: {both} days"
+            )
+
+        return wide
 
 def merge_all_sensors(
     config: Optional[PipelineConfig] = None,
@@ -420,5 +523,21 @@ def merge_all_sensors(
     # Also export monthly CSV
     if not merged.empty:
         merger.export_monthly_csv(merged)
-    
+    # Merge uptime CSVs
+    if config is not None:
+        uptime_csvs = {
+            name: path
+            for name, path in config.iter_sensor_uptimes().items()
+            if path.exists()
+        }
+        if uptime_csvs:
+            # Identify reference sensor (first LGR-type sensor)
+            ref_name = next(
+                (s.name for s in config.sensors if s.sensor_type == 'lgr_csv'),
+                None
+            )
+            merger.merge_uptimes(
+                uptime_csvs,
+                reference_sensor=ref_name,
+            )
     return merged

@@ -197,6 +197,14 @@ class PipelineConfig:
             for s in self.sensors
             if s.sensor_id not in self.excluded_sensor_ids
         }
+    
+    def iter_sensor_uptimes(self) -> Dict[str, Path]:
+        """Iterate over all sensor uptime CSV paths."""
+        return {
+            s.name: self.get_sensor_output_paths(s.name)['uptime']
+            for s in self.sensors
+            if s.sensor_id not in self.excluded_sensor_ids
+        }
 
     def iter_sensor_parquet_dirs(self) -> Dict[str, Path]:
         """
