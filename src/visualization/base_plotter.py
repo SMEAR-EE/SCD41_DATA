@@ -29,10 +29,22 @@ class BasePlotter:
     
     def __init__(self, output_dir: Path, close_after_save: bool = False):
         """
+        Initialise the plotter and apply publication-quality style defaults.
+
+        Creates the output directory if it does not already exist, configures
+        matplotlib with consistent rcParams, and sets up a class-level logger
+        named after the concrete subclass.
+
         Args:
-            output_dir: Where to save plots
-            close_after_save: If True, close figures after saving to prevent
-                              inline display in notebooks (default: False)
+            output_dir: Directory in which to save plot files.  Created
+                        automatically (including any parent directories) if it
+                        does not exist.
+            close_after_save: If True, close each figure immediately after
+                              saving to suppress inline display in Jupyter
+                              notebooks (default: False).
+
+        Returns:
+            None
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)

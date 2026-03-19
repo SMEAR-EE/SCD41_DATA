@@ -39,14 +39,31 @@ class TaylorDiagram:
     def __init__(self, STD, fig=None, rect=111, label='_', smax=None,
                  extend_negative=False):
         """
+        Initialise the Taylor diagram and draw the reference point and arc.
+
+        Constructs a polar floating-axes figure using
+        ``mpl_toolkits.axisartist``.  Correlation tick marks are placed at
+        fixed values between −1 and 1 (negative ticks only when
+        ``extend_negative=True``).  The reference standard deviation is plotted
+        as a black star with a dashed arc at radius STD.
+
         Args:
-            STD:   Reference standard deviation
-            fig:   Existing figure or None
-            rect:  Subplot spec
-            label: Reference point legend label
-            smax:  Manual axis limit (default: 1.5 * STD)
-            extend_negative: If True, show full semicircle (r = -1 to 1).
-                             Use from_stats() to set this automatically.
+            STD: Reference standard deviation (sets the scale of the diagram).
+            fig: Existing matplotlib Figure to draw into, or None to create a
+                 new one (default: None).
+            rect: Subplot specification integer or tuple passed to
+                  ``FloatingSubplot`` (default: 111).
+            label: Legend label for the reference point (default: '_', which
+                   hides it from the legend).
+            smax: Maximum radial axis limit.  If None, defaults to
+                  ``1.5 * STD`` (default: None).
+            extend_negative: If True, extend the angular axis to a full
+                             semicircle (correlation −1 to 1) to accommodate
+                             negative correlations.  Use ``from_stats()`` to
+                             set this automatically (default: False).
+
+        Returns:
+            None
         """
         self.STD = STD
         self.extend_negative = extend_negative
@@ -138,17 +155,74 @@ class TaylorDiagram:
     @classmethod
     def from_stats(cls, ref_std, correlations, fig=None, rect=111,
                    label='_', smax=None):
-        """Factory: auto-detect whether negative correlations are present."""
+        """
+        Factory method: create a diagram and auto-detect negative correlations.
+
+        Inspects ``correlations`` and sets ``extend_negative=True`` if any
+        value is below zero, ensuring the angular axis spans the full
+        semicircle.
+
+        Args:
+            ref_std: Reference standard deviation.
+            correlations: Iterable of correlation coefficients for the sensors
+                          that will be plotted.  Used only to decide whether to
+                          extend the axis; the values are not stored.
+            fig: Existing matplotlib Figure or None (default: None).
+            rect: Subplot specification (default: 111).
+            label: Legend label for the reference point (default: '_').
+            smax: Manual radial axis limit, or None to use ``1.5 * ref_std``
+                  (default: None).
+
+        Returns:
+            TaylorDiagram instance configured for the supplied correlations.
+        """
         extend = any(r < 0 for r in correlations)
         return cls(ref_std, fig=fig, rect=rect, label=label, smax=smax,
                    extend_negative=extend)
 
     def add_sample(self, STD, r, *args, **kwargs):
+        """
+        Plot a single sample point on the diagram.
+
+        Converts the correlation coefficient ``r`` to an angle via
+        ``arccos(r)`` and plots the point at polar coordinates
+        ``(arccos(r), STD)``.  All additional positional and keyword arguments
+        are forwarded to ``ax.plot``.
+
+        Args:
+            STD: Standard deviation of the sample (radial coordinate).
+            r: Pearson correlation coefficient of the sample (angular
+               coordinate, mapped as ``theta = arccos(r)``).
+            *args: Additional positional arguments passed to ``ax.plot``
+                   (e.g., marker style strings).
+            **kwargs: Additional keyword arguments passed to ``ax.plot``
+                      (e.g., ``label``, ``color``, ``markersize``).
+
+        Returns:
+            matplotlib Line2D artist for the plotted point.
+        """
         (l,) = self.ax.plot(np.arccos(r), STD, *args, **kwargs)
         self.samplePoints.append(l)
         return l
 
     def add_contours(self, levels=5, **kwargs):
+        """
+        Overlay RMSE contour lines on the Taylor diagram.
+
+        Computes the centred root-mean-square error (RMSE after removing the
+        mean bias) on a mesh of (theta, r) values and draws contour lines
+        using ``ax.contour``.  The contours radiate from the reference point.
+
+        Args:
+            levels: Number of evenly-spaced contour levels, or an explicit
+                    sequence of RMSE values at which to draw contours
+                    (default: 5).
+            **kwargs: Additional keyword arguments forwarded to
+                      ``ax.contour`` (e.g., ``colors``, ``linewidths``).
+
+        Returns:
+            matplotlib QuadContourSet returned by ``ax.contour``.
+        """
         rs, ts = np.meshgrid(
             np.linspace(self.smin, self.smax),
             np.linspace(0, self.theta_max),
@@ -161,10 +235,26 @@ class TaylorDiagram:
 
     def queue_offchart(self, STD, r, label='', marker='o', color='blue',
                        markersize=8, **kwargs):
-        """Register an off-chart point for later batch drawing.
+        """
+        Register an off-chart point for later batch drawing.
 
-        Call flush_offchart() after all points are queued to draw
-        them with proportionally scaled arrows.
+        Stores the point's statistics so that ``flush_offchart()`` can draw
+        all queued points together with proportionally scaled arrows.  Using
+        the queue/flush pattern ensures that arrow lengths are scaled relative
+        to one another rather than being drawn independently.
+
+        Args:
+            STD: True standard deviation of the point (may exceed ``smax``).
+            r: Pearson correlation coefficient of the point.
+            label: Legend label for the point (default: '').
+            marker: Matplotlib marker style string (default: 'o').
+            color: Marker and arrow colour (default: 'blue').
+            markersize: Marker size in points (default: 8).
+            **kwargs: Additional keyword arguments forwarded to ``ax.plot``
+                      when the marker is drawn.
+
+        Returns:
+            None
         """
         self._offchart_queue.append(dict(
             STD=STD, r=r, label=label, marker=marker, color=color,
@@ -173,16 +263,26 @@ class TaylorDiagram:
 
     def flush_offchart(self, base_fraction=0.82, arrow_zone=0.15,
                        min_arrow=0.03):
-        """Draw all queued off-chart points with proportional arrows.
+        """
+        Draw all queued off-chart points with proportionally scaled arrows.
 
         Arrow length scales linearly with how far the true σ exceeds
-        smax, normalised so the most extreme point gets the longest
-        arrow and closer points get shorter ones.
+        ``smax``, normalised so the most extreme point gets the longest
+        arrow and closer points get shorter ones.  Each marker is placed
+        inside the diagram boundary with an upward-pointing arrow indicating
+        that the true value lies beyond the axis, and a σ label alternating
+        sides to avoid overlap.  Clears the internal queue after drawing.
 
         Args:
-            base_fraction:  Radial position of marker base (fraction of smax)
-            arrow_zone:     Maximum arrow length as fraction of smax
-            min_arrow:      Minimum arrow length as fraction of smax
+            base_fraction: Radial position of the marker base as a fraction
+                           of ``smax`` (default: 0.82).
+            arrow_zone: Maximum arrow length as a fraction of ``smax``
+                        (default: 0.15).
+            min_arrow: Minimum arrow length as a fraction of ``smax``
+                       (default: 0.03).
+
+        Returns:
+            None
         """
         if not self._offchart_queue:
             return
@@ -237,7 +337,29 @@ class TaylorDiagram:
     # Keep the direct method for one-off use, but prefer queue/flush
     def add_offchart_arrow(self, STD, r, label='', marker='o', color='blue',
                            markersize=8, offset_fraction=0.92, **kwargs):
-        """Legacy single-point off-chart arrow (non-proportional)."""
+        """
+        Draw a single off-chart arrow immediately (non-proportional, legacy).
+
+        Places the marker at a fixed radial position (``offset_fraction *
+        smax``) with a short upward arrow and a σ label.  Prefer the
+        ``queue_offchart`` / ``flush_offchart`` workflow when plotting
+        multiple off-chart sensors so that arrow lengths scale proportionally.
+
+        Args:
+            STD: True standard deviation of the point (used for the σ label
+                 only; the marker is drawn inside the diagram boundary).
+            r: Pearson correlation coefficient of the point.
+            label: Legend label for the point (default: '').
+            marker: Matplotlib marker style string (default: 'o').
+            color: Marker and arrow colour (default: 'blue').
+            markersize: Marker size in points (default: 8).
+            offset_fraction: Radial position of the marker as a fraction of
+                             ``smax`` (default: 0.92).
+            **kwargs: Additional keyword arguments forwarded to ``ax.plot``.
+
+        Returns:
+            matplotlib Line2D artist for the plotted marker.
+        """
         theta = np.arccos(np.clip(r, -1, 1))
         r_plot = self.smax * offset_fraction
 
@@ -277,12 +399,29 @@ class TaylorPlotter(BasePlotter):
              title='Taylor Diagram: SCD41 vs LGR Reference',
              filename='taylor_diagram.png'):
         """
+        Build a Taylor diagram comparing SCD41 sensors against a reference.
+
+        Loads the reference and test sensor CSVs, merges them on timestamp,
+        computes standard deviation and Pearson correlation for each sensor,
+        then draws a ``TaylorDiagram`` with RMSE contours, per-sensor markers,
+        and a legend.  Sensors whose standard deviation exceeds 95 % of the
+        diagram's radial limit are rendered as off-chart arrows via the
+        queue/flush mechanism.
+
         Args:
-            ref_csv:   Path to reference (LGR) 10min CSV
-            scd_csvs:  dict {sensor_name: Path} for test sensors
-            ref_name:  Reference sensor display name
+            ref_csv: Path to the reference (e.g., LGR) 10-minute CSV file.
+            scd_csvs: Dict mapping sensor display names to their 10-minute CSV
+                      paths, e.g. ``{'CO2_30M_A': Path('CO2_30M_A_10min.csv')}``.
+            ref_name: Display name for the reference instrument used in the
+                      legend and diagram title.
+            title: Figure suptitle string
+                   (default: 'Taylor Diagram: SCD41 vs LGR Reference').
+            filename: Output filename saved to ``output_dir``
+                      (default: 'taylor_diagram.png').
+
         Returns:
-            matplotlib Figure
+            matplotlib Figure object, or None if no sensor has at least 10
+            overlapping timestamps with the reference.
         """
         # --- stats ---
         # ref_df = pd.read_csv(ref_csv, parse_dates=['timestamp'])

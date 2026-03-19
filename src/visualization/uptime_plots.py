@@ -235,6 +235,37 @@ class UptimePlots(BasePlotter):
         trim_end: str | None = None,
         show_lgr_absence: bool = True,
         save: bool = True) -> plt.Figure:
+        """
+        Plot a calendar heatmap showing SCD41 sensor coverage overlap.
+
+        Reads the merged uptime CSV to build a month × day grid where each
+        cell is coloured by the number of SCD41 sensors reporting on that day.
+        Optionally overlays hatching on days where the LGR reference instrument
+        was absent.  Supports three trim modes to remove months outside the
+        active deployment window.
+
+        Args:
+            merged_uptime_csv: Path to the merged uptime CSV produced by the
+                               pipeline (e.g., SMEAR_EE_CO2_uptime_merged.csv).
+                               Must contain 'year', 'month', 'day',
+                               'scd_reporting', and optionally 'ref_reporting'.
+            trim_mode: Controls which months are shown.
+                       'auto'   — drop leading/trailing months with zero SCD41
+                                  activity (default).
+                       'none'   — show the full date range in the CSV.
+                       'manual' — restrict to trim_start..trim_end (inclusive).
+            trim_start: Start month in 'YYYY-MM' format; used only when
+                        trim_mode is 'manual'.
+            trim_end: End month in 'YYYY-MM' format; used only when
+                      trim_mode is 'manual'.
+            show_lgr_absence: If True, overlay red hatching on days where the
+                              LGR reference was not reporting (default: True).
+            save: If True, save the figure to output_dir as
+                  'uptime_overlay_count.png' (default: True).
+
+        Returns:
+            matplotlib Figure object containing the coverage overlap heatmap.
+        """
 
         SHOW_LGR_ABSENCE = show_lgr_absence
 
