@@ -13,6 +13,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from .base_plotter import BasePlotter
+import numpy as np
+import matplotlib.patches as mpatches
+from matplotlib.colors import ListedColormap, BoundaryNorm
 
 
 class UptimePlots(BasePlotter):
@@ -218,5 +221,118 @@ class UptimePlots(BasePlotter):
         if save:
             filename = "uptime_summary_all_sensors.png"
             self._save_figure(fig, filename)
+        
+        return fig
+
+    def plot_coverage_overlap(
+        self,
+        merged_uptime_csv: Path,
+        trim_mode: str = "auto", 
+        # "none"   — show all months
+        # "auto"   — drop leading/trailing months with zero SCD41 activity
+        # "manual" — crop to trim_start / trim_end (inclusive, "YYYY-MM")
+        trim_start: str | None = None,
+        trim_end: str | None = None,
+        show_lgr_absence: bool = True,
+        save: bool = True) -> plt.Figure:
+
+        SHOW_LGR_ABSENCE = show_lgr_absence
+
+        # --- Load & identify columns ---
+        df = pd.read_csv(merged_uptime_csv)
+        df["date"] = pd.to_datetime(df[["year", "month", "day"]])
+        df["ym"] = df["date"].dt.to_period("M")
+
+        # Auto-detect sensor columns (everything that isn't scaffolding)
+        SCAFFOLD = {"year", "month", "day", "date", "ym", "scd_reporting", "ref_reporting"}
+        REF_COL = next((c for c in df.columns if "lgr" in c.lower()), None)
+        if REF_COL:
+            SCAFFOLD.add(REF_COL)
+        SCD_SENSORS = [c for c in df.columns if c not in SCAFFOLD]
+        self.logger.info(f"SCD41 sensors detected: {SCD_SENSORS}")
+        self.logger.info(f"Reference column: {REF_COL}")
+
+        # --- Apply trim ---
+        if trim_mode == "auto":
+            monthly_max = df.groupby("ym")["scd_reporting"].max()
+            active = monthly_max[monthly_max > 0].index
+            if len(active) > 0:
+                df = df[(df["ym"] >= active.min()) & (df["ym"] <= active.max())]
+                self.logger.info(f"Auto-trimmed to {active.min()} .. {active.max()}")
+        elif trim_mode == "manual":
+            start_p = pd.Period(trim_start, freq="M")
+            end_p = pd.Period(trim_end, freq="M")
+            df = df[(df["ym"] >= start_p) & (df["ym"] <= end_p)]
+            self.logger.info(f"Manual trim to {trim_start} .. {trim_end}")
+
+        months = sorted(df["ym"].unique())
+        month_labels = [str(m) for m in months]
+        n_months = len(months)
+        
+        # --- Shared grids ---
+        scd_grid = np.full((n_months, 31), np.nan)
+        for i, m in enumerate(months):
+            chunk = df[df["ym"] == m]
+            days = chunk["day"].values.astype(int) - 1
+            scd_grid[i, days] = chunk["scd_reporting"].values
+
+        lgr_grid = None
+        if "ref_reporting" in df.columns:
+            lgr_grid = np.full((n_months, 31), False)
+            for i, m in enumerate(months):
+                chunk = df[df["ym"] == m]
+                days = chunk["day"].values.astype(int) - 1
+                lgr_grid[i, days] = ~chunk["ref_reporting"].astype(bool).values
+
+        OVERLAP_COLOURS = ["#e0e0e0", "#c7e9c0", "#74c476", "#238b45", "#00441b"]
+        CMAP_COUNT = ListedColormap(OVERLAP_COLOURS[:len(SCD_SENSORS) + 1])
+        bounds = [i - 0.5 for i in range(len(SCD_SENSORS) + 2)]
+        NORM_COUNT = BoundaryNorm(bounds, CMAP_COUNT.N)
+
+        fig, ax = plt.subplots(figsize=(14, max(4, n_months * 0.45)), constrained_layout=True)
+
+        masked = np.ma.masked_invalid(scd_grid)
+        mesh = ax.pcolormesh(
+            np.arange(32) - 0.5,
+            np.arange(n_months + 1) - 0.5,
+            masked,
+            cmap=CMAP_COUNT, norm=NORM_COUNT,
+            edgecolors="white", linewidth=0.5,
+        )
+
+        if SHOW_LGR_ABSENCE and lgr_grid is not None:
+            for i in range(n_months):
+                for j in range(31):
+                    if lgr_grid[i, j]:
+                        ax.add_patch(plt.Rectangle(
+                            (j - 0.5, i - 0.5), 1, 1,
+                            fill=False, hatch="///",
+                            edgecolor="#d62728", linewidth=1.2,
+                        ))
+
+        ax.set_xticks(range(31))
+        ax.set_xticklabels(range(1, 32), fontsize=8)
+        ax.set_xlabel("Day of Month")
+        ax.set_yticks(range(n_months))
+        ax.set_yticklabels(month_labels, fontsize=9)
+        ax.set_ylabel("Month")
+        ax.set_title("SCD41 Sensor Coverage Overlap", fontsize=13, fontweight="bold", pad=10)
+        ax.invert_yaxis()
+
+        cbar = fig.colorbar(mesh, ax=ax, ticks=range(len(SCD_SENSORS) + 1), shrink=0.6, aspect=20, pad=0.02)
+        cbar.set_label("SCD41 Sensors Reporting", fontsize=10)
+        cbar.ax.set_yticklabels([str(i) for i in range(len(SCD_SENSORS) + 1)])
+
+        if SHOW_LGR_ABSENCE and lgr_grid is not None and lgr_grid.any():
+            ax.legend(
+                handles=[mpatches.Patch(
+                    facecolor="none", edgecolor="#d62728",
+                    hatch="///", label="LGR reference absent",
+                )],
+                loc="lower right", fontsize=9,
+            )
+
+        if save:
+            self._save_figure(fig, "uptime_overlay_count.png")
         
         return fig

@@ -25,6 +25,7 @@ qc = QualityControlPlots("plots/")
 - `plot_timeseries(csv, sensor)` - Time series with data availability
 - `plot_heatmap(csv, sensor)` - Calendar heatmap showing gaps
 - `plot_summary(csv_dict)` - Multi-sensor comparison
+- `plot_coverage_overlap(merged_csv)` - Multi-sensor coverage overlap heatmap with LGR absence
 
 ### ValidationPlots
 - `plot_timeseries(data_csvs, start_date, end_date)` - Overlay multiple sensors

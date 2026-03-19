@@ -67,6 +67,7 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
               'scatter_hue'     - 2x2 scatter panels coloured by temp/RH
               'timeseries_hue'  - stacked timeseries coloured by temp/RH
               'taylor'          - Taylor diagram
+              'coverage_overlap'- Coverage Overlap Heatmap
     
     Example:
         generate_all_plots(config)                             # all plots, quiet
@@ -157,11 +158,17 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
                     monthly_csv, sensor_name, period_label=period)
 
     # -- 2. Multi-sensor summary plots (-> merged/plots/) -----------------
+    uptime_summary_plotter = UptimePlots(merged_plots_dir, close_after_save=close)
+    
     if len(uptime_csvs) > 1 and 'uptime_summary' not in skip:
         logger.info("  Multi-sensor uptime summary")
-        uptime_summary_plotter = UptimePlots(
-            merged_plots_dir, close_after_save=close)
         uptime_summary_plotter.plot_summary(uptime_csvs)
+    
+    if 'coverage_overlap' not in skip:
+        merged_uptime_csv = config.get_merged_dirs()['csv'] / "SMEAR_EE_CO2_uptime_merged.csv"
+        if merged_uptime_csv.exists():
+            logger.info("  Coverage overlap heatmap")
+            uptime_summary_plotter.plot_coverage_overlap(merged_uptime_csv)
 
     if len(data_csvs) > 1 and 'comparison' not in skip:
         logger.info("  CO2 timeseries comparison")
