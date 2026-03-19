@@ -1,12 +1,12 @@
 # SMEAR Estonia CO2 Sensor Processing
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/SMEAR-EE/SCD41_DATA/releases/tag/v0.2.0)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/SMEAR-EE/SCD41_DATA/releases/tag/v0.3.0)
 [![License](https://img.shields.io/badge/license-Apache_2.0-white.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 Fast, light and reproducible post-processing pipeline for SCD41 and LGR CO2 raw sensor data at the Estonian Station for Measuring Ecosystem-Atmosphere Relations (SMEAR; [smear.emu.ee](https://smear.emu.ee/)).
 
-> **Status:** v0.2.0 - Stable release with comprehensive validation suite and enhanced data quality reporting
+> **Status:** v0.3.0 - Stable release with comprehensive validation suite and enhanced data quality reporting
 
 ## Quick Start
 
@@ -102,14 +102,14 @@ See [`DOCKER.md`](DOCKER.md) for full setup instructions: volume mounts, config 
 ```
 Zorec, M. et al. (2026). SMEAR Estonia CO2 Sensor Processing Pipeline.
 Version 0.2.0. GitHub: SMEAR-EE/SCD41_DATA
-Dataset available at: [(DOI pending) 10.xxxx/zenodo.xxxxx]
+Dataset available at: 10.5281/zenodo.18984845
 ```
 
 ## Version
 
-**Current Release:** v0.2.0 (Stable)
+**Current Release:** v0.3.0 (Stable)
 
 ## License
 
-Software application licensed under the Apache License 2.0 (see [LICENSE](LICENSE) file).
-Dataset licensed under CC BY 4.0, available on [Zenodo.org/#](https://zenodo.org/).
+- Software application licensed under the Apache License 2.0 (see [LICENSE](LICENSE) file).
+- Dataset licensed under CC BY 4.0, available on [https://zenodo.org/uploads/18984845](http://doi.org/10.5281/zenodo.18984845).
