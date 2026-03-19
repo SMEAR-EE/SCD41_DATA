@@ -1,10 +1,20 @@
 """Visualization package for sensor data analysis
 
 Modular visualization tools split by functionality:
-- uptime: Uptime analysis plots
-- validation: CO2 comparison and validation plots  
-- quality_control: QC flag analysis
-- taylor: Taylor diagrams (currently broken)
+
+- ``BasePlotter``           — shared matplotlib styling, output-directory
+                              management, and CO2 column detection.
+- ``UptimePlots``           — uptime timeseries, calendar heatmap, multi-sensor
+                              summary, and coverage overlap plots.
+- ``ValidationPlots``       — CO2 timeseries overlay, scatter, difference,
+                              and hue-mapped panel plots against LGR reference.
+- ``QualityControlPlots``   — QC flag distribution bar charts.
+- ``TaylorDiagram``         — low-level Taylor diagram built on a polar
+                              floating-axes projection.
+- ``TaylorPlotter``         — high-level interface: merged CSV → Taylor diagram.
+
+Use the ``generate_all_plots`` convenience function to run the full plot suite
+from a ``PipelineConfig`` object in a single call.
 
 Example usage:
     from visualization import UptimePlots, ValidationPlots

@@ -31,9 +31,25 @@ qc = QualityControlPlots("plots/")
 - `plot_timeseries(data_csvs, start_date, end_date)` - Overlay multiple sensors
 - `plot_scatter(reference_csv, test_csv, ref_name, test_name)` - Sensor vs reference
 - `plot_difference(reference_csv, test_csv, ref_name, test_name)` - Bias analysis
+- `plot_co2_timeseries(data, sensor_name, period_label)` - Single-sensor CO2 timeseries with summary statistics
+- `plot_scatter_panel_hue(merged, lgr_co2_col, sensors, hue_var, cmap)` - 2×2 scatter grid coloured by temperature or relative humidity
+- `plot_timeseries_hue(merged, lgr_co2_col, sensors, hue_var, cmap)` - Stacked timeseries panels coloured by temperature or relative humidity
+- `build_sensor_map(merged_df, sensor_names)` - Auto-discover column mappings from merged CSV
 
 ### QualityControlPlots
 - `plot_qc_summary(data_csv, sensor_name)` - QC flag distribution
+
+### TaylorDiagram
+- `__init__(STD, fig, rect, label, smax, extend_negative)` - Initialise the polar floating-axes diagram
+- `from_stats(ref_std, correlations, fig, rect, label, smax)` - Factory method: auto-detect negative correlations
+- `add_sample(STD, r)` - Plot a single sample point on the diagram
+- `add_contours(levels)` - Overlay RMSE contour lines
+- `queue_offchart(STD, r, label, marker, color, markersize)` - Register an off-chart point for later batch drawing
+- `flush_offchart(base_fraction, arrow_zone, min_arrow)` - Draw all queued off-chart points with proportional arrows
+- `add_offchart_arrow(STD, r, label, marker, color, markersize, offset_fraction)` - Draw a single off-chart arrow immediately (legacy)
+
+### TaylorPlotter
+- `plot(ref_csv, scd_csvs, ref_name, title, filename)` - Build a Taylor diagram comparing SCD41 sensors against a reference
 
 ## Example Usage
 
