@@ -17,8 +17,9 @@ Fast, light and reproducible post-processing pipeline for SCD41 and LGR CO2 raw 
 # 2. Activate environment
 source venv/bin/activate
 
-# 3. Configure sensors
-edit config/sensors.yaml  # Set your data paths
+# 3. Configure sensors (copy template, then edit paths)
+cp config/sensor_config.yaml config/sensors.yaml
+# edit config/sensors.yaml  # Set your data paths
 
 # 4. Run processing
 jupyter notebook process_data.ipynb
@@ -46,7 +47,10 @@ Processes many sensors (4x SCD41, 1x LGR reference) with:
 
 ## Configuration
 
-Edit `config/sensors.yaml` to set input data paths:
+Copy the template and edit `config/sensors.yaml` to set input data paths:
+```bash
+cp config/sensor_config.yaml config/sensors.yaml
+```
 ```yaml
 sensors:
   - name: CO2_SCT1_2M
@@ -101,7 +105,7 @@ See [`DOCKER.md`](DOCKER.md) for full setup instructions: volume mounts, config 
 
 ```
 Zorec, M. et al. (2026). SMEAR Estonia CO2 Sensor Processing Pipeline.
-Version 0.2.0. GitHub: SMEAR-EE/SCD41_DATA
+Version 0.3.0. GitHub: SMEAR-EE/SCD41_DATA
 Dataset available at: 10.5281/zenodo.18984845
 ```
 

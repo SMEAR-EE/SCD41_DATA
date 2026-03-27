@@ -160,25 +160,22 @@ SCD41_DATA/
 │   │   ├── scd41_parser.py  # SCD41 JSON parser
 │   │   └── lgr_parser.py    # LGR CSV parser
 │   └── visualization/
-│       ├── base_plotter.py  # Common styling
-│       ├── uptime_plots.py  # Uptime visualizations
-│       ├── validation_plots.py  # Validation plots
-│       ├── quality_control.py   # QC plots
-│       └── taylor_plots.py      # Taylor diagrams (WIP)
+│       ├── base_plotter.py          # Common styling
+│       ├── uptime_plots.py          # Uptime visualizations
+│       ├── validation_plots.py      # Validation plots
+│       ├── quality_control.py       # QC plots
+│       └── taylor_diagram_custom.py # Taylor diagrams
 ├── config/
-│   └── sensors.example.yaml # Configuration template
-├── output/
-│   ├── individual/          # Per-sensor CSV files
-│   ├── parquet/             # Monthly Parquet files
-│   ├── plots/               # Generated plots
+│   ├── sensor_config.yaml   # Configuration template
+│   └── sensors.yaml         # Your config (copy from template; gitignored)
+├── output/                  # Created at runtime by pipeline
+│   ├── sensors/             # Per-sensor outputs (csv/, parquet/, plots/)
+│   ├── merged/              # Merged datasets (csv/, parquet/, plots/)
+│   ├── validation/          # Validation receipts
 │   └── logs/                # Processing logs
-├── testing/
-│   └── prototype/           # Development notebooks
 ├── process_data.ipynb       # Example Jupyter notebook
 ├── README.md                # Quick start guide
-├── APPLICATION_SUMMARY.md   # Detailed documentation
 ├── SETUP.md                 # Installation guide
-├── MERGING.md               # Data merging documentation
 ├── Dockerfile               # Container definition
 ├── docker-compose.yaml      # Orchestration config
 ├── requirements.txt         # Production dependencies
@@ -215,17 +212,18 @@ SCD41_DATA/
 1. **Setup** (one-time):
    - Clone repository
    - Run `./setup.sh` to create virtual environment
-   - Configure `config/sensors.yaml` with data paths
+   - Copy template: `cp config/sensor_config.yaml config/sensors.yaml`
+   - Edit `config/sensors.yaml` with your data paths
 
 2. **Processing**:
    - Activate environment: `source venv/bin/activate`
    - Run Jupyter notebook: `jupyter notebook process_data.ipynb`
-   - Or use Docker: `docker-compose up`
+   - Or use Docker: `docker compose up`
 
 3. **Output**:
-   - Processed CSVs: `output/individual/`
-   - Monthly Parquets: `output/parquet/`
-   - Plots: `output/plots/`
+   - Processed CSVs: `output/sensors/`
+   - Monthly Parquets: `output/sensors/{sensor}/parquet/`
+   - Plots: `output/merged/plots/`
    - Logs: `output/logs/`
 
 4. **Reprocessing**:
