@@ -514,7 +514,7 @@ sensors:
 ```
 
 ```python
-config = PipelineConfig.from_yaml('sensors.yaml')  # Builds entire config
+config = PipelineConfig.from_yaml('config/sensors.yaml')  # Builds entire config
 ```
 
 **Benefit:** Separates configuration from code, supports validation.

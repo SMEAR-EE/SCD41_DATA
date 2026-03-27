@@ -35,7 +35,11 @@ This will:
 
 ### 3. Configure Sensors
 
-Edit `config/sensor_config.yaml` to point to your data directories:
+Copy the template and edit `config/sensors.yaml` to point to your data directories:
+
+```bash
+cp config/sensor_config.yaml config/sensors.yaml
+```
 
 ```yaml
 sensors:
@@ -74,9 +78,7 @@ python -c "
 from src.config import PipelineConfig
 from src.pipeline import SensorPipeline
 
-config = PipelineConfig.from_yaml('config/sensor_config.yaml')
-pipeline = SensorPipeline(config)
-pipeline.run_all(year=2024, month=9)
+config = PipelineConfig.from_yaml('config/sensors.yaml')
 "
 ```
 
@@ -88,9 +90,7 @@ from src.pipeline import SensorPipeline
 from src.merger import merge_all_sensors
 
 # Load config
-config = PipelineConfig.from_yaml('config/sensor_config.yaml')
-
-# Process sensors
+config = PipelineConfig.from_yaml('config/sensors.yaml')
 pipeline = SensorPipeline(config)
 pipeline.run_all(year=2024, month=9)
 
@@ -116,7 +116,8 @@ SCD41_DATA/
 │   ├── visualization/
 │   └── validation/
 ├── config/
-│   └── sensor_config.yaml  # Sensor configuration
+│   ├── sensor_config.yaml  # Configuration template
+│   └── sensors.yaml        # Your config (copy from template; gitignored)
 ├── output/                 # Created at runtime by pipeline
 │   ├── sensors/            # Per-sensor outputs (csv/, parquet/, plots/)
 │   ├── merged/             # Merged datasets (csv/, parquet/)

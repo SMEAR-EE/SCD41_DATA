@@ -25,8 +25,8 @@ validate_outputs(export_json=False, export_markdown=False)
 | File | Location | Purpose |
 |------|----------|---------|
 | Console summary | stdout | Quick review |
-| `validation_report.json` | `output/` | Machine-readable, CI integration |
-| `VALIDATION_RECEIPT.md` | `output/` | Documentation, data management |
+| `validation_report.json` | `output/validation/` | Machine-readable, CI integration |
+| `VALIDATION_RECEIPT.md` | `output/validation/` | Documentation, data management |
 
 ## Checks Performed
 
@@ -43,7 +43,7 @@ validate_outputs(export_json=False, export_markdown=False)
 Edit `src/validation/templates/receipt.md.j2` (Jinja2 template).
 
 Available variables:
-- `{{ cfg.output_dir }}`, `{{ cfg.parquet_dir }}`, `{{ merged_dir }}`
+- `{{ cfg.sensors_dir }}`, `{{ merged_dir }}`
 - `{{ sensor_summaries }}` — dict of SensorSummary objects
 - `{{ quality_metrics }}` — comparison statistics
 - `{{ checks }}` — list of CheckResult objects
