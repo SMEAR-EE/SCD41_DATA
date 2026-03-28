@@ -93,6 +93,84 @@ class BasePlotter:
             'figure.figsize': (12, 6)
         })
     
+    def _apply_qc_filter(self, df: pd.DataFrame, co2_col: str = None) -> pd.DataFrame:
+        """Drop rows where the CO2 QC flag is not OK.
+
+        Looks for a QC column that corresponds to the CO2 measurement:
+        - In individual sensor CSVs: ``co2_qc``
+        - In merged CSVs: ``{prefix}_co2_qc`` derived from *co2_col*
+
+        Args:
+            df: DataFrame to filter (not modified in place).
+            co2_col: CO2 value column name.  When provided the method
+                     derives the QC column as ``co2_col`` with
+                     ``_mean`` stripped and ``_qc`` appended, falling
+                     back to the bare ``co2_qc`` column.
+
+        Returns:
+            Filtered copy of *df* containing only rows with ``OK`` QC.
+        """
+        # Candidate QC column names in priority order
+        candidates = []
+        if co2_col:
+            # e.g. co2_sct1_2m_co2_mean -> co2_sct1_2m_co2_qc
+            base = co2_col.replace('_mean', '').replace('_dry', '')
+            candidates.append(f"{base}_qc")
+        candidates.extend(['co2_qc', 'CO2_qc'])
+
+        for qc_col in candidates:
+            if qc_col in df.columns:
+                before = len(df)
+                df = df[df[qc_col] == 'OK'].copy()
+                dropped = before - len(df)
+                if dropped:
+                    self.logger.debug("QC filter (%s): dropped %d / %d rows",
+                                      qc_col, dropped, before)
+                return df
+
+        # No QC column found — return unmodified
+        return df
+
+    @staticmethod
+    def _break_gaps(df: pd.DataFrame, time_col: str = 'timestamp',
+                    max_gap_minutes: float = 15.0) -> pd.DataFrame:
+        """Insert NaN sentinel rows at timestamp gaps so plot lines break.
+
+        Any gap between consecutive timestamps exceeding *max_gap_minutes*
+        triggers a single NaN row, preventing matplotlib from drawing a
+        line across the gap.
+
+        Args:
+            df: DataFrame sorted by *time_col*.
+            time_col: Name of the datetime column.
+            max_gap_minutes: Threshold in minutes above which a break is
+                             inserted (default: 15.0).
+
+        Returns:
+            New DataFrame with NaN break rows inserted.
+        """
+        if len(df) < 2:
+            return df
+        dt = df[time_col].diff()
+        gap_mask = dt > pd.Timedelta(minutes=max_gap_minutes)
+        if not gap_mask.any():
+            return df
+
+        parts = []
+        prev = 0
+        for idx in df.index[gap_mask]:
+            pos = df.index.get_loc(idx)
+            parts.append(df.iloc[prev:pos])
+            # Single NaN row at the midpoint of the gap
+            mid_time = df[time_col].iloc[pos - 1] + (df[time_col].iloc[pos] - df[time_col].iloc[pos - 1]) / 2
+            nan_row = pd.DataFrame({c: [pd.NaT if c == time_col else float('nan')]
+                                    for c in df.columns})
+            nan_row[time_col] = mid_time
+            parts.append(nan_row)
+            prev = pos
+        parts.append(df.iloc[prev:])
+        return pd.concat(parts, ignore_index=True)
+
     def _save_figure(self, fig: plt.Figure, filename: str):
         """Save figure with consistent settings
         

@@ -55,10 +55,22 @@ class ValidationPlots(BasePlotter):
             
             # Get CO2 column
             co2_col = self._detect_co2_column(df)
+
+            # QC filter + gap-breaking
+            df = self._apply_qc_filter(df, co2_col)
+            df = self._break_gaps(df)
+
+            # LGR gets a distinct dashed style; SCD41 sensors keep default
+            is_lgr = 'lgr' in sensor_name.lower()
+            style = dict(
+                linestyle='--', linewidth=1.8, color='dimgray',
+                alpha=0.85, marker='None',
+            ) if is_lgr else dict(
+                alpha=0.7, marker='.', markersize=1.5, linewidth=0.8,
+            )
             
             # Plot
-            ax.plot(df['timestamp'], df[co2_col], label=sensor_name,
-                    alpha=0.7, marker='.', markersize=1.5, linewidth=0.8)
+            ax.plot(df['timestamp'], df[co2_col], label=sensor_name, **style)
         
         ax.set_ylabel('CO₂ (ppm)', fontsize=12)
         ax.set_xlabel('Date', fontsize=12)
@@ -112,6 +124,10 @@ class ValidationPlots(BasePlotter):
         # Get CO2 columns
         ref_col = self._detect_co2_column(ref)
         test_col = self._detect_co2_column(test)
+
+        # QC filter
+        ref = self._apply_qc_filter(ref, ref_col)
+        test = self._apply_qc_filter(test, test_col)
         
         # Merge on timestamp
         merged = pd.merge(
@@ -142,6 +158,18 @@ class ValidationPlots(BasePlotter):
         max_val = max(merged[ref_col].max(), merged[test_col].max())
         ax.plot([min_val, max_val], [min_val, max_val], 
                'r--', linewidth=2, label='1:1 Line')
+
+        # Tighten 2m sensor y-axis and annotate outlier count
+        if '2m' in test_name.lower() or '2M' in test_name:
+            y_cap = 1000
+            n_outliers = int((merged[test_col] > y_cap).sum())
+            if n_outliers > 0:
+                ax.set_ylim(top=y_cap)
+                ax.text(0.03, 0.97, f'{n_outliers} outlier(s) above {y_cap} ppm',
+                        transform=ax.transAxes, fontsize=9,
+                        va='top', ha='left',
+                        bbox=dict(boxstyle='round', fc='lightyellow',
+                                  ec='orange', alpha=0.85))
         
         # Stats text
         stats_text = f'R = {corr:.3f}\nRMSE = {rmse:.2f} ppm\nBias = {bias:.2f} ppm\nn = {len(merged)}'
@@ -206,6 +234,10 @@ class ValidationPlots(BasePlotter):
         # Get CO2 columns
         ref_col = self._detect_co2_column(ref)
         test_col = self._detect_co2_column(test)
+
+        # QC filter
+        ref = self._apply_qc_filter(ref, ref_col)
+        test = self._apply_qc_filter(test, test_col)
         
         # Merge on timestamp
         merged = pd.merge(
@@ -306,6 +338,10 @@ class ValidationPlots(BasePlotter):
         except ValueError:
             self.logger.warning("No CO2 column in data for %s", sensor_name)
             return None
+
+        # QC filter + gap-breaking
+        df = self._apply_qc_filter(df, co2_col)
+        df = self._break_gaps(df)
         
         co2 = df[['timestamp', co2_col]].dropna()
         
@@ -448,11 +484,19 @@ class ValidationPlots(BasePlotter):
             co2_col = info["co2"]
             hue_col = info[hue_var]
 
+            # QC filter: derive QC column from CO2 column name
+            qc_col = co2_col.replace('_mean', '_qc').replace('_dry', '')
+            lgr_qc_col = lgr_co2_col.replace('_mean', '_qc').replace('_dry', '').replace('_CO2', '_co2')
+
             mask = (
                 df[lgr_co2_col].notna()
                 & df[co2_col].notna()
                 & df[hue_col].notna()
             )
+            if qc_col in df.columns:
+                mask = mask & (df[qc_col] == 'OK')
+            if lgr_qc_col in df.columns:
+                mask = mask & (df[lgr_qc_col] == 'OK')
             sub = df.loc[mask]
 
             if len(sub) == 0:
@@ -482,12 +526,33 @@ class ValidationPlots(BasePlotter):
             hi = max(ref.max(), test.max())
             ax.plot([lo, hi], [lo, hi], "k--", lw=1.2, alpha=0.6)
 
-            stats_txt = (
-                f"R = {corr:.3f}\n"
-                f"RMSE = {rmse:.1f} ppm\n"
-                f"Bias = {bias:+.1f} ppm\n"
-                f"n = {len(sub):,}"
-            )
+            # Tighten 2m sensor y-axis
+            if '2m' in info['label'].lower():
+                y_cap = 1000
+                n_outliers = int((test > y_cap).sum())
+                if n_outliers > 0:
+                    ax.set_ylim(top=y_cap)
+                    stats_txt = (
+                        f"R = {corr:.3f}\n"
+                        f"RMSE = {rmse:.1f} ppm\n"
+                        f"Bias = {bias:+.1f} ppm\n"
+                        f"n = {len(sub):,}\n"
+                        f"{n_outliers} outlier(s) >{y_cap}"
+                    )
+                else:
+                    stats_txt = (
+                        f"R = {corr:.3f}\n"
+                        f"RMSE = {rmse:.1f} ppm\n"
+                        f"Bias = {bias:+.1f} ppm\n"
+                        f"n = {len(sub):,}"
+                    )
+            else:
+                stats_txt = (
+                    f"R = {corr:.3f}\n"
+                    f"RMSE = {rmse:.1f} ppm\n"
+                    f"Bias = {bias:+.1f} ppm\n"
+                    f"n = {len(sub):,}"
+                )
             # stats box
             ax.text(
                 0.96, 0.04, stats_txt, transform=ax.transAxes,
@@ -586,7 +651,13 @@ class ValidationPlots(BasePlotter):
             co2_col = info["co2"]
             hue_col = info[hue_var]
 
+            # QC filter columns
+            qc_col = co2_col.replace('_mean', '_qc').replace('_dry', '')
+            lgr_qc_col = lgr_co2_col.replace('_mean', '_qc').replace('_dry', '').replace('_CO2', '_co2')
+
             mask = df[co2_col].notna() & df[hue_col].notna()
+            if qc_col in df.columns:
+                mask = mask & (df[qc_col] == 'OK')
             sub = df.loc[mask]
 
             if len(sub) == 0:
@@ -604,12 +675,17 @@ class ValidationPlots(BasePlotter):
                 s=5, alpha=0.7, edgecolors="face", linewidths=0.15, rasterized=True,
             )
 
-            # LGR reference as grey backdrop
+            # LGR reference — dashed, thicker, with gap breaks
             lgr_mask = df[lgr_co2_col].notna()
+            if lgr_qc_col in df.columns:
+                lgr_mask = lgr_mask & (df[lgr_qc_col] == 'OK')
+            lgr_sub = df.loc[lgr_mask, ["timestamp", lgr_co2_col]].copy()
+            lgr_sub = self._break_gaps(lgr_sub)
             ax.plot(
-                df.loc[lgr_mask, "timestamp"],
-                df.loc[lgr_mask, lgr_co2_col],
-                color="gray", alpha=0.65, lw=1.0, label="LGR (ref)",
+                lgr_sub["timestamp"],
+                lgr_sub[lgr_co2_col],
+                color="dimgray", alpha=0.75, lw=1.8,
+                linestyle="--", label="LGR (ref)",
             )
 
             ax.set_ylabel("CO\u2082 (ppm)", fontsize=10)

@@ -429,6 +429,7 @@ class TaylorPlotter(BasePlotter):
         ref_df['timestamp'] = pd.to_datetime(ref_df['timestamp'], format='mixed')
 
         ref_col = self._detect_co2_column(ref_df)
+        ref_df = self._apply_qc_filter(ref_df, ref_col)
         ref_std = float(ref_df[ref_col].std(ddof=1))
 
         stats = {}
@@ -439,6 +440,8 @@ class TaylorPlotter(BasePlotter):
             test_df['timestamp'] = pd.to_datetime(test_df['timestamp'], format='mixed')
 
             test_col = self._detect_co2_column(test_df)
+
+            test_df = self._apply_qc_filter(test_df, test_col)
 
             self.logger.debug("%s ref dtype=%s test dtype=%s",
                               name, 
@@ -484,8 +487,12 @@ class TaylorPlotter(BasePlotter):
             plt.clabel(dia.add_contours(colors='0.5'), inline=True, fontsize=10)
 
             for i, (name, s) in enumerate(stats.items()):
+                # Human-readable legend label
+                display = name.replace("CO2_SCT1_", "SCD41 ").replace("CO2_30M_", "SCD41 ").replace("2M", "2m")
+                if "30M" in name.upper():
+                    display += " (30m)"
                 kw = dict(
-                    label=f"{name} (r={s['corr']:.2f}, σ={s['std']:.0f})",
+                    label=f"{display} (r={s['corr']:.2f}, σ={s['std']:.0f})",
                     marker=self.MARKERS[i % len(self.MARKERS)],
                     color=self.COLOURS[i % len(self.COLOURS)],
                     markersize=10,

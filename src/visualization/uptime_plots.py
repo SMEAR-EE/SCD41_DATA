@@ -315,7 +315,8 @@ class UptimePlots(BasePlotter):
                 days = chunk["day"].values.astype(int) - 1
                 lgr_grid[i, days] = ~chunk["ref_reporting"].astype(bool).values
 
-        OVERLAP_COLOURS = ["#e0e0e0", "#c7e9c0", "#74c476", "#238b45", "#00441b"]
+        OVERLAP_COLOURS = ["#f5f5f5", "#c7e9c0", "#74c476", "#238b45", "#00441b"]
+
         CMAP_COUNT = ListedColormap(OVERLAP_COLOURS[:len(SCD_SENSORS) + 1])
         bounds = [i - 0.5 for i in range(len(SCD_SENSORS) + 2)]
         NORM_COUNT = BoundaryNorm(bounds, CMAP_COUNT.N)
@@ -328,7 +329,7 @@ class UptimePlots(BasePlotter):
             np.arange(n_months + 1) - 0.5,
             masked,
             cmap=CMAP_COUNT, norm=NORM_COUNT,
-            edgecolors="white", linewidth=0.5,
+            edgecolors="#999999", linewidth=0.8,
         )
 
         if SHOW_LGR_ABSENCE and lgr_grid is not None:
