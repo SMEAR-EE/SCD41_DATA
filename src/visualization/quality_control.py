@@ -106,3 +106,91 @@ class QualityControlPlots(BasePlotter):
             self._save_figure(fig, filename)
         
         return fig
+    
+    def plot_qc_multi_sensor(
+        self,
+        data_csvs: dict,
+        save: bool = True,
+    ) -> plt.Figure:
+        """Grouped bar chart of CO₂ QC flag distribution across all sensors.
+
+        Args:
+            data_csvs: Dict mapping sensor names to 10min CSV paths.
+            save: If True, save to output_dir (default: True).
+
+        Returns:
+            matplotlib Figure object.
+        """
+        from collections import OrderedDict
+        import numpy as np
+
+        DISPLAY = {
+            'CO2_SCT1_2M': 'SCD41 2m',
+            'CO2_30M_A': 'SCD41 A\n(30m)',
+            'CO2_30M_B': 'SCD41 B\n(30m)',
+            'CO2_30M_C': 'SCD41 C\n(30m)',
+            'LGR_30M': 'LGR\n(30m)',
+        }
+        FLAG_COLOURS = {
+            'OK': '#4c9f38',
+            'BELOW_RANGE': '#e15759',
+            'ABOVE_RANGE': '#f28e2b',
+            'NO_DATA': '#bab0ab',
+        }
+
+        sensor_qc = OrderedDict()
+        for name, csv_path in data_csvs.items():
+            df = pd.read_csv(csv_path,
+                             usecols=lambda c: c == 'co2_qc' or c.endswith('_co2_qc'))
+            qc_col = [c for c in df.columns if 'co2' in c.lower() and c.endswith('_qc')]
+            if not qc_col:
+                continue
+            sensor_qc[name] = df[qc_col[0]].value_counts().to_dict()
+
+        all_flags = sorted({f for counts in sensor_qc.values() for f in counts})
+        sensor_names = list(sensor_qc.keys())
+        display_names = [DISPLAY.get(s, s) for s in sensor_names]
+        totals = {s: sum(c.values()) for s, c in sensor_qc.items()}
+
+        max_ok = max(sensor_qc[s].get('OK', 0) for s in sensor_names)
+        min_flagged = min(
+            (c for s in sensor_names for f, c in sensor_qc[s].items() if f != 'OK'),
+            default=max_ok)
+        use_log = (max_ok / max(min_flagged, 1)) > 50
+
+        n_sensors = len(sensor_names)
+        n_flags = len(all_flags)
+        x = np.arange(n_sensors)
+        bar_w = 0.8 / n_flags
+
+        fig, ax = plt.subplots(figsize=(10, 5))
+        for j, flag in enumerate(all_flags):
+            counts = [sensor_qc[s].get(flag, 0) for s in sensor_names]
+            colour = FLAG_COLOURS.get(flag, '#76b7b2')
+            offset = (j - (n_flags - 1) / 2) * bar_w
+            ax.bar(x + offset, counts, bar_w * 0.9, label=flag,
+                   color=colour, edgecolor='white', linewidth=0.5)
+
+        if use_log:
+            ax.set_yscale('log')
+            ax.set_ylabel('Record count (log scale)', fontsize=11)
+        else:
+            ax.set_ylabel('Record count', fontsize=11)
+
+        y_top = ax.get_ylim()[1]
+        for i, s in enumerate(sensor_names):
+            ax.text(i, y_top, f'n={totals[s]:,}',
+                    ha='center', va='bottom', fontsize=9, fontweight='bold')
+        ax.set_ylim(top=y_top * (4 if use_log else 1.15))
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(display_names, fontsize=10)
+        ax.set_title('CO₂ QC Flag Distribution — All Sensors',
+                     fontsize=13, fontweight='bold')
+        ax.legend(title='QC Flag', fontsize=9, title_fontsize=10, loc='upper right')
+        ax.grid(axis='y', alpha=0.3)
+        fig.tight_layout()
+
+        if save:
+            self._save_figure(fig, "qc_flag_distribution_all_sensors.png")
+        return fig

@@ -718,6 +718,106 @@ class ValidationPlots(BasePlotter):
 
         return fig
 
+    def plot_residual_env(
+        self,
+        merged: 'Path | pd.DataFrame',
+        lgr_co2_col: str,
+        sensors: list,
+        lowess_frac: float = 0.3,
+        y_lim: tuple = (-75, 325),
+        save: bool = True,
+    ) -> plt.Figure:
+        """3×2 residual vs temperature / RH panel (30m sensors).
+
+        Args:
+            merged: Path to merged CSV or pre-loaded DataFrame.
+            lgr_co2_col: LGR CO₂ column name.
+            sensors: List of dicts with 'co2', 'temp', 'rh', 'label', 'color' keys.
+            lowess_frac: LOWESS smoothing fraction (default: 0.3).
+            y_lim: Shared y-axis limits (default: (-75, 325)).
+            save: If True, save to output_dir (default: True).
+
+        Returns:
+            matplotlib Figure, or None if no data.
+        """
+        import warnings
+        from statsmodels.nonparametric.smoothers_lowess import lowess
+        from matplotlib.patheffects import withStroke
+
+        df = self._load_merged(merged)
+        lgr_qc = lgr_co2_col.replace('_mean', '_qc').replace('_dry', '').replace('_CO2', '_co2')
+
+        def clipped_lowess(y, x, frac=0.3, min_pts=15, n_bins=30):
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", RuntimeWarning)
+                lw = lowess(y, x, frac=frac, return_sorted=True)
+            counts, edges = np.histogram(x, bins=n_bins)
+            centres = 0.5 * (edges[:-1] + edges[1:])
+            dense = centres[counts >= min_pts]
+            if len(dense) == 0:
+                return lw
+            keep = (lw[:, 0] >= dense.min()) & (lw[:, 0] <= dense.max())
+            return lw[keep]
+
+        sensor_data = []
+        for info in sensors:
+            qc_col = info['co2'].replace('_mean', '_qc').replace('_dry', '')
+            mask = (df[info['co2']].notna() & df[lgr_co2_col].notna()
+                    & df[info['temp']].notna() & df[info['rh']].notna())
+            if qc_col in df.columns:
+                mask = mask & (df[qc_col] == 'OK')
+            if lgr_qc in df.columns:
+                mask = mask & (df[lgr_qc] == 'OK')
+            sub = df.loc[mask]
+            if len(sub) == 0:
+                continue
+            sensor_data.append({
+                'temp': sub[info['temp']].values,
+                'rh': sub[info['rh']].values,
+                'residual': (sub[info['co2']] - sub[lgr_co2_col]).values,
+                'label': info['label'], 'color': info['color'],
+                'n': len(sub),
+            })
+
+        if not sensor_data:
+            self.logger.warning("No data for residual env plot")
+            return None
+
+        n = len(sensor_data)
+        fig, axes = plt.subplots(n, 2, figsize=(13, 3.7 * n), sharey=True)
+        if n == 1:
+            axes = axes.reshape(1, 2)
+        halo = [withStroke(linewidth=5, foreground='white')]
+
+        for row, d in enumerate(sensor_data):
+            ax_t, ax_rh = axes[row, 0], axes[row, 1]
+            for ax, xvar, xlabel in [(ax_t, 'temp', 'Temperature (°C)'),
+                                      (ax_rh, 'rh', 'Relative Humidity (%)')]:
+                ax.scatter(d[xvar], d['residual'], s=2, alpha=0.08,
+                           color=d['color'], rasterized=True)
+                lw = clipped_lowess(d['residual'], d[xvar], frac=lowess_frac)
+                ax.plot(lw[:, 0], lw[:, 1], color=d['color'], lw=3,
+                        label=f"{d['label']} (n={d['n']:,})", zorder=5,
+                        path_effects=halo)
+                ax.axhline(0, color='black', ls='--', lw=1, alpha=0.5)
+                ax.set_ylim(y_lim)
+                ax.grid(True, alpha=0.15)
+                ax.legend(fontsize=9, loc='upper right')
+                if row == n - 1:
+                    ax.set_xlabel(xlabel, fontsize=11)
+            ax_t.set_ylabel('SCD41 − LGR (ppm)', fontsize=10)
+            if row == 0:
+                ax_t.set_title('Residual vs Temperature', fontsize=12, fontweight='bold')
+                ax_rh.set_title('Residual vs Relative Humidity', fontsize=12, fontweight='bold')
+
+        fig.suptitle('Environmental Dependence of SCD41 Bias (30m sensors)',
+                     fontsize=13, fontweight='bold')
+        fig.tight_layout()
+
+        if save:
+            self._save_figure(fig, "residual_env_dependence_30m.png")
+        return fig
+    
     # ── Helpers ──────────────────────────────────────────────────────
 
     @staticmethod
@@ -790,11 +890,14 @@ class ValidationPlots(BasePlotter):
             if "30M" in name.upper() or "30m" in name:
                 label += " (30m)"
 
+            _COLOURS = ['#1f77b4', '#2ca02c', '#9467bd', '#d62728']
+
             sensors.append({
                 "co2": co2_col,
                 "temp": temp_col,
                 "rh": rh_col,
                 "label": label,
+                "color": _COLOURS[len(sensors) % len(_COLOURS)],
             })
 
         return lgr_co2_col, sensors

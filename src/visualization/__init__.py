@@ -78,6 +78,8 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
               'timeseries_hue'  - stacked timeseries coloured by temp/RH
               'taylor'          - Taylor diagram
               'coverage_overlap'- Coverage Overlap Heatmap
+              'residual_env'    - Residuals per sensor vs LGR
+              'qc_multi'        - QC multiplot
     
     Example:
         generate_all_plots(config)                             # all plots, quiet
@@ -183,7 +185,13 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
     if len(data_csvs) > 1 and 'comparison' not in skip:
         logger.info("  CO2 timeseries comparison")
         validation_plotter.plot_timeseries(data_csvs)
-
+    
+    # Multi-sensor QC bar chart
+    if 'qc_multi' not in skip and len(data_csvs) > 1:
+        logger.info("  Multi-sensor QC distribution")
+        qc_plotter = QualityControlPlots(merged_plots_dir, close_after_save=close)
+        qc_plotter.plot_qc_multi_sensor(data_csvs)
+    
     # -- 3. Reference comparison (LGR) ------------------------------------
     ref_sensors = [s for s in config.sensors
                    if 'lgr' in s.sensor_type.lower()]
@@ -277,6 +285,15 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
                         hue_plotter.plot_timeseries_hue(
                             merged_df, lgr_co2_col, sensor_map,
                             hue_var=hue, cmap=cmap)
+                
+                if 'residual_env' not in skip:
+                    # Filter to 30m sensors only
+                    sensors_30m = [s for s in sensor_map if '30m' in s['label'].lower()]
+                    if sensors_30m:
+                        logger.info("  Residual vs environment (30m)")
+                        hue_plotter.plot_residual_env(
+                            merged_df, lgr_co2_col, sensors_30m)
+            
             else:
                 logger.warning("No SCD41 sensors found in merged CSV; "
                                "skipping hue panel plots")
