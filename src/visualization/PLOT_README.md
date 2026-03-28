@@ -35,6 +35,8 @@ qc = QualityControlPlots("plots/")
 - `plot_scatter_panel_hue(merged, lgr_co2_col, sensors, hue_var, cmap)` - 2×2 scatter grid coloured by temperature or relative humidity
 - `plot_timeseries_hue(merged, lgr_co2_col, sensors, hue_var, cmap)` - Stacked timeseries panels coloured by temperature or relative humidity
 - `build_sensor_map(merged_df, sensor_names)` - Auto-discover column mappings from merged CSV
+- `plot_timeseries_seasonal(merged, lgr_co2_col, sensors, hue_var, cmap)` - Seasonal-shaded timeseries with winter/summer bands and temperature hue
+- `plot_monthly_bias_boxplot(merged, lgr_co2_col, sensors, seasonal_shading, show_fliers)` - Monthly boxplot of SCD41−LGR residuals (30 m sensors)
 
 ### QualityControlPlots
 - `plot_qc_summary(data_csv, sensor_name)` - QC flag distribution

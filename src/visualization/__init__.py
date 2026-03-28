@@ -79,6 +79,8 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
               'taylor'          - Taylor diagram
               'coverage_overlap'- Coverage Overlap Heatmap
               'residual_env'    - Residuals per sensor vs LGR
+              'seasonal_ts'     - Seasonal-shaded timeseries (temp hue)
+              'monthly_bias'    - Monthly bias boxplot (30m sensors)
               'qc_multi'        - QC multiplot
     
     Example:
@@ -292,6 +294,18 @@ def generate_all_plots(config, show: bool = False, exclude: list = None):
                     if sensors_30m:
                         logger.info("  Residual vs environment (30m)")
                         hue_plotter.plot_residual_env(
+                            merged_df, lgr_co2_col, sensors_30m)
+                
+                if 'seasonal_ts' not in skip:
+                    logger.info("  Seasonal timeseries (temp hue)")
+                    hue_plotter.plot_timeseries_seasonal(
+                        merged_df, lgr_co2_col, sensor_map)
+
+                if 'monthly_bias' not in skip:
+                    sensors_30m = [s for s in sensor_map if '30m' in s['label'].lower()]
+                    if sensors_30m:
+                        logger.info("  Monthly bias boxplot (30m)")
+                        hue_plotter.plot_monthly_bias_boxplot(
                             merged_df, lgr_co2_col, sensors_30m)
             
             else:

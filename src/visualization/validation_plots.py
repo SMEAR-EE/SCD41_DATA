@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+import matplotlib.patches as mpatches
 from .base_plotter import BasePlotter
 
 
@@ -818,7 +819,300 @@ class ValidationPlots(BasePlotter):
             self._save_figure(fig, "residual_env_dependence_30m.png")
         return fig
     
+    # ── Seasonal / bias distribution plots ────────────────────────────
+
+    # Season definitions shared by seasonal methods
+    _SEASONS = {
+        "winter": {"months": [11, 12, 1, 2], "color": "#b3d4fc", "alpha": 0.18, "label": "Winter (Nov\u2013Feb)"},
+        "summer": {"months": [5, 6, 7, 8],   "color": "#fce4b3", "alpha": 0.18, "label": "Summer (May\u2013Aug)"},
+    }
+
+    def plot_timeseries_seasonal(
+        self,
+        merged: 'Path | pd.DataFrame',
+        lgr_co2_col: str,
+        sensors: List[Dict[str, str]],
+        hue_var: str = "temp",
+        cmap: str = "RdYlBu_r",
+        save: bool = True,
+    ) -> plt.Figure:
+        """Per-sensor CO2 timeseries with temperature hue and seasonal shading.
+
+        Builds on plot_timeseries_hue layout, adding axvspan bands for
+        winter (Nov-Feb) and summer (May-Aug) behind the scatter points.
+        Transition months remain unshaded.
+
+        Args:
+            merged: Path to merged CSV or pre-loaded DataFrame.
+            lgr_co2_col: Column name for LGR reference CO2.
+            sensors: List of dicts with keys 'co2', 'temp', 'rh', 'label'.
+            hue_var: 'temp' or 'rh' (default: 'temp').
+            cmap: Matplotlib colourmap name (default: 'RdYlBu_r').
+            save: If True, save plot to output_dir (default: True).
+
+        Returns:
+            matplotlib Figure, or None if no sensor has data.
+        """
+        df = self._load_merged(merged)
+
+        hue_label = (
+            "Temperature (\u00b0C)" if hue_var == "temp"
+            else "Relative Humidity (%)"
+        )
+
+        # Global hue range
+        all_hue = pd.concat(
+            df.loc[df[s["co2"]].notna() & df[s[hue_var]].notna(), s[hue_var]]
+            for s in sensors
+        )
+        if all_hue.empty:
+            self.logger.warning("No data for seasonal timeseries plot")
+            return None
+        vmin, vmax = np.nanpercentile(all_hue, [2, 98])
+
+        # Derive QC column names
+        lgr_qc = lgr_co2_col.replace('_mean', '_qc').replace('_dry', '').replace('_CO2', '_co2')
+
+        n_sensors = len(sensors)
+        fig, axes = plt.subplots(
+            n_sensors, 1, figsize=(16, 3.5 * n_sensors), sharex=True,
+        )
+        if n_sensors == 1:
+            axes = [axes]
+
+        sc = None
+        for ax, info in zip(axes, sensors):
+            co2_col = info["co2"]
+            hue_col = info[hue_var]
+            qc_col = co2_col.replace('_mean', '_qc').replace('_dry', '')
+
+            mask = df[co2_col].notna() & df[hue_col].notna()
+            if qc_col in df.columns:
+                mask = mask & (df[qc_col] == "OK")
+            sub = df.loc[mask]
+
+            if len(sub) == 0:
+                ax.text(0.5, 0.5, "No data", transform=ax.transAxes, ha="center")
+                ax.set_ylabel(info["label"], fontsize=10)
+                continue
+
+            # Seasonal shading (behind data)
+            for sdef in self._SEASONS.values():
+                for t0, t1 in self._seasonal_spans(df["timestamp"], sdef["months"]):
+                    ax.axvspan(t0, t1, color=sdef["color"], alpha=sdef["alpha"],
+                               zorder=0, linewidth=0)
+
+            # SCD41 scatter coloured by hue variable
+            sc = ax.scatter(
+                sub["timestamp"], sub[co2_col],
+                c=sub[hue_col], cmap=cmap, vmin=vmin, vmax=vmax,
+                s=3, alpha=0.5, edgecolors="none", rasterized=True, zorder=2,
+            )
+
+            # LGR reference backdrop
+            lgr_mask = df[lgr_co2_col].notna()
+            if lgr_qc in df.columns:
+                lgr_mask = lgr_mask & (df[lgr_qc] == "OK")
+            ax.plot(
+                df.loc[lgr_mask, "timestamp"],
+                df.loc[lgr_mask, lgr_co2_col],
+                color="gray", alpha=0.3, lw=0.5, label="LGR (ref)", zorder=1,
+            )
+
+            ax.set_ylabel("CO\u2082 (ppm)", fontsize=10)
+            ax.set_title(info["label"], fontsize=11, fontweight="bold", loc="left")
+            ax.grid(True, alpha=0.25)
+            ax.legend(loc="upper right", fontsize=8, framealpha=0.8)
+
+        axes[-1].set_xlabel("Date", fontsize=11)
+        fig.autofmt_xdate()
+
+        if sc is None:
+            self.logger.warning("No data rendered in seasonal timeseries plot")
+            plt.close(fig)
+            return None
+
+        fig.subplots_adjust(right=0.87, hspace=0.25)
+        cbar_ax = fig.add_axes([0.89, 0.10, 0.015, 0.80])
+        cbar = fig.colorbar(sc, cax=cbar_ax)
+        cbar.set_label(hue_label, fontsize=11)
+
+        # Season legend at figure level
+        season_handles = [
+            mpatches.Patch(facecolor=s["color"], alpha=s["alpha"] * 2.5,
+                           edgecolor="none", label=s["label"])
+            for s in self._SEASONS.values()
+        ]
+        fig.legend(handles=season_handles, loc="upper right",
+                   fontsize=9, framealpha=0.8, bbox_to_anchor=(0.87, 0.98))
+
+        fig.suptitle(
+            f"CO\u2082 timeseries \u2014 {hue_label.lower()} with seasonal shading",
+            fontsize=14, fontweight="bold", y=1.0,
+        )
+
+        plt.tight_layout(rect=[0, 0, 0.87, 0.97])
+
+        if save:
+            filename = f"timeseries_seasonal_{hue_var}_hue.png"
+            self._save_figure(fig, filename)
+
+        return fig
+
+    def plot_monthly_bias_boxplot(
+        self,
+        merged: 'Path | pd.DataFrame',
+        lgr_co2_col: str,
+        sensors: List[Dict[str, str]],
+        seasonal_shading: bool = True,
+        show_fliers: bool = False,
+        save: bool = True,
+    ) -> plt.Figure:
+        """Monthly boxplot of SCD41-minus-LGR residuals, grouped by sensor.
+
+        Designed for co-located 30 m sensors only (exclude SCT1 2 m
+        unless a co-located reference exists). Optionally applies
+        winter/summer column shading to match the seasonal timeseries.
+
+        Args:
+            merged: Path to merged CSV or pre-loaded DataFrame.
+            lgr_co2_col: Column name for LGR reference CO2.
+            sensors: List of dicts with keys 'co2', 'label', 'color'.
+            seasonal_shading: If True, shade winter/summer month columns.
+            show_fliers: If True, draw outlier dots (default: False).
+            save: If True, save plot to output_dir (default: True).
+
+        Returns:
+            matplotlib Figure, or None if no data.
+        """
+        df = self._load_merged(merged)
+        df["month"] = df["timestamp"].dt.month
+
+        lgr_qc = lgr_co2_col.replace('_mean', '_qc').replace('_dry', '').replace('_CO2', '_co2')
+
+        month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+        # Compute residuals per sensor
+        residuals = []
+        for info in sensors:
+            qc_col = info["co2"].replace('_mean', '_qc').replace('_dry', '')
+            mask = df[info["co2"]].notna() & df[lgr_co2_col].notna()
+            if qc_col in df.columns:
+                mask = mask & (df[qc_col] == "OK")
+            if lgr_qc in df.columns:
+                mask = mask & (df[lgr_qc] == "OK")
+            sub = df.loc[mask, ["month", info["co2"], lgr_co2_col]].copy()
+            sub["residual"] = sub[info["co2"]] - sub[lgr_co2_col]
+            sub["sensor"] = info["label"]
+            residuals.append(sub[["month", "residual", "sensor"]])
+
+        if not residuals:
+            self.logger.warning("No data for monthly bias boxplot")
+            return None
+
+        res_df = pd.concat(residuals, ignore_index=True)
+        months_present = sorted(res_df["month"].unique())
+
+        if len(months_present) == 0:
+            self.logger.warning("No months with data for bias boxplot")
+            return None
+
+        n_sensors = len(sensors)
+        group_width = 0.75
+        box_width = group_width / n_sensors
+
+        fig, ax = plt.subplots(figsize=(14, 5.5))
+
+        positions_all = []
+        colors_all = []
+        data_all = []
+
+        for mi, m in enumerate(months_present):
+            month_data = res_df[res_df["month"] == m]
+            for si, info in enumerate(sensors):
+                sensor_data = month_data.loc[
+                    month_data["sensor"] == info["label"], "residual"
+                ]
+                pos = mi - group_width / 2 + box_width * (si + 0.5)
+                positions_all.append(pos)
+                colors_all.append(info["color"])
+                data_all.append(
+                    sensor_data.values if len(sensor_data) > 0 else [np.nan]
+                )
+
+        bp = ax.boxplot(
+            data_all,
+            positions=positions_all,
+            widths=box_width * 0.8,
+            patch_artist=True,
+            showfliers=show_fliers,
+            medianprops=dict(color="black", lw=1.2),
+            whiskerprops=dict(lw=0.8),
+            capprops=dict(lw=0.8),
+        )
+
+        for patch, c in zip(bp["boxes"], colors_all):
+            patch.set_facecolor(c)
+            patch.set_alpha(0.65)
+
+        # Zero-bias reference
+        ax.axhline(0, color="red", ls="--", lw=1, alpha=0.6, zorder=0)
+
+        # Seasonal column shading
+        if seasonal_shading:
+            for mi, m in enumerate(months_present):
+                for sdef in self._SEASONS.values():
+                    if m in sdef["months"]:
+                        ax.axvspan(mi - 0.45, mi + 0.45,
+                                   color=sdef["color"], alpha=0.12, zorder=0)
+
+        ax.set_xticks(range(len(months_present)))
+        ax.set_xticklabels([month_names[m - 1] for m in months_present], fontsize=10)
+        ax.set_ylabel("SCD41 \u2212 LGR  (ppm)", fontsize=11)
+        ax.set_title(
+            "Monthly bias distribution \u2014 30 m sensors",
+            fontsize=13, fontweight="bold",
+        )
+        ax.grid(axis="y", alpha=0.25)
+
+        # Sensor legend
+        handles = [
+            plt.Line2D([0], [0], color=info["color"], lw=6, alpha=0.65,
+                       label=f"Sensor {info['label']}")
+            for info in sensors
+        ]
+        ax.legend(handles=handles, loc="upper left", fontsize=9, framealpha=0.8)
+
+        plt.tight_layout()
+
+        if save:
+            self._save_figure(fig, "monthly_bias_boxplot_30m.png")
+
+        return fig
+
     # ── Helpers ──────────────────────────────────────────────────────
+
+    @staticmethod
+    def _seasonal_spans(ts: pd.Series, month_set: list) -> list:
+        """Yield (start, end) datetime pairs for contiguous month-blocks.
+
+        Args:
+            ts: Timestamp Series (must be sorted).
+            month_set: List of month integers belonging to the season.
+
+        Returns:
+            List of (start, end) tuples.
+        """
+        in_season = ts.dt.month.isin(month_set)
+        edges = in_season.astype(int).diff().fillna(0)
+        starts = ts[edges == 1].tolist()
+        ends = ts[edges == -1].tolist()
+        if in_season.iloc[0]:
+            starts.insert(0, ts.iloc[0])
+        if in_season.iloc[-1]:
+            ends.append(ts.iloc[-1])
+        return list(zip(starts, ends))
 
     @staticmethod
     def _load_merged(merged: 'Path | pd.DataFrame') -> pd.DataFrame:
