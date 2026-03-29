@@ -187,7 +187,13 @@ class QualityControlPlots(BasePlotter):
         ax.set_xticklabels(display_names, fontsize=10)
         ax.set_title('CO₂ QC Flag Distribution — All Sensors',
                      fontsize=13, fontweight='bold')
-        ax.legend(title='QC Flag', fontsize=9, title_fontsize=10, loc='upper right')
+        ax.legend(
+                title="QC Flag",
+                loc="upper center",
+                bbox_to_anchor=(0.5, 0.65),
+                ncol=4,               # all 4 flags in one row
+                framealpha=0.8,
+            )
         ax.grid(axis='y', alpha=0.3)
         fig.tight_layout()
 
