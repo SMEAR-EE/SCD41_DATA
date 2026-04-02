@@ -8,6 +8,7 @@ Fast, light and reproducible post-processing pipeline for SCD41 and LGR CO2 raw 
 
 ### todo:
 
+- adjust header, clarify term 'light'... :)
 - explicitly state "its a pipeline postprocess stack"
 - add publication state: in review (when submitted)
 - what does the dataset do, why
