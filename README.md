@@ -6,6 +6,13 @@
 
 Fast, light and reproducible post-processing pipeline for SCD41 and LGR CO2 raw sensor data at the Estonian Station for Measuring Ecosystem-Atmosphere Relations (SMEAR; [smear.emu.ee](https://smear.emu.ee/)).
 
+### todo:
+
+- explicitly state "its a pipeline postprocess stack"
+- add publication state: in review (when submitted)
+- what does the dataset do, why
+- what does this repo contribute to the dataset
+
 > **Status:** v0.3.0 - Stable release with comprehensive validation suite and enhanced data quality reporting
 
 ## Quick Start
