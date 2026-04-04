@@ -823,8 +823,8 @@ class ValidationPlots(BasePlotter):
 
     # Season definitions shared by seasonal methods
     _SEASONS = {
-        "winter": {"months": [11, 12, 1, 2], "color": "#b3d4fc", "alpha": 0.18, "label": "Winter (Nov\u2013Feb)"},
-        "summer": {"months": [5, 6, 7, 8],   "color": "#fce4b3", "alpha": 0.18, "label": "Summer (May\u2013Aug)"},
+        "winter": {"months": [11, 12, 1, 2], "color": "#b3d4fc", "alpha": 0.30, "label": "Winter (Nov\u2013Feb)"},
+        "summer": {"months": [5, 6, 7, 8],   "color": "#fce4b3", "alpha": 0.30, "label": "Summer (May\u2013Aug)"},
     }
 
     def plot_timeseries_seasonal(
@@ -906,7 +906,7 @@ class ValidationPlots(BasePlotter):
             sc = ax.scatter(
                 sub["timestamp"], sub[co2_col],
                 c=sub[hue_col], cmap=cmap, vmin=vmin, vmax=vmax,
-                s=3, alpha=0.5, edgecolors="none", rasterized=True, zorder=2,
+                s=5, alpha=0.5, edgecolors="none", rasterized=True, zorder=2,
             )
 
             # LGR reference backdrop
@@ -916,7 +916,7 @@ class ValidationPlots(BasePlotter):
             ax.plot(
                 df.loc[lgr_mask, "timestamp"],
                 df.loc[lgr_mask, lgr_co2_col],
-                color="gray", alpha=0.3, lw=0.5, label="LGR (ref)", zorder=1,
+                color="black", alpha=0.55, lw=0.7, label="LGR (ref)", zorder=1,
             )
 
             ax.set_ylabel("CO\u2082 (ppm)", fontsize=10)
@@ -1065,7 +1065,7 @@ class ValidationPlots(BasePlotter):
                 for sdef in self._SEASONS.values():
                     if m in sdef["months"]:
                         ax.axvspan(mi - 0.45, mi + 0.45,
-                                   color=sdef["color"], alpha=0.12, zorder=0)
+                                   color=sdef["color"], alpha=0.30, zorder=0)
 
         ax.set_xticks(range(len(months_present)))
         ax.set_xticklabels([month_names[m - 1] for m in months_present], fontsize=10)
