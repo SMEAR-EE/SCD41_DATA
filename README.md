@@ -4,15 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache_2.0-white.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-Fast, light and reproducible post-processing pipeline for SCD41 and LGR CO2 raw sensor data at the Estonian Station for Measuring Ecosystem-Atmosphere Relations (SMEAR; [smear.emu.ee](https://smear.emu.ee/)).
-
-### todo:
-
-- adjust header, clarify term 'light'... :)
-- explicitly state "its a pipeline postprocess stack"
-- add publication state: in review (when submitted)
-- what does the dataset do, why
-- what does this repo contribute to the dataset
+Configurable, reproducible preprocessing pipeline for SCD41 and LGR CO2 sensor data collected at SMEAR Estonia (smear.emu.ee). Transforms raw JSON message logs into quality-controlled 10-minute aggregates in CSV and Parquet formats. Accompanies: [paper title], [journal], [status: in review].
 
 > **Status:** v0.3.0 - Stable release with comprehensive validation suite and enhanced data quality reporting
 
