@@ -5,14 +5,14 @@ Modular plotting package for sensor data visualization with uptime, validation, 
 ## Quick Start
 
 ```python
-from visualization import generate_all_plots
+from src.visualization import generate_all_plots
 generate_all_plots(config)  # Generate all plots at once
 ```
 
 Or use individual plotters:
 
 ```python
-from visualization import UptimePlots, ValidationPlots, QualityControlPlots
+from src.visualization import UptimePlots, ValidationPlots, QualityControlPlots
 
 uptime = UptimePlots("plots/")
 validation = ValidationPlots("plots/")

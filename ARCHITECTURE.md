@@ -260,9 +260,10 @@ output/
 │   │   ├── SMEAR_EE_CO2_merged.csv         # Main merged dataset
 │   │   ├── SMEAR_EE_CO2_2024_09_merged.csv # Monthly export
 │   │   └── SMEAR_EE_CO2_2024_10_merged.csv
-│   └── parquet/
-│       ├── SMEAR_EE_CO2_2024_09_merged.parquet
-│       └── SMEAR_EE_CO2_2024_10_merged.parquet
+│   ├── parquet/
+│   │   ├── SMEAR_EE_CO2_2024_09_merged.parquet
+│   │   └── SMEAR_EE_CO2_2024_10_merged.parquet
+│   └── plots/                  # Multi-sensor comparison plots
 ├── validation/                 # Validation outputs
 │   ├── validation_report.json
 │   └── VALIDATION_RECEIPT.md

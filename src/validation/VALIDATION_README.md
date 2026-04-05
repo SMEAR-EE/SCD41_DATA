@@ -37,6 +37,7 @@ validate_outputs(export_json=False, export_markdown=False)
 5. **Merged data** — Combined dataset readable, date range valid
 6. **Quality metrics** — Time gaps, sensor vs reference comparison
 7. **Checksums** — SHA256 for merged CSV
+8. **Verification checks** — Timestamp uniqueness, duplicates (when implemented)
 
 ## Customising the Receipt
 
