@@ -8,5 +8,6 @@ PyYAML==6.0.3
 matplotlib==3.10.7
 seaborn==0.13.2
 
-# For Taylor diagrams (currently non-functional module)
-SkillMetrics==1.2.4
+# For validation report Markdown export
+Jinja2==3.1.6
+MarkupSafe==2.1.3

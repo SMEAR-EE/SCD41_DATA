@@ -195,7 +195,6 @@ SCD41_DATA/
 ### Visualization
 - **matplotlib** (3.10.7): Base plotting
 - **seaborn** (0.13.2): Statistical visualizations
-- **SkillMetrics** (1.2.4): Taylor diagram framework
 
 ### Development & Analysis
 - **jupyter** (ipykernel 7.1.0): Interactive analysis
