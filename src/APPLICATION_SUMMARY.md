@@ -120,7 +120,7 @@ Modular plotting system with multiple plot types:
 5. **Visualization (`visualization/`)**
    - Modular plotting system with base styling
    - Separate modules for uptime, validation, and QC plots
-   - Note: Taylor diagram module is work-in-progress (WIP)
+   - Taylor diagram module for reference vs. sensor comparison
 
 6. **Merger (`merger.py`)**
    - `SensorMerger`: Combines multiple sensor outputs
@@ -280,10 +280,9 @@ The pipeline is designed for easy extension:
 
 ## Current Limitations & Known Issues
 
-1. **Taylor diagram visualization**: Module exists (`taylor_plots.py`) and is work-in-progress - under active development
-2. **Single-site focus**: Optimized for SMEAR Estonia station
-3. **File format specificity**: Parsers designed for NodeRED JSON and LGR CSV formats
-4. **No real-time processing**: Batch-oriented, not streaming
+1. **Single-site focus**: Optimized for SMEAR Estonia station
+2. **File format specificity**: Parsers designed for NodeRED JSON and LGR CSV formats
+3. **No real-time processing**: Batch-oriented, not streaming
 
 ---
 

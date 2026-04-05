@@ -79,6 +79,8 @@ from src.config import PipelineConfig
 from src.pipeline import SensorPipeline
 
 config = PipelineConfig.from_yaml('config/sensors.yaml')
+pipeline = SensorPipeline(config)
+pipeline.run_all()
 "
 ```
 
@@ -94,11 +96,8 @@ config = PipelineConfig.from_yaml('config/sensors.yaml')
 pipeline = SensorPipeline(config)
 pipeline.run_all(year=2024, month=9)
 
-# Merge results
-merged = merge_all_sensors(
-    individual_dir=config.output_dir,
-    sensor_names=[s.name for s in config.sensors]
-)
+# Merge results (preferred usage)
+merged = merge_all_sensors(config=config)
 ```
 
 ## Directory Structure
@@ -120,7 +119,7 @@ SCD41_DATA/
 │   └── sensors.yaml        # Your config (copy from template; gitignored)
 ├── output/                 # Created at runtime by pipeline
 │   ├── sensors/            # Per-sensor outputs (csv/, parquet/, plots/)
-│   ├── merged/             # Merged datasets (csv/, parquet/)
+│   ├── merged/             # Merged datasets (csv/, parquet/, plots/)
 │   ├── validation/         # Validation reports
 │   └── logs/               # Processing logs
 ├── venv/                   # Python environment (created by setup.sh)
@@ -153,7 +152,7 @@ Try updating pip first:
 ```bash
 source venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt  # if you have one
+pip install -r requirements.txt
 ```
 
 ## Deactivating Environment

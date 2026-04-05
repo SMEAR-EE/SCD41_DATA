@@ -160,8 +160,8 @@ pipeline.run_sensor(sensor_config, year=2024, month=9)
 For each sensor:
 - `{sensor}_10min.csv` - Main resampled data
 - `{sensor}_uptime.csv` - Daily uptime statistics
-- `{sensor}_{year}_{month}.csv` - Monthly CSV exports
-- `{sensor}_{year}_{month}.parquet` - Monthly Parquet exports
+- `{sensor}_{year}_{month:02d}.csv` - Monthly CSV exports (e.g. `CO2_SCT1_2M_2024_09.csv`)
+- `{sensor}_{year}_{month:02d}.parquet` - Monthly Parquet exports
 
 ---
 
@@ -516,7 +516,9 @@ report = ValidationReport('config/sensors.yaml')
 report.run_all()
 
 # Access results
-print(report.status)              # 'passed' or 'failed'
+status, message, counts = report.get_status()
+print(status)    # 'PASSED', 'PASSED_WITH_WARNINGS', or 'FAILED'
+print(message)   # human-readable description
 print(report.checks)              # List of CheckResult objects
 print(report.sensor_summaries)    # Dict of sensor statistics
 print(report.quality_metrics)     # Validation metrics
@@ -529,14 +531,14 @@ report.print_summary()
 
 **Checks Performed:**
 
-1. Column names (no `<lambda>` artifacts)
-2. File inventory (CSV/Parquet counts match)
-3. Parquet integrity (schema, compression, timestamps)
-4. CSV/Parquet consistency (values match)
-5. Merged data (readability, coverage)
-6. Data quality (gaps, sensor comparisons)
-7. Verification (timestamps, duplicates)
-8. Checksums (SHA256 for reproducibility)
+1. **Column names** — no `<lambda>` artifacts from pandas
+2. **File inventory** — CSV/Parquet counts match per sensor
+3. **Parquet integrity** — schema, compression, timestamps
+4. **CSV/Parquet consistency** — row counts and values match
+5. **Merged data** — readability, coverage
+6. **Quality metrics** — gaps, sensor comparisons
+7. **Checksums** — SHA-256 for merged CSV reproducibility
+8. **Verification checks** — timestamp uniqueness, duplicates (when implemented)
 
 ---
 

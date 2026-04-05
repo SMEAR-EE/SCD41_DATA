@@ -61,8 +61,8 @@ The image uses a multi-stage Alpine build for minimal disk usage.
 ## 4. Output
 
 Results appear in `./output/` on the host (mounted volume). The pipeline creates subdirectories automatically:
-- `output/sensors/` - per-sensor CSVs and Parquet
-- `output/merged/` - merged datasets
+- `output/sensors/` - per-sensor CSVs, Parquet, and plots
+- `output/merged/` - merged datasets (CSV, Parquet) and multi-sensor plots
 - `output/validation/` - validation reports
 - `output/logs/` - processing logs
 
