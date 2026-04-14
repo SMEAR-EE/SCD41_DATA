@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache_2.0-white.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
-Configurable, reproducible preprocessing pipeline for SCD41 and LGR CO2 sensor data collected at SMEAR Estonia (smear.emu.ee). Transforms raw JSON message logs into quality-controlled 10-minute aggregates in CSV and Parquet formats. Accompanies: [paper title], [journal], [status: in review].
+Configurable, reproducible preprocessing pipeline for SCD41 and LGR CO2 sensor data collected at SMEAR Estonia (smear.emu.ee). Transforms raw JSON message logs into quality-controlled 10-minute aggregates in CSV and Parquet formats. Accompanies: "Fourteen-month co-located SCD41 low-cost IoT CO2 sensor dataset from hemiboreal Estonia", Scientific Data (nature), [status: in review].
 
 > **Status:** v0.4.0 - Stable release with comprehensive validation suite and enhanced data quality reporting
 
@@ -116,4 +116,4 @@ Dataset available at: 10.5281/zenodo.18984845
 ## License
 
 - Software application licensed under the Apache License 2.0 (see [LICENSE](LICENSE) file).
-- Dataset licensed under CC BY 4.0, available on [https://zenodo.org/uploads/18984845](http://doi.org/10.5281/zenodo.18984845).
+- Dataset licensed under CC BY 4.0, available on [https://doi.org/10.5281/zenodo.18984845](https://doi.org/10.5281/zenodo.18984845).
