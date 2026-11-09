@@ -451,7 +451,7 @@ class ValidationPlots(BasePlotter):
 
         hue_label = (
             "Temperature (\u00b0C)" if hue_var == "temp"
-            else "Relative Humidity (%)"
+            else "Relative humidity (%)"
         )
 
         # Global hue range (2nd–98th percentile) for consistent colour scale
@@ -585,7 +585,7 @@ class ValidationPlots(BasePlotter):
         cbar.set_label(hue_label, fontsize=11)
 
         fig.suptitle(
-            f"LGR vs SCD41 \u2014 coloured by {hue_label.lower()}",
+            f"LGR vs SCD41 \u2014 coloured by {hue_label[0].lower() + hue_label[1:]}",
             fontsize=14, fontweight="bold", y=0.98,
         )
 
@@ -709,7 +709,7 @@ class ValidationPlots(BasePlotter):
         cbar.set_label(hue_label, fontsize=11)
 
         fig.suptitle(
-            f"CO\u2082 timeseries \u2014 coloured by {hue_label.lower()}",
+            f"CO\u2082 timeseries \u2014 coloured by {hue_label[0].lower() + hue_label[1:]}",
             fontsize=14, fontweight="bold", y=0.98,
         )
 
@@ -811,7 +811,7 @@ class ValidationPlots(BasePlotter):
                 ax_t.set_title('Residual vs Temperature', fontsize=12, fontweight='bold')
                 ax_rh.set_title('Residual vs Relative Humidity', fontsize=12, fontweight='bold')
 
-        fig.suptitle('Environmental Dependence of SCD41 Bias (30m sensors)',
+        fig.suptitle('Environmental Dependence of SCD41 Bias (30m sensors)', y=1.03,
                      fontsize=13, fontweight='bold')
         fig.tight_layout()
 
@@ -947,7 +947,7 @@ class ValidationPlots(BasePlotter):
                    fontsize=9, framealpha=0.8, bbox_to_anchor=(0.87, 0.98))
 
         fig.suptitle(
-            f"CO\u2082 timeseries \u2014 {hue_label.lower()} with seasonal shading",
+            f"CO\u2082 timeseries \u2014 {hue_label[0].lower() + hue_label[1:]} with seasonal shading",
             fontsize=14, fontweight="bold", y=1.0,
         )
 
@@ -1070,19 +1070,19 @@ class ValidationPlots(BasePlotter):
         ax.set_xticks(range(len(months_present)))
         ax.set_xticklabels([month_names[m - 1] for m in months_present], fontsize=10)
         ax.set_ylabel("SCD41 \u2212 LGR  (ppm)", fontsize=11)
-        ax.set_title(
-            "Monthly bias distribution \u2014 30 m sensors",
-            fontsize=13, fontweight="bold",
-        )
+        # ax.set_title(
+        #     "Monthly bias distribution \u2014 30 m sensors",
+        #     fontsize=13, fontweight="bold",
+        # )
         ax.grid(axis="y", alpha=0.25)
 
         # Sensor legend
         handles = [
             plt.Line2D([0], [0], color=info["color"], lw=6, alpha=0.65,
-                       label=f"Sensor {info['label']}")
+                       label=info["label"])
             for info in sensors
         ]
-        ax.legend(handles=handles, loc="upper left", fontsize=9, framealpha=0.8)
+        ax.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=3, fontsize=9, framealpha=0.8)
 
         plt.tight_layout()
 

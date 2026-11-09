@@ -189,9 +189,9 @@ class QualityControlPlots(BasePlotter):
                      fontsize=13, fontweight='bold')
         ax.legend(
                 title="QC Flag",
-                loc="upper center",
-                bbox_to_anchor=(0.5, 0.65),
-                ncol=4,               # all 4 flags in one row
+                loc="center left", 
+                bbox_to_anchor=(1.01, 0.5), 
+                ncol=1,
                 framealpha=0.8,
             )
         ax.grid(axis='y', alpha=0.3)

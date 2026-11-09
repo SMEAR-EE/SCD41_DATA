@@ -8,6 +8,8 @@ output.bak.bak/
 output.bak_202409-202602/
 output.bak_202411-202602/
 
+venv_old/
+
 *.parquet
 *.csv
 *.log

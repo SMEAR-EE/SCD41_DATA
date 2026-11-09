@@ -343,7 +343,7 @@ class UptimePlots(BasePlotter):
                         ))
 
         ax.set_xticks(range(31))
-        ax.set_xticklabels(range(1, 32), fontsize=8)
+        ax.set_xticklabels([d if d == 1 or d % 5 == 0 else '' for d in range(1, 32)])
         ax.set_xlabel("Day of Month")
         ax.set_yticks(range(n_months))
         ax.set_yticklabels(month_labels, fontsize=9)
@@ -361,7 +361,7 @@ class UptimePlots(BasePlotter):
                     facecolor="none", edgecolor="#d62728",
                     hatch="///", label="LGR reference absent",
                 )],
-                loc="lower right", fontsize=9,
+                loc="upper right", bbox_to_anchor=(1.0, -0.09), fontsize=9,
             )
 
         if save:

@@ -474,6 +474,7 @@ class TaylorPlotter(BasePlotter):
             'figure.facecolor': 'white',
             'axes.facecolor': 'white',
             'font.size': 11,
+            'pdf.fonttype': 42,
         })
 
         try:

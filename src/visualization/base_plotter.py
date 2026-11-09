@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
 
 
 class BasePlotter:
@@ -90,7 +91,8 @@ class BasePlotter:
             'xtick.labelsize': 10,
             'ytick.labelsize': 10,
             'legend.fontsize': 10,
-            'figure.figsize': (12, 6)
+            'figure.figsize': (12, 6),
+            'pdf.fonttype': 42
         })
     
     def _apply_qc_filter(self, df: pd.DataFrame, co2_col: str = None) -> pd.DataFrame:
@@ -179,7 +181,18 @@ class BasePlotter:
             filename: Output filename (with extension)
         """
         filepath = self.output_dir / filename
+        
+        PRINT_W, MIN_PT = 5.0, 7.0          # \textwidth in inches; smallest printed font
+        shrink = PRINT_W / fig.get_size_inches()[0]
+        for t in fig.findobj(matplotlib.text.Text):
+            if t.get_text() and t.get_fontsize() * shrink < MIN_PT:
+                t.set_fontsize(MIN_PT / shrink)
+        if 10 * shrink < MIN_PT:
+            for ax in fig.axes:
+                ax.tick_params(labelsize=MIN_PT / shrink)
         fig.savefig(filepath, dpi=300, bbox_inches='tight')
+        fig.savefig(filepath.with_suffix('.pdf'), bbox_inches='tight')
+        
         self.logger.info(f"Saved: {filename}")
         if self.close_after_save:
             plt.close(fig)
